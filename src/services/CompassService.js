@@ -1,7 +1,7 @@
 class CompassService {
   constructor() {
     this.currentHeading = 0; // 0 is North, 90 East
-    this.alpha = 0.9; // Low pass filter factor to avoid jitter
+    this.alpha = 0.5; // Low pass filter factor (lower = faster response, less smoothing)
   }
 
   update(orientationData) {

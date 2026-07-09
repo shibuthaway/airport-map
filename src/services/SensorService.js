@@ -57,12 +57,18 @@ class SensorService {
   }
 
   handleOrientation(event) {
-    // If deviceorientationabsolute is available, prefer it for absolute true north
     if (event.type === 'deviceorientationabsolute') {
+      this.orientation.hasAbsolute = true;
       this.orientation.absolute = true;
+      this.orientation.alpha = event.alpha || 0;
+      this.orientation.beta = event.beta || 0;
+      this.orientation.gamma = event.gamma || 0;
+      return;
     }
 
-    this.orientation.alpha = event.alpha || 0;
+    if (!this.orientation.hasAbsolute) {
+      this.orientation.alpha = event.alpha || 0;
+    }
     this.orientation.beta = event.beta || 0;
     this.orientation.gamma = event.gamma || 0;
     
