@@ -29,19 +29,14 @@ const computePoisFromNodes = (nodes) => {
 const genId = (name, floor) =>
   `${floor}_${name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')}_${Date.now()}`;
 
-const defaultFloors = [
-  { id: 'arrival', level: 'L1', name: 'Arrival', image: '/maps/arrival.jpg' },
-  { id: 'departure', level: 'L2', name: 'Departure', image: '/maps/departure.jpg' },
-  { id: 'mezzanine', level: 'L3', name: 'Mezzanine', image: '/maps/mezzanine.jpg' },
-  { id: 'lounge', level: 'L4', name: 'Lounge', image: '/maps/lounge.jpg' }
-];
+
 
 export const useMapStore = create((set, get) => ({
   // Mode Selection
   isAdminMode: typeof window !== 'undefined' ? !window.location.href.includes('mode=public') : true,
 
   // Floors
-  floors: defaultFloors,
+  floors: [],
   currentFloor: 'lounge',
   setFloor: (floor) => set({
     currentFloor: floor,

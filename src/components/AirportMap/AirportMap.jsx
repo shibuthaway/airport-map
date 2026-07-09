@@ -164,8 +164,15 @@ export default function AirportMap() {
 
   // ── Floor Map Renderer ────────────────────────────────────────────────────
   const renderMap = () => {
-    const currentFloorData = floors?.find(f => f.id === currentFloor);
-    const imageUrl = currentFloorData?.image || "/maps/departure.jpg";
+    if (!floors || floors.length === 0) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        </div>
+      );
+    }
+    const currentFloorData = floors.find(f => f.id === currentFloor) || floors[0];
+    const imageUrl = currentFloorData?.image || "";
     return (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="100%" height="100%" className="airport-map-svg select-none">
         <image href={imageUrl} width="1600" height="1000" preserveAspectRatio="xMidYMid slice" />
