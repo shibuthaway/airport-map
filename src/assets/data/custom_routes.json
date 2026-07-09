@@ -1,0 +1,112 @@
+{
+  "departure_wine_1782812672237_to_departure_mac_1782821357711": {
+    "path": [
+      {
+        "x": 178,
+        "y": 254,
+        "floor": "departure"
+      },
+      {
+        "x": 185,
+        "y": 313,
+        "floor": "departure"
+      },
+      {
+        "x": 494,
+        "y": 315,
+        "floor": "departure"
+      }
+    ],
+    "distance": 600
+  },
+  "departure_wine_1782812672237_to_departure_bar_1782808485572": {
+    "path": [
+      {
+        "x": 179,
+        "y": 254,
+        "floor": "departure"
+      },
+      {
+        "x": 184,
+        "y": 292,
+        "floor": "departure"
+      },
+      {
+        "x": 361,
+        "y": 295,
+        "floor": "departure"
+      },
+      {
+        "x": 433,
+        "y": 292,
+        "floor": "departure"
+      },
+      {
+        "x": 436,
+        "y": 254,
+        "floor": "departure"
+      }
+    ],
+    "distance": 300
+  },
+  "departure_mac_1782821357711_to_departure_bar_1782808485572": {
+    "path": [
+      {
+        "x": 492,
+        "y": 305,
+        "floor": "departure"
+      },
+      {
+        "x": 429,
+        "y": 305,
+        "floor": "departure"
+      },
+      {
+        "x": 428,
+        "y": 249,
+        "floor": "departure"
+      }
+    ],
+    "distance": 80
+  },
+  "departure_wahroom_1782895759022_to_departure_wine_1782812672237": {
+    "path": [
+      {
+        "x": 114,
+        "y": 213,
+        "floor": "departure"
+      },
+      {
+        "x": 117,
+        "y": 257,
+        "floor": "departure"
+      },
+      {
+        "x": 176,
+        "y": 258,
+        "floor": "departure"
+      }
+    ],
+    "distance": 60
+  },
+  "departure_mac_1782821357711_to_departure_wahroom_1782895759022": {
+    "path": [
+      {
+        "x": 491,
+        "y": 310,
+        "floor": "departure"
+      },
+      {
+        "x": 113,
+        "y": 217,
+        "floor": "departure"
+      },
+      {
+        "x": 118,
+        "y": 313,
+        "floor": "departure"
+      }
+    ],
+    "distance": 200
+  }
+}

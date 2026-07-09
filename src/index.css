@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-airport-50: #f0f9ff;
+  --color-airport-100: #e0f2fe;
+  --color-airport-200: #bae6fd;
+  --color-airport-300: #7dd3fc;
+  --color-airport-400: #38bdf8;
+  --color-airport-500: #0ea5e9;
+  --color-airport-600: #0284c7;
+  --color-airport-700: #0369a1;
+  --color-airport-800: #075985;
+  --color-airport-900: #0c4a6e;
+  --color-airport-950: #031b2e;
+  
+  --color-brand-gold: #dfb76c;
+  --color-brand-amber: #f59e0b;
+  --color-brand-emerald: #10b981;
+  --color-brand-rose: #f43f5e;
+  --color-brand-violet: #8b5cf6;
+  --color-brand-slate: #475569;
+
+  --font-sans: 'Outfit', 'Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif';
+
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --shadow-glass-dark: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --shadow-glow: 0 0 15px rgba(14, 165, 233, 0.5);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  min-height: 0;
+  border-inline: none;
+  display: flex;
+}
+
+/* Custom Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.25);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.45);
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* SVG Line Animations */
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.animate-dash-line {
+  animation: dash 1s linear infinite;
+}
+
+/* Base interactive SVG styling */
+.airport-map-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.poi-element {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Map background colors based on mode */
+.stop-color-light-start {
+  stop-color: #f8fafc;
+}
+.stop-color-light-end {
+  stop-color: #f1f5f9;
+}
+
+.dark .stop-color-dark-start {
+  stop-color: #0b0f19;
+}
+.dark .stop-color-dark-end {
+  stop-color: #030712;
+}
+
+/* Search Location Pin Bounce */
+@keyframes searchPinBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-search-pin {
+  animation: searchPinBounce 1s infinite ease-in-out;
+}

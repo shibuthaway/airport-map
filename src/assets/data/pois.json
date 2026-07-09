@@ -1,0 +1,354 @@
+{
+  "departure": [
+    {
+      "id": "departure_bar_1782808485572",
+      "floor": "departure",
+      "x": 435,
+      "y": 248,
+      "width": 40,
+      "height": 40,
+      "name": "bar",
+      "category": "restaurant",
+      "description": "",
+      "status": "Open",
+      "icon": "cafe",
+      "keywords": [
+        "bar",
+        "cafe"
+      ],
+      "searchTerms": [
+        "bar",
+        "cafe"
+      ],
+      "isCustom": true,
+      "imageUrl": null
+    },
+    {
+      "id": "departure_wine_1782812672237",
+      "floor": "departure",
+      "x": 180,
+      "y": 254,
+      "width": 40,
+      "height": 40,
+      "name": "wine",
+      "category": "restaurant",
+      "description": "test bar",
+      "status": "Open",
+      "icon": "restaurant",
+      "keywords": [
+        "wine",
+        "restaurant"
+      ],
+      "searchTerms": [
+        "wine",
+        "restaurant"
+      ],
+      "isCustom": true,
+      "imageUrl": "/poi-images/1782812672177_coffeeshop.jpg"
+    },
+    {
+      "id": "departure_mac_1782821357711",
+      "floor": "departure",
+      "x": 494,
+      "y": 309,
+      "width": 40,
+      "height": 40,
+      "name": "mac",
+      "category": "restaurant",
+      "description": "",
+      "status": "Open",
+      "icon": "restaurant",
+      "keywords": [
+        "mac",
+        "restaurant"
+      ],
+      "searchTerms": [
+        "mac",
+        "restaurant"
+      ],
+      "isCustom": true,
+      "imageUrl": null
+    },
+    {
+      "id": "departure_wahroom_1782895759022",
+      "floor": "departure",
+      "x": 113,
+      "y": 214,
+      "width": 40,
+      "height": 40,
+      "name": "wahroom",
+      "category": "washroom",
+      "description": "washroom no 2",
+      "status": "Open",
+      "icon": "washroom",
+      "keywords": [
+        "wahroom",
+        "washroom"
+      ],
+      "searchTerms": [
+        "wahroom",
+        "washroom"
+      ],
+      "isCustom": true,
+      "imageUrl": "/poi-images/1782895758921_coffeeshop.jpg"
+    },
+    {
+      "id": "departure_kfc_1782994370002",
+      "floor": "departure",
+      "x": 739,
+      "y": 31,
+      "width": 40,
+      "height": 40,
+      "name": "KFC",
+      "category": "restaurant",
+      "description": "",
+      "status": "Open",
+      "icon": "restaurant",
+      "keywords": [
+        "KFC",
+        "restaurant"
+      ],
+      "searchTerms": [
+        "kfc",
+        "restaurant"
+      ],
+      "isCustom": true,
+      "imageUrl": "/poi-images/1782994369980_coffeeshop.jpg"
+    },
+    {
+      "id": "departure_test_1782996440753",
+      "floor": "departure",
+      "x": 109,
+      "y": 143,
+      "width": 40,
+      "height": 40,
+      "name": "test",
+      "category": "gate",
+      "description": "",
+      "status": "Open",
+      "icon": "gate",
+      "keywords": [
+        "test",
+        "gate"
+      ],
+      "searchTerms": [
+        "test",
+        "gate"
+      ],
+      "isCustom": true,
+      "imageUrl": null
+    }
+  ],
+  "arrival": [],
+  "mezzanine": [],
+  "lounge": [],
+  "ground_floor_1783058078798": [
+    {
+      "id": "ground_floor_1783058078798_gate1_1783058292917",
+      "floor": "ground_floor_1783058078798",
+      "x": 298,
+      "y": 137,
+      "width": 40,
+      "height": 40,
+      "name": "Gate1",
+      "category": "gate",
+      "description": "",
+      "status": "Open",
+      "icon": "gate",
+      "keywords": [
+        "Gate1",
+        "gate"
+      ],
+      "searchTerms": [
+        "gate1",
+        "gate"
+      ],
+      "isCustom": true,
+      "imageUrl": null
+    },
+    {
+      "id": "ground_floor_1783058078798_gate_2_1783058309586",
+      "floor": "ground_floor_1783058078798",
+      "x": 451,
+      "y": 172,
+      "width": 40,
+      "height": 40,
+      "name": "Gate 2",
+      "category": "gate",
+      "description": "",
+      "status": "Open",
+      "icon": "gate",
+      "keywords": [
+        "Gate 2",
+        "gate"
+      ],
+      "searchTerms": [
+        "gate 2",
+        "gate"
+      ],
+      "isCustom": true,
+      "imageUrl": null
+    },
+    {
+      "id": "ground_floor_1783058078798_gate_3_1783058331776",
+      "floor": "ground_floor_1783058078798",
+      "x": 584,
+      "y": 201,
+      "width": 40,
+      "height": 40,
+      "name": "Gate 3",
+      "category": "gate",
+      "description": "",
+      "status": "Open",
+      "icon": "gate",
+      "keywords": [
+        "Gate 3",
+        "gate"
+      ],
+      "searchTerms": [
+        "gate 3",
+        "gate"
+      ],
+      "isCustom": true,
+      "imageUrl": null
+    },
+    {
+      "id": "ground_floor_1783058078798_gate_4_1783058349690",
+      "floor": "ground_floor_1783058078798",
+      "x": 721,
+      "y": 235,
+      "width": 40,
+      "height": 40,
+      "name": "Gate 4",
+      "category": "gate",
+      "description": "",
+      "status": "Open",
+      "icon": "gate",
+      "keywords": [
+        "Gate 4",
+        "gate"
+      ],
+      "searchTerms": [
+        "gate 4",
+        "gate"
+      ],
+      "isCustom": true,
+      "imageUrl": null
+    },
+    {
+      "id": "ground_floor_1783058078798_gate_5_1783058366509",
+      "floor": "ground_floor_1783058078798",
+      "x": 843,
+      "y": 257,
+      "width": 40,
+      "height": 40,
+      "name": "Gate 5",
+      "category": "gate",
+      "description": "",
+      "status": "Open",
+      "icon": "gate",
+      "keywords": [
+        "Gate 5",
+        "gate"
+      ],
+      "searchTerms": [
+        "gate 5",
+        "gate"
+      ],
+      "isCustom": true,
+      "imageUrl": null
+    },
+    {
+      "id": "ground_floor_1783058078798_escalator_1783058391660",
+      "floor": "ground_floor_1783058078798",
+      "x": 246,
+      "y": 260,
+      "width": 40,
+      "height": 40,
+      "name": "Escalator 1",
+      "category": "escalator",
+      "description": "",
+      "status": "Open",
+      "icon": "escalator",
+      "keywords": [
+        "Escalator",
+        "escalator"
+      ],
+      "searchTerms": [
+        "escalator",
+        "escalator"
+      ],
+      "isCustom": true,
+      "imageUrl": null
+    },
+    {
+      "id": "ground_floor_1783058078798_escalator_2_1783058448284",
+      "floor": "ground_floor_1783058078798",
+      "x": 239,
+      "y": 182,
+      "width": 40,
+      "height": 40,
+      "name": "Escalator 2",
+      "category": "escalator",
+      "description": "",
+      "status": "Open",
+      "icon": "escalator",
+      "keywords": [
+        "Escalator 2",
+        "escalator"
+      ],
+      "searchTerms": [
+        "escalator 2",
+        "escalator"
+      ],
+      "isCustom": true,
+      "imageUrl": null
+    },
+    {
+      "id": "ground_floor_1783058078798_escalator_3_1783058475291",
+      "floor": "ground_floor_1783058078798",
+      "x": 673,
+      "y": 404,
+      "width": 40,
+      "height": 40,
+      "name": "Escalator 3",
+      "category": "escalator",
+      "description": "",
+      "status": "Open",
+      "icon": "escalator",
+      "keywords": [
+        "Escalator 3",
+        "escalator"
+      ],
+      "searchTerms": [
+        "escalator 3",
+        "escalator"
+      ],
+      "isCustom": true,
+      "imageUrl": null
+    },
+    {
+      "id": "ground_floor_1783058078798_escalator_4_1783058497908",
+      "floor": "ground_floor_1783058078798",
+      "x": 795,
+      "y": 309,
+      "width": 40,
+      "height": 40,
+      "name": "Escalator 4",
+      "category": "escalator",
+      "description": "",
+      "status": "Open",
+      "icon": "escalator",
+      "keywords": [
+        "Escalator 4",
+        "escalator"
+      ],
+      "searchTerms": [
+        "escalator 4",
+        "escalator"
+      ],
+      "isCustom": true,
+      "imageUrl": null
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="100%" height="100%" class="airport-map-svg">
+  <defs>
+    <linearGradient id="terminal-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--map-bg-start, #f8fafc)" />
+      <stop offset="100%" stop-color="var(--map-bg-end, #f1f5f9)" />
+    </linearGradient>
+  </defs>
+
+  <!-- Base Grid -->
+  <g class="map-grid opacity-10 dark:opacity-5" stroke="#cbd5e1" stroke-width="0.5">
+    <path d="M 0,100 L 1000,100 M 0,200 L 1000,200 M 0,300 L 1000,300 M 0,400 L 1000,400 M 0,500 L 1000,500" />
+    <path d="M 100,0 L 100,600 M 200,0 L 200,600 M 300,0 L 300,600 M 400,0 L 400,600 M 500,0 L 500,600 M 600,0 L 600,600 M 700,0 L 700,600 M 800,0 L 800,600 M 900,0 L 900,600" />
+  </g>
+
+  <!-- Outer Terminal Boundary (Fades/Inset to show Mezzanine is smaller/balcony) -->
+  <path d="M 100,550 L 100,200 L 120,200 L 120,80 L 880,80 L 880,200 L 900,200 L 900,550 Z" 
+        fill="url(#terminal-bg)" stroke="#94a3b8" stroke-width="3" class="terminal-boundary transition-colors duration-300 dark:stroke-slate-700" />
+
+  <!-- Void Area (Open to below visual) -->
+  <path d="M 150,150 L 850,150 L 850,500 L 150,500 Z" fill="none" stroke="#e2e8f0" stroke-dasharray="10,8" stroke-width="2" class="walkway-line opacity-60 dark:stroke-slate-800" />
+  <text x="500" y="350" font-family="Outfit, sans-serif" font-size="16" font-weight="bold" fill="#94a3b8" text-anchor="middle" pointer-events="none" class="opacity-30 dark:fill-slate-600">OPEN TO DEPARTURE HALL BELOW</text>
+
+  <!-- ====== MEZZANINE LEVEL AREAS (Interactive) ====== -->
+
+  <!-- Offices (Staff Only) -->
+  <g class="poi-group office-zone">
+    <!-- Proposed Office Area -->
+    <rect id="office-proposed" x="180" y="380" width="220" height="90" rx="8" class="poi-element transition-all duration-300 fill-slate-200 dark:fill-slate-800/80 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1.5 cursor-pointer" />
+    <text x="290" y="420" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">ADMIN &amp; AIRLINE OFFICES</text>
+    <text x="290" y="440" font-family="Outfit, sans-serif" font-size="10" fill="#f43f5e" text-anchor="middle" pointer-events="none" font-weight="bold">STAFF ONLY</text>
+
+    <!-- Security SHA Area Office -->
+    <rect id="sha-proposed" x="600" y="380" width="220" height="90" rx="8" class="poi-element transition-all duration-300 fill-slate-200 dark:fill-slate-800/80 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1.5 cursor-pointer" />
+    <text x="710" y="420" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">SECURITY CONTROL ROOM</text>
+    <text x="710" y="440" font-family="Outfit, sans-serif" font-size="10" fill="#f43f5e" text-anchor="middle" pointer-events="none" font-weight="bold">RESTRICTED ENTRY</text>
+  </g>
+
+  <!-- Lounges -->
+  <g class="poi-group lounges-zone">
+    <!-- Maharaja Lounge -->
+    <rect id="maharaja-lounge" x="180" y="180" width="220" height="120" rx="10" class="poi-element transition-all duration-300 fill-violet-50 dark:fill-violet-950/20 hover:fill-violet-500/20 stroke-violet-300 dark:stroke-violet-900/50 stroke-1.5 cursor-pointer" />
+    <text x="290" y="235" font-family="Outfit, sans-serif" font-size="13" font-weight="bold" fill="#8b5cf6" text-anchor="middle" pointer-events="none">AIR INDIA</text>
+    <text x="290" y="255" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#8b5cf6" text-anchor="middle" pointer-events="none" opacity="0.9">MAHARAJA LOUNGE</text>
+
+    <!-- Quiet Zone -->
+    <rect id="quiet-zone-mezz" x="600" y="180" width="220" height="120" rx="10" class="poi-element transition-all duration-300 fill-violet-50 dark:fill-violet-950/20 hover:fill-violet-500/20 stroke-violet-300 dark:stroke-violet-900/50 stroke-1.5 cursor-pointer" />
+    <text x="710" y="235" font-family="Outfit, sans-serif" font-size="13" font-weight="bold" fill="#8b5cf6" text-anchor="middle" pointer-events="none">PREMIUM QUIET ZONE</text>
+    <text x="710" y="255" font-family="Outfit, sans-serif" font-size="10" fill="#8b5cf6" text-anchor="middle" pointer-events="none" opacity="0.8">Recliners &amp; Sleep Pods</text>
+  </g>
+
+  <!-- Cafe -->
+  <g class="poi-group retail-food-zone">
+    <rect id="coffeeday-mezz" x="430" y="150" width="140" height="60" rx="8" class="poi-element transition-all duration-300 fill-emerald-50 dark:fill-emerald-950/20 hover:fill-emerald-500/20 stroke-emerald-300 dark:stroke-emerald-900/50 stroke-1 cursor-pointer" />
+    <text x="500" y="185" font-family="Outfit, sans-serif" font-size="11" font-weight="bold" fill="#10b981" text-anchor="middle" pointer-events="none">CAFE COFFEE DAY</text>
+  </g>
+
+  <!-- Support Facilities -->
+  <g class="poi-group service-facilities">
+    <!-- Restrooms -->
+    <rect id="washroom-mezz" x="460" y="270" width="80" height="45" rx="4" class="poi-element transition-all duration-300 fill-slate-200 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1 cursor-pointer" />
+    <text x="500" y="297" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#64748b" text-anchor="middle" pointer-events="none" class="dark:fill-slate-400">RESTROOMS</text>
+
+    <!-- Lift West -->
+    <rect id="lift-mezz-west" x="340" y="310" width="20" height="30" rx="3" class="poi-element transition-all duration-300 fill-slate-300 dark:fill-slate-700 hover:fill-sky-500/30 stroke-slate-400 dark:stroke-slate-600 stroke-1 cursor-pointer" />
+    <text x="350" y="329" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">L</text>
+
+    <!-- Escalator West -->
+    <rect id="escalator-mezz-west" x="365" y="310" width="30" height="30" rx="3" class="poi-element transition-all duration-300 fill-slate-300 dark:fill-slate-700 hover:fill-sky-500/30 stroke-slate-400 dark:stroke-slate-600 stroke-1 cursor-pointer" />
+    <text x="380" y="329" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">E</text>
+
+    <!-- Lift East -->
+    <rect id="lift-mezz-east" x="640" y="310" width="20" height="30" rx="3" class="poi-element transition-all duration-300 fill-slate-300 dark:fill-slate-700 hover:fill-sky-500/30 stroke-slate-400 dark:stroke-slate-600 stroke-1 cursor-pointer" />
+    <text x="650" y="329" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">L</text>
+
+    <!-- Escalator East -->
+    <rect id="escalator-mezz-east" x="605" y="310" width="30" height="30" rx="3" class="poi-element transition-all duration-300 fill-slate-300 dark:fill-slate-700 hover:fill-sky-500/30 stroke-slate-400 dark:stroke-slate-600 stroke-1 cursor-pointer" />
+    <text x="620" y="329" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">E</text>
+  </g>
+
+  <!-- Emergency Exit -->
+  <g class="poi-group emergency-zone">
+    <circle id="emergency-mezz-1" cx="115" cy="360" r="10" class="poi-element fill-rose-500/20 stroke-rose-500 stroke-1.5 cursor-pointer hover:fill-rose-500/40" />
+    <text x="115" y="363" font-family="Outfit, sans-serif" font-size="8" fill="#ef4444" font-weight="bold" text-anchor="middle" pointer-events="none">EXIT</text>
+  </g>
+</svg>

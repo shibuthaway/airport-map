@@ -1,0 +1,14 @@
+[
+  {
+    "id": "top_floor_1783067083692",
+    "level": "L6",
+    "name": "Top Floor",
+    "image": "/maps/1783067532338_livemap.png"
+  },
+  {
+    "id": "2nd_floor_1783497447162",
+    "level": "L2",
+    "name": "2nd Floor",
+    "image": "/maps/1783497445016_secondfloor.png"
+  }
+]

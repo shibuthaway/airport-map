@@ -1,0 +1,71 @@
+[
+  {
+    "id": "departure_bar_1782808485572",
+    "floor": "departure",
+    "x": 435,
+    "y": 248,
+    "width": 40,
+    "height": 40,
+    "name": "bar",
+    "category": "gate",
+    "description": "",
+    "status": "Open",
+    "icon": "cafe",
+    "keywords": [
+      "bar",
+      "cafe"
+    ],
+    "searchTerms": [
+      "bar",
+      "cafe"
+    ],
+    "isCustom": true,
+    "imageUrl": null
+  },
+  {
+    "id": "departure_wine_1782812672237",
+    "floor": "departure",
+    "x": 180,
+    "y": 254,
+    "width": 40,
+    "height": 40,
+    "name": "wine",
+    "category": "restaurant",
+    "description": "test bar",
+    "status": "Open",
+    "icon": "restaurant",
+    "keywords": [
+      "wine",
+      "restaurant"
+    ],
+    "searchTerms": [
+      "wine",
+      "restaurant"
+    ],
+    "isCustom": true,
+    "imageUrl": "/poi-images/1782812672177_coffeeshop.jpg"
+  },
+  {
+    "id": "departure_mac_1782821357711",
+    "floor": "departure",
+    "x": 494,
+    "y": 309,
+    "width": 40,
+    "height": 40,
+    "name": "mac",
+    "category": "restaurant",
+    "description": "",
+    "status": "Open",
+    "icon": "restaurant",
+    "keywords": [
+      "mac",
+      "restaurant"
+    ],
+    "searchTerms": [
+      "mac",
+      "restaurant"
+    ],
+    "isCustom": true,
+    "imageUrl": null
+  }
+]

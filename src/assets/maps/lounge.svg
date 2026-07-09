@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="100%" height="100%" class="airport-map-svg">
+  <defs>
+    <linearGradient id="terminal-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--map-bg-start, #f8fafc)" />
+      <stop offset="100%" stop-color="var(--map-bg-end, #f1f5f9)" />
+    </linearGradient>
+  </defs>
+
+  <!-- Base Grid -->
+  <g class="map-grid opacity-10 dark:opacity-5" stroke="#cbd5e1" stroke-width="0.5">
+    <path d="M 0,100 L 1000,100 M 0,200 L 1000,200 M 0,300 L 1000,300 M 0,400 L 1000,400 M 0,500 L 1000,500" />
+    <path d="M 100,0 L 100,600 M 200,0 L 200,600 M 300,0 L 300,600 M 400,0 L 400,600 M 500,0 L 500,600 M 600,0 L 600,600 M 700,0 L 700,600 M 800,0 L 800,600 M 900,0 L 900,600" />
+  </g>
+
+  <!-- Outer Terminal Boundary (Lounge level is centered and smaller) -->
+  <path d="M 120,530 L 120,200 L 140,200 L 140,80 L 860,80 L 860,200 L 880,200 L 880,530 Z" 
+        fill="url(#terminal-bg)" stroke="#94a3b8" stroke-width="3" class="terminal-boundary transition-colors duration-300 dark:stroke-slate-700" />
+
+  <!-- Void/Atrium Area (Open to below visual) -->
+  <path d="M 180,140 L 820,140 L 820,480 L 180,480 Z" fill="none" stroke="#cbd5e1" stroke-dasharray="8,6" stroke-width="1.5" class="walkway-line opacity-50 dark:stroke-slate-800" />
+  <text x="500" y="350" font-family="Outfit, sans-serif" font-size="14" font-weight="bold" fill="#94a3b8" text-anchor="middle" pointer-events="none" class="opacity-30 dark:fill-slate-600">CENTRAL ATRIUM VOID</text>
+
+  <!-- ====== LOUNGE LEVEL AREAS (Interactive) ====== -->
+
+  <!-- Exclusive Lounges -->
+  <g class="poi-group lounges-zone">
+    <!-- Emirates Lounge -->
+    <rect id="emirates-lounge" x="160" y="160" width="200" height="130" rx="10" class="poi-element transition-all duration-300 fill-violet-50 dark:fill-violet-950/20 hover:fill-violet-500/20 stroke-violet-300 dark:stroke-violet-900/50 stroke-1.5 cursor-pointer" />
+    <text x="260" y="210" font-family="Outfit, sans-serif" font-size="13" font-weight="bold" fill="#8b5cf6" text-anchor="middle" pointer-events="none">EMIRATES</text>
+    <text x="260" y="230" font-family="Outfit, sans-serif" font-size="11" font-weight="bold" fill="#8b5cf6" text-anchor="middle" pointer-events="none" opacity="0.9">FIRST &amp; BUSINESS</text>
+    <text x="260" y="245" font-family="Outfit, sans-serif" font-size="11" font-weight="bold" fill="#8b5cf6" text-anchor="middle" pointer-events="none" opacity="0.9">CLASS LOUNGE</text>
+
+    <!-- Singapore SilverKris Lounge -->
+    <rect id="singapore-silverkris" x="640" y="160" width="200" height="130" rx="10" class="poi-element transition-all duration-300 fill-violet-50 dark:fill-violet-950/20 hover:fill-violet-500/20 stroke-violet-300 dark:stroke-violet-900/50 stroke-1.5 cursor-pointer" />
+    <text x="740" y="210" font-family="Outfit, sans-serif" font-size="13" font-weight="bold" fill="#8b5cf6" text-anchor="middle" pointer-events="none">SINGAPORE AIRLINES</text>
+    <text x="740" y="230" font-family="Outfit, sans-serif" font-size="11" font-weight="bold" fill="#8b5cf6" text-anchor="middle" pointer-events="none" opacity="0.9">SILVERKRIS LOUNGE</text>
+  </g>
+
+  <!-- Fine Dining -->
+  <g class="poi-group retail-food-zone">
+    <!-- Bistro -->
+    <rect id="runway-bistro" x="420" y="125" width="160" height="60" rx="8" class="poi-element transition-all duration-300 fill-emerald-50 dark:fill-emerald-950/20 hover:fill-emerald-500/20 stroke-emerald-300 dark:stroke-emerald-900/50 stroke-1.5 cursor-pointer" />
+    <text x="500" y="155" font-family="Outfit, sans-serif" font-size="11" font-weight="bold" fill="#10b981" text-anchor="middle" pointer-events="none">THE RUNWAY BISTRO</text>
+    <text x="500" y="168" font-family="Outfit, sans-serif" font-size="9" fill="#10b981" text-anchor="middle" pointer-events="none" opacity="0.8">Fine Dining</text>
+  </g>
+
+  <!-- Wellness & Prayer -->
+  <g class="poi-group retail-services">
+    <!-- Spa -->
+    <rect id="wellness-spa" x="250" y="350" width="130" height="60" rx="8" class="poi-element transition-all duration-300 fill-amber-50 dark:fill-amber-950/20 hover:fill-amber-500/20 stroke-amber-300 dark:stroke-amber-900/50 stroke-1 cursor-pointer" />
+    <text x="315" y="380" font-family="Outfit, sans-serif" font-size="11" font-weight="bold" fill="#d97706" text-anchor="middle" pointer-events="none">O2 WELLNESS SPA</text>
+    <text x="315" y="393" font-family="Outfit, sans-serif" font-size="9" fill="#d97706" text-anchor="middle" pointer-events="none" opacity="0.8">Spa &amp; Showers</text>
+
+    <!-- Lounge Prayer Room -->
+    <rect id="prayer-room-lounge" x="620" y="350" width="130" height="60" rx="8" class="poi-element transition-all duration-300 fill-violet-50 dark:fill-violet-950/20 hover:fill-violet-500/20 stroke-violet-200 dark:stroke-violet-900/50 stroke-1 cursor-pointer" />
+    <text x="685" y="380" font-family="Outfit, sans-serif" font-size="11" font-weight="bold" fill="#8b5cf6" text-anchor="middle" pointer-events="none">PRAYER ROOM</text>
+    <text x="685" y="393" font-family="Outfit, sans-serif" font-size="9" fill="#8b5cf6" text-anchor="middle" pointer-events="none" opacity="0.8">Quiet Zone</text>
+  </g>
+
+  <!-- ATM -->
+  <g class="poi-group atm-zone">
+    <rect id="atm-lounge-citi" x="470" y="450" width="60" height="30" rx="3" class="poi-element transition-all duration-300 fill-sky-50 dark:fill-sky-950/20 hover:fill-sky-500/20 stroke-sky-200 dark:stroke-sky-900/50 stroke-1 cursor-pointer" />
+    <text x="500" y="468" font-family="Outfit, sans-serif" font-size="9" font-weight="bold" fill="#0ea5e9" text-anchor="middle" pointer-events="none">CITI ATM</text>
+  </g>
+
+  <!-- Services -->
+  <g class="poi-group service-facilities">
+    <!-- Restrooms -->
+    <rect id="washroom-lounge" x="460" y="270" width="80" height="45" rx="4" class="poi-element transition-all duration-300 fill-slate-200 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1 cursor-pointer" />
+    <text x="500" y="297" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#64748b" text-anchor="middle" pointer-events="none" class="dark:fill-slate-400">RESTROOMS</text>
+
+    <!-- Lift West -->
+    <rect id="lift-lounge-west" x="340" y="310" width="20" height="30" rx="3" class="poi-element transition-all duration-300 fill-slate-300 dark:fill-slate-700 hover:fill-sky-500/30 stroke-slate-400 dark:stroke-slate-600 stroke-1 cursor-pointer" />
+    <text x="350" y="329" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">L</text>
+
+    <!-- Escalator West -->
+    <rect id="escalator-lounge-west" x="365" y="310" width="30" height="30" rx="3" class="poi-element transition-all duration-300 fill-slate-300 dark:fill-slate-700 hover:fill-sky-500/30 stroke-slate-400 dark:stroke-slate-600 stroke-1 cursor-pointer" />
+    <text x="380" y="329" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">E</text>
+
+    <!-- Lift East -->
+    <rect id="lift-lounge-east" x="640" y="310" width="20" height="30" rx="3" class="poi-element transition-all duration-300 fill-slate-300 dark:fill-slate-700 hover:fill-sky-500/30 stroke-slate-400 dark:stroke-slate-600 stroke-1 cursor-pointer" />
+    <text x="650" y="329" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">L</text>
+
+    <!-- Escalator East -->
+    <rect id="escalator-lounge-east" x="605" y="310" width="30" height="30" rx="3" class="poi-element transition-all duration-300 fill-slate-300 dark:fill-slate-700 hover:fill-sky-500/30 stroke-slate-400 dark:stroke-slate-600 stroke-1 cursor-pointer" />
+    <text x="620" y="329" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">E</text>
+  </g>
+
+  <!-- Emergency Exit -->
+  <g class="poi-group emergency-zone">
+    <circle id="emergency-lounge-1" cx="865" cy="360" r="10" class="poi-element fill-rose-500/20 stroke-rose-500 stroke-1.5 cursor-pointer hover:fill-rose-500/40" />
+    <text x="865" y="363" font-family="Outfit, sans-serif" font-size="8" fill="#ef4444" font-weight="bold" text-anchor="middle" pointer-events="none">EXIT</text>
+  </g>
+</svg>

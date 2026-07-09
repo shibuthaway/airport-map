@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="100%" height="100%" class="airport-map-svg">
+  <defs>
+    <!-- Gradients for premium styling -->
+    <linearGradient id="terminal-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--map-bg-start, #f8fafc)" />
+      <stop offset="100%" stop-color="var(--map-bg-end, #f1f5f9)" />
+    </linearGradient>
+    <linearGradient id="wall-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#475569" />
+      <stop offset="100%" stop-color="#334155" />
+    </linearGradient>
+    <filter id="glow-filter" x="-20%" y="-20%" width="140%" height="140%">
+      <drop-shadow dx="0" dy="0" stdDeviation="6" flood-color="#0ea5e9" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Base Grid (Optional/Subtle) -->
+  <g class="map-grid opacity-10 dark:opacity-5" stroke="#cbd5e1" stroke-width="0.5">
+    <path d="M 0,100 L 1000,100 M 0,200 L 1000,200 M 0,300 L 1000,300 M 0,400 L 1000,400 M 0,500 L 1000,500" />
+    <path d="M 100,0 L 100,600 M 200,0 L 200,600 M 300,0 L 300,600 M 400,0 L 400,600 M 500,0 L 500,600 M 600,0 L 600,600 M 700,0 L 700,600 M 800,0 L 800,600 M 900,0 L 900,600" />
+  </g>
+
+  <!-- Outer Terminal Boundary -->
+  <path d="M 50,580 L 50,450 L 80,450 L 80,180 L 120,180 L 120,60 L 880,60 L 880,180 L 920,180 L 920,450 L 950,450 L 950,580 Z" 
+        fill="url(#terminal-bg)" stroke="#94a3b8" stroke-width="3" class="terminal-boundary transition-colors duration-300 dark:stroke-slate-700" />
+
+  <!-- Corridors & Main Walkways -->
+  <path d="M 120,180 L 880,180 L 880,450 L 120,450 Z" fill="none" stroke="#e2e8f0" stroke-width="80" stroke-linecap="round" stroke-linejoin="round" class="walkway-line opacity-40 dark:stroke-slate-800/40" />
+
+  <!-- ====== PASSENGER AREAS / ROOMS (Interactive) ====== -->
+
+  <!-- Check-in Rows -->
+  <g class="poi-group checkin-zone">
+    <!-- Row A -->
+    <rect id="checkin-a" x="150" y="470" width="100" height="50" rx="6" class="poi-element transition-all duration-300 fill-slate-200 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1 cursor-pointer" />
+    <text x="200" y="500" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#64748b" text-anchor="middle" pointer-events="none" class="dark:fill-slate-400">Row A</text>
+    
+    <!-- Row B -->
+    <rect id="checkin-b" x="350" y="470" width="100" height="50" rx="6" class="poi-element transition-all duration-300 fill-slate-200 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1 cursor-pointer" />
+    <text x="400" y="500" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#64748b" text-anchor="middle" pointer-events="none" class="dark:fill-slate-400">Row B</text>
+
+    <!-- Row C -->
+    <rect id="checkin-c" x="550" y="470" width="100" height="50" rx="6" class="poi-element transition-all duration-300 fill-slate-200 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1 cursor-pointer" />
+    <text x="600" y="500" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#64748b" text-anchor="middle" pointer-events="none" class="dark:fill-slate-400">Row C</text>
+
+    <!-- Row D -->
+    <rect id="checkin-d" x="750" y="470" width="100" height="50" rx="6" class="poi-element transition-all duration-300 fill-slate-200 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1 cursor-pointer" />
+    <text x="800" y="500" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#64748b" text-anchor="middle" pointer-events="none" class="dark:fill-slate-400">Row D</text>
+  </g>
+
+  <!-- Central Security -->
+  <g class="poi-group security-zone">
+    <rect id="security-main" x="400" y="350" width="200" height="60" rx="10" class="poi-element transition-all duration-300 fill-rose-50 dark:fill-rose-950/20 hover:fill-rose-500/20 stroke-rose-300 dark:stroke-rose-900/50 stroke-1.5 cursor-pointer" />
+    <text x="500" y="380" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#f43f5e" text-anchor="middle" pointer-events="none">SECURITY CHECKPOINT</text>
+    <!-- Scanning lines visual -->
+    <line x1="420" y1="390" x2="580" y2="390" stroke="#f43f5e" stroke-width="1" stroke-dasharray="4,4" opacity="0.6" />
+  </g>
+
+  <!-- Immigration -->
+  <g class="poi-group immigration-zone">
+    <rect id="immigration-dept" x="400" y="270" width="200" height="50" rx="6" class="poi-element transition-all duration-300 fill-indigo-50 dark:fill-indigo-950/20 hover:fill-indigo-500/20 stroke-indigo-300 dark:stroke-indigo-900/50 stroke-1.5 cursor-pointer" />
+    <text x="500" y="300" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#6366f1" text-anchor="middle" pointer-events="none">IMMIGRATION</text>
+  </g>
+
+  <!-- Retail / Food -->
+  <g class="poi-group retail-food-zone">
+    <!-- Starbucks -->
+    <rect id="starbucks-dept" x="170" y="220" width="100" height="60" rx="8" class="poi-element transition-all duration-300 fill-emerald-50 dark:fill-emerald-950/20 hover:fill-emerald-500/20 stroke-emerald-300 dark:stroke-emerald-900/50 stroke-1 cursor-pointer" />
+    <text x="220" y="250" font-family="Outfit, sans-serif" font-size="11" font-weight="bold" fill="#10b981" text-anchor="middle" pointer-events="none">STARBUCKS</text>
+    <text x="220" y="265" font-family="Outfit, sans-serif" font-size="9" fill="#10b981" text-anchor="middle" pointer-events="none" opacity="0.8">Coffee</text>
+
+    <!-- Duty Free -->
+    <rect id="dutyfree-dept" x="420" y="190" width="160" height="55" rx="8" class="poi-element transition-all duration-300 fill-amber-50 dark:fill-amber-950/20 hover:fill-amber-500/20 stroke-amber-300 dark:stroke-amber-900/50 stroke-1.5 cursor-pointer" />
+    <text x="500" y="220" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#d97706" text-anchor="middle" pointer-events="none">DUTY FREE SHOP</text>
+    
+    <!-- Hudson News -->
+    <rect id="hudson-news" x="720" y="220" width="100" height="60" rx="8" class="poi-element transition-all duration-300 fill-amber-50 dark:fill-amber-950/20 hover:fill-amber-500/20 stroke-amber-300 dark:stroke-amber-900/50 stroke-1 cursor-pointer" />
+    <text x="770" y="250" font-family="Outfit, sans-serif" font-size="11" font-weight="bold" fill="#d97706" text-anchor="middle" pointer-events="none">HUDSON NEWS</text>
+  </g>
+
+  <!-- Lounges -->
+  <g class="poi-group lounges-zone">
+    <!-- Plaza Lounge -->
+    <rect id="plaza-lounge-dept" x="700" y="130" width="130" height="60" rx="8" class="poi-element transition-all duration-300 fill-violet-50 dark:fill-violet-950/20 hover:fill-violet-500/20 stroke-violet-300 dark:stroke-violet-900/50 stroke-1.5 cursor-pointer" />
+    <text x="765" y="160" font-family="Outfit, sans-serif" font-size="11" font-weight="bold" fill="#8b5cf6" text-anchor="middle" pointer-events="none">PLAZA PREMIUM</text>
+    <text x="765" y="175" font-family="Outfit, sans-serif" font-size="9" fill="#8b5cf6" text-anchor="middle" pointer-events="none" opacity="0.8">Lounge</text>
+  </g>
+
+  <!-- Boarding Gates (Top Wing) -->
+  <g class="poi-group gates-zone">
+    <!-- Gate 19 -->
+    <path id="gate-19" d="M 120,100 L 180,100 L 180,60 L 120,60 Z" class="poi-element transition-all duration-300 fill-slate-100 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1.5 cursor-pointer" />
+    <text x="150" y="85" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">G19</text>
+    <line x1="150" y1="60" x2="150" y2="40" stroke="#64748b" stroke-width="4" stroke-linecap="round" /> <!-- Jetbridge visual -->
+
+    <!-- Gate 20 -->
+    <path id="gate-20" d="M 270,100 L 330,100 L 330,60 L 270,60 Z" class="poi-element transition-all duration-300 fill-slate-100 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1.5 cursor-pointer" />
+    <text x="300" y="85" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">G20</text>
+    <line x1="300" y1="60" x2="300" y2="40" stroke="#64748b" stroke-width="4" stroke-linecap="round" />
+
+    <!-- Gate 21 -->
+    <path id="gate-21" d="M 390,100 L 450,100 L 450,60 L 390,60 Z" class="poi-element transition-all duration-300 fill-slate-100 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1.5 cursor-pointer" />
+    <text x="420" y="85" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">G21</text>
+    <line x1="420" y1="60" x2="420" y2="40" stroke="#64748b" stroke-width="4" stroke-linecap="round" />
+
+    <!-- Gate 22 -->
+    <path id="gate-22" d="M 550,100 L 610,100 L 610,60 L 550,60 Z" class="poi-element transition-all duration-300 fill-slate-100 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1.5 cursor-pointer" />
+    <text x="580" y="85" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">G22</text>
+    <line x1="580" y1="60" x2="580" y2="40" stroke="#64748b" stroke-width="4" stroke-linecap="round" />
+
+    <!-- Gate 23 -->
+    <path id="gate-23" d="M 670,100 L 730,100 L 730,60 L 670,60 Z" class="poi-element transition-all duration-300 fill-slate-100 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1.5 cursor-pointer" />
+    <text x="700" y="85" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">G23</text>
+    <line x1="700" y1="60" x2="700" y2="40" stroke="#64748b" stroke-width="4" stroke-linecap="round" />
+
+    <!-- Gate 24 -->
+    <path id="gate-24" d="M 820,100 L 880,100 L 880,60 L 820,60 Z" class="poi-element transition-all duration-300 fill-slate-100 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1.5 cursor-pointer" />
+    <text x="850" y="85" font-family="Outfit, sans-serif" font-size="12" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">G24</text>
+    <line x1="850" y1="60" x2="850" y2="40" stroke="#64748b" stroke-width="4" stroke-linecap="round" />
+  </g>
+
+  <!-- ====== SERVICE FACILITIES ====== -->
+
+  <!-- Restrooms -->
+  <g class="poi-group washroom-zone">
+    <!-- West Restroom -->
+    <rect id="washroom-west" x="220" y="110" width="80" height="40" rx="4" class="poi-element transition-all duration-300 fill-slate-200 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1 cursor-pointer" />
+    <text x="260" y="134" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#64748b" text-anchor="middle" pointer-events="none" class="dark:fill-slate-400">WC West</text>
+
+    <!-- East Restroom -->
+    <rect id="washroom-east" x="700" y="110" width="80" height="40" rx="4" class="poi-element transition-all duration-300 fill-slate-200 dark:fill-slate-800 hover:fill-sky-500/20 stroke-slate-400 dark:stroke-slate-700 stroke-1 cursor-pointer" />
+    <text x="740" y="134" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#64748b" text-anchor="middle" pointer-events="none" class="dark:fill-slate-400">WC East</text>
+  </g>
+
+  <!-- Lifts & Escalators -->
+  <g class="poi-group vertical-transit">
+    <!-- Lift West -->
+    <rect id="lift-dept-west" x="340" y="265" width="20" height="30" rx="3" class="poi-element transition-all duration-300 fill-slate-300 dark:fill-slate-700 hover:fill-sky-500/30 stroke-slate-400 dark:stroke-slate-600 stroke-1 cursor-pointer" />
+    <text x="350" y="284" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">L</text>
+
+    <!-- Escalator West -->
+    <rect id="escalator-dept-west" x="365" y="265" width="30" height="30" rx="3" class="poi-element transition-all duration-300 fill-slate-300 dark:fill-slate-700 hover:fill-sky-500/30 stroke-slate-400 dark:stroke-slate-600 stroke-1 cursor-pointer" />
+    <text x="380" y="284" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">E</text>
+
+    <!-- Lift East -->
+    <rect id="lift-dept-east" x="640" y="265" width="20" height="30" rx="3" class="poi-element transition-all duration-300 fill-slate-300 dark:fill-slate-700 hover:fill-sky-500/30 stroke-slate-400 dark:stroke-slate-600 stroke-1 cursor-pointer" />
+    <text x="650" y="284" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">L</text>
+
+    <!-- Escalator East -->
+    <rect id="escalator-dept-east" x="605" y="265" width="30" height="30" rx="3" class="poi-element transition-all duration-300 fill-slate-300 dark:fill-slate-700 hover:fill-sky-500/30 stroke-slate-400 dark:stroke-slate-600 stroke-1 cursor-pointer" />
+    <text x="620" y="284" font-family="Outfit, sans-serif" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" pointer-events="none" class="dark:fill-slate-300">E</text>
+  </g>
+
+  <!-- ATMs -->
+  <g class="poi-group atm-zone">
+    <rect id="atm-hdfc" x="90" y="525" width="40" height="30" rx="3" class="poi-element transition-all duration-300 fill-sky-50 dark:fill-sky-950/20 hover:fill-sky-500/20 stroke-sky-200 dark:stroke-sky-900/50 stroke-1 cursor-pointer" />
+    <text x="110" y="543" font-family="Outfit, sans-serif" font-size="8" font-weight="bold" fill="#0ea5e9" text-anchor="middle" pointer-events="none">ATM</text>
+    
+    <rect id="atm-sbi" x="870" y="525" width="40" height="30" rx="3" class="poi-element transition-all duration-300 fill-sky-50 dark:fill-sky-950/20 hover:fill-sky-500/20 stroke-sky-200 dark:stroke-sky-900/50 stroke-1 cursor-pointer" />
+    <text x="890" y="543" font-family="Outfit, sans-serif" font-size="8" font-weight="bold" fill="#0ea5e9" text-anchor="middle" pointer-events="none">ATM</text>
+  </g>
+
+  <!-- Medical Clinic -->
+  <g class="poi-group medical-zone">
+    <rect id="medical-dept" x="860" y="400" width="50" height="40" rx="4" class="poi-element transition-all duration-300 fill-rose-50 dark:fill-rose-950/20 hover:fill-rose-500/20 stroke-rose-200 dark:stroke-rose-900/50 stroke-1 cursor-pointer" />
+    <path d="M 885,412 L 885,428 M 877,420 L 893,420" stroke="#f43f5e" stroke-width="3" stroke-linecap="round" pointer-events="none" />
+  </g>
+
+  <!-- Help Desk -->
+  <g class="poi-group service-zone">
+    <circle id="helpdesk-dept" cx="500" cy="530" r="18" class="poi-element transition-all duration-300 fill-indigo-100 dark:fill-indigo-950 hover:fill-indigo-500/20 stroke-indigo-400 dark:stroke-indigo-800 stroke-1.5 cursor-pointer" />
+    <text x="500" y="534" font-family="Outfit, sans-serif" font-size="14" font-weight="bold" fill="#4f46e5" text-anchor="middle" pointer-events="none" class="dark:fill-indigo-400">?</text>
+  </g>
+
+  <!-- Prayer Room -->
+  <g class="poi-group prayer-zone">
+    <rect id="prayer-room-dept" x="910" y="110" width="30" height="40" rx="4" class="poi-element transition-all duration-300 fill-violet-50 dark:fill-violet-950/20 hover:fill-violet-500/20 stroke-violet-200 dark:stroke-violet-900/50 stroke-1 cursor-pointer" />
+    <text x="925" y="134" font-family="Outfit, sans-serif" font-size="9" fill="#8b5cf6" text-anchor="middle" pointer-events="none">🙏</text>
+  </g>
+
+  <!-- Emergency Exits -->
+  <g class="poi-group emergency-zone">
+    <circle id="emergency-dept-1" cx="65" cy="300" r="10" class="poi-element fill-rose-500/20 stroke-rose-500 stroke-1.5 cursor-pointer hover:fill-rose-500/40" />
+    <text x="65" y="303" font-family="Outfit, sans-serif" font-size="9" fill="#ef4444" font-weight="bold" text-anchor="middle" pointer-events="none">EXIT</text>
+
+    <circle id="emergency-dept-2" cx="935" cy="300" r="10" class="poi-element fill-rose-500/20 stroke-rose-500 stroke-1.5 cursor-pointer hover:fill-rose-500/40" />
+    <text x="935" y="303" font-family="Outfit, sans-serif" font-size="9" fill="#ef4444" font-weight="bold" text-anchor="middle" pointer-events="none">EXIT</text>
+  </g>
+</svg>
