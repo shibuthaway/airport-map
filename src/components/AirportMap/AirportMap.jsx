@@ -652,8 +652,8 @@ export default function AirportMap() {
 
       {/* Navigation active banner */}
       {navigationMode && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2 w-[90%] md:w-auto max-w-sm">
-          <div className="flex items-center gap-3 md:gap-4 pl-3 pr-1.5 md:pl-4 md:pr-2 py-1.5 md:py-2 rounded-full bg-sky-500/90 backdrop-blur text-white shadow-xl animate-in fade-in slide-in-from-top-4 justify-between w-full">
+        <div className="absolute top-[120px] md:top-4 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2 w-[90%] md:w-auto max-w-sm pointer-events-none">
+          <div className="flex items-center gap-3 md:gap-4 pl-3 pr-1.5 md:pl-4 md:pr-2 py-1.5 md:py-2 rounded-full bg-sky-500/90 backdrop-blur text-white shadow-xl animate-in fade-in slide-in-from-top-4 justify-between w-full pointer-events-auto">
             <span className="text-[11px] md:text-xs font-bold flex items-center gap-1.5 md:gap-2 truncate">
               <FiNavigation className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" /> 
               <span className="truncate">{navigationEnd ? `Navigating to ${navigationEnd.name}` : 'Select a destination'}</span>
