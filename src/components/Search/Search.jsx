@@ -5,7 +5,7 @@ import { useMapStore } from '../../store/useMapStore';
 import { FiSearch, FiX, FiMapPin } from 'react-icons/fi';
 
 export default function Search() {
-  const { searchQuery, setSearchQuery, selectPoi, pois, currentFloor, setFloor } = useMapStore();
+  const { searchQuery, setSearchQuery, selectPoi, pois, currentFloor, setFloor, zoomMapTo } = useMapStore();
   const [suggestions, setSuggestions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const searchRef = useRef(null);
@@ -55,15 +55,18 @@ export default function Search() {
 
   const handleSelect = (poi) => {
     if (poi.floor && poi.floor !== currentFloor && setFloor) {
+      window.__mapSkipNextReset = true;
       setFloor(poi.floor);
       // Slight delay to allow floor transition before highlighting the POI
       setTimeout(() => {
         selectPoi(poi);
+        zoomMapTo(poi.x, poi.y, 3.5);
         // Dispatch custom event so Sidebar can close on mobile
         window.dispatchEvent(new CustomEvent('map:poi-selected'));
       }, 150);
     } else {
       selectPoi(poi);
+      zoomMapTo(poi.x, poi.y, 3.5);
       window.dispatchEvent(new CustomEvent('map:poi-selected'));
     }
     setSearchQuery('');
