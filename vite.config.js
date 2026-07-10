@@ -15,6 +15,14 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
+      },
+      '/maps': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      '/poi-images': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
       }
     }
   }
