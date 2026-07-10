@@ -151,7 +151,24 @@ async function initDB() {
     // Insert Default Project if not exists
     await conn.execute(`
       INSERT IGNORE INTO ap_projects (id, name, logo_url) 
-      VALUES ('default', 'Chennai Airport T1', null)
+      VALUES ('default', 'Chennai Airport', null)
+    `);
+
+    await conn.execute(`
+      CREATE TABLE IF NOT EXISTS ap_buildings (
+        id VARCHAR(100) PRIMARY KEY,
+        project_id VARCHAR(100) NOT NULL,
+        name VARCHAR(200) NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_project (project_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // Insert Default Building
+    await conn.execute(`
+      INSERT IGNORE INTO ap_buildings (id, project_id, name) 
+      VALUES ('bldg_default', 'default', 'Chennai Terminal 1')
     `);
 
     // Create Super Admin if not exists
@@ -641,11 +658,62 @@ app.post('/api/save-settings', verifyToken, async (req, res) => {
   }
 });
 
+// ── BUILDINGS ──────────────────────────────────────────────────────────────────
+app.get('/api/load-buildings', async (req, res) => {
+  try {
+    const projectId = await resolveProjectId(req.query.project);
+    const [rows] = await pool.execute('SELECT id, name, description FROM ap_buildings WHERE project_id = ? ORDER BY created_at ASC', [projectId]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/save-buildings', verifyToken, async (req, res) => {
+  const buildings = req.body;
+  const projectId = req.user.project_id || 'default';
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    
+    // Get existing buildings to detect deletions
+    const [existing] = await conn.execute('SELECT id FROM ap_buildings WHERE project_id = ?', [projectId]);
+    const existingIds = existing.map(b => b.id);
+    const newIds = buildings.map(b => b.id);
+    const idsToDelete = existingIds.filter(id => !newIds.includes(id));
+
+    // Delete buildings (and their floors cascade? For now, just delete buildings)
+    if (idsToDelete.length > 0) {
+      for (const delId of idsToDelete) {
+        await conn.execute('DELETE FROM ap_floors WHERE building_id = ? AND project_id = ?', [delId, projectId]);
+        await conn.execute('DELETE FROM ap_buildings WHERE id = ? AND project_id = ?', [delId, projectId]);
+      }
+    }
+
+    // Upsert buildings
+    for (const b of buildings) {
+      await conn.execute(
+        'INSERT INTO ap_buildings (id, project_id, name, description) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE name = ?, description = ?',
+        [b.id, projectId, b.name, b.description || null, b.name, b.description || null]
+      );
+    }
+    
+    await conn.commit();
+    res.json({ success: true });
+  } catch (err) {
+    await conn.rollback();
+    res.status(500).json({ error: err.message });
+  } finally {
+    conn.release();
+  }
+});
+
 // ── FLOORS ─────────────────────────────────────────────────────────────────────
 app.get('/api/load-floors', async (req, res) => {
   try {
     const projectId = await resolveProjectId(req.query.project);
-    const [rows] = await pool.execute('SELECT id, level, name, image FROM ap_floors WHERE project_id = ? ORDER BY sort_order', [projectId]);
+    const buildingId = req.query.building || 'bldg_default'; // default fallback for safety
+    const [rows] = await pool.execute('SELECT id, building_id, level, name, image FROM ap_floors WHERE project_id = ? AND building_id = ? ORDER BY sort_order', [projectId, buildingId]);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -653,17 +721,18 @@ app.get('/api/load-floors', async (req, res) => {
 });
 
 app.post('/api/save-floors', verifyToken, async (req, res) => {
-  const floors = req.body;
+  const { floors, buildingId } = req.body;
+  if (!buildingId) return res.status(400).json({ error: 'buildingId is required' });
   const projectId = req.user.project_id || 'default';
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    await conn.execute('DELETE FROM ap_floors WHERE project_id = ?', [projectId]);
+    await conn.execute('DELETE FROM ap_floors WHERE project_id = ? AND building_id = ?', [projectId, buildingId]);
     for (let i = 0; i < floors.length; i++) {
       const f = floors[i];
       await conn.execute(
-        'INSERT INTO ap_floors (id, project_id, level, name, image, sort_order) VALUES (?,?,?,?,?,?)',
-        [f.id, projectId, f.level, f.name, f.image || null, i]
+        'INSERT INTO ap_floors (id, project_id, building_id, level, name, image, sort_order) VALUES (?,?,?,?,?,?,?)',
+        [f.id, projectId, buildingId, f.level, f.name, f.image || null, i]
       );
     }
     await conn.commit();

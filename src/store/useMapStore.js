@@ -56,6 +56,71 @@ export const useMapStore = create((set, get) => ({
   // Loading State
   dataLoaded: false,
 
+  // Buildings
+  buildings: [],
+  currentBuilding: null,
+  setBuilding: (buildingId) => {
+    set({ currentBuilding: buildingId, floors: [], nodes: [], edges: [], pois: {} });
+    get().loadMapData();
+  },
+
+  loadBuildings: async (projectId) => {
+    try {
+      const res = await fetch(`/api/load-buildings?project=${projectId}`);
+      if (res.ok) {
+        const buildings = await res.json();
+        set({ buildings });
+        return buildings;
+      }
+    } catch (e) {
+      console.error('Failed to load buildings', e);
+    }
+    return [];
+  },
+
+  addBuilding: async (name, description) => {
+    const { buildings } = get();
+    const newBuilding = { id: `bldg_${Date.now()}`, name, description };
+    const updated = [...buildings, newBuilding];
+    
+    try {
+      await fetch('/api/save-buildings', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
+        },
+        body: JSON.stringify(updated)
+      });
+      set({ buildings: updated });
+      if (!get().currentBuilding) get().setBuilding(newBuilding.id);
+    } catch (e) {
+      console.error('Failed to add building', e);
+    }
+  },
+
+  deleteBuilding: async (id) => {
+    const { buildings, currentBuilding } = get();
+    const updated = buildings.filter(b => b.id !== id);
+    
+    try {
+      await fetch('/api/save-buildings', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
+        },
+        body: JSON.stringify(updated)
+      });
+      set({ buildings: updated });
+      if (currentBuilding === id) {
+        get().setBuilding(updated[0]?.id || null);
+      }
+    } catch (e) {
+      console.error('Failed to delete building', e);
+    }
+  },
+
   // Floors
   floors: [],
   currentFloor: 'lounge',
@@ -438,8 +503,15 @@ export const useMapStore = create((set, get) => ({
         }
       }
 
+      const buildings = await get().loadBuildings(projectId);
+      let activeBuildingId = get().currentBuilding;
+      if (!activeBuildingId && buildings.length > 0) {
+        activeBuildingId = buildings[0].id;
+        set({ currentBuilding: activeBuildingId });
+      }
+
       const [floorsRes, graphRes, settingsRes] = await Promise.all([
-        fetch(`/api/load-floors?project=${projectId}`),
+        fetch(`/api/load-floors?project=${projectId}&building=${activeBuildingId || 'bldg_default'}`),
         fetch(`/api/load-graph?project=${projectId}`),
         fetch(`/api/load-settings?project=${projectId}`)
       ]);
@@ -481,9 +553,8 @@ export const useMapStore = create((set, get) => ({
   },
 
   addFloor: async (level, name, imageUrl) => {
-    const { floors } = get();
-    const id = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') + '_' + Date.now();
-    const newFloor = { id, level, name, image: imageUrl };
+    const { floors, currentBuilding } = get();
+    const newFloor = { id: `flr_${Date.now()}`, level, name, image: imageUrl || null };
     const updatedFloors = [...floors, newFloor];
 
     try {
@@ -493,9 +564,10 @@ export const useMapStore = create((set, get) => ({
           'Content-Type': 'application/json',
           ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
         },
-        body: JSON.stringify(updatedFloors)
+        body: JSON.stringify({ floors: updatedFloors, buildingId: currentBuilding || 'bldg_default' })
       });
-      set({ floors: updatedFloors, currentFloor: id });
+      set({ floors: updatedFloors });
+      if (!get().currentFloor) set({ currentFloor: newFloor.id });
     } catch (e) {
       console.error('Failed to add floor', e);
     }
@@ -512,7 +584,7 @@ export const useMapStore = create((set, get) => ({
           'Content-Type': 'application/json',
           ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
         },
-        body: JSON.stringify(updatedFloors)
+        body: JSON.stringify({ floors: updatedFloors, buildingId: get().currentBuilding || 'bldg_default' })
       });
       set({ floors: updatedFloors });
     } catch (e) {
@@ -542,7 +614,7 @@ export const useMapStore = create((set, get) => ({
           'Content-Type': 'application/json',
           ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
         },
-        body: JSON.stringify(updatedFloors)
+        body: JSON.stringify({ floors: updatedFloors, buildingId: get().currentBuilding || 'bldg_default' })
       });
       set({ floors: updatedFloors, nodes: updatedNodes, edges: updatedEdges, pois: computePoisFromNodes(updatedNodes), currentFloor: nextFloor });
       saveGraph(updatedNodes, updatedEdges);

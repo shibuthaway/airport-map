@@ -41,7 +41,25 @@ async function migrate() {
     // Insert Default Project
     await conn.execute(`
       INSERT IGNORE INTO ap_projects (id, name, logo_url) 
-      VALUES ('default', 'Chennai Airport T1', null)
+      VALUES ('default', 'Chennai Airport', null)
+    `);
+
+    console.log('Creating ap_buildings...');
+    await conn.execute(`
+      CREATE TABLE IF NOT EXISTS ap_buildings (
+        id VARCHAR(100) PRIMARY KEY,
+        project_id VARCHAR(100) NOT NULL,
+        name VARCHAR(200) NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_project (project_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // Insert Default Building
+    await conn.execute(`
+      INSERT IGNORE INTO ap_buildings (id, project_id, name) 
+      VALUES ('bldg_default', 'default', 'Chennai Terminal 1')
     `);
 
     // Create Super Admin
@@ -60,6 +78,8 @@ async function migrate() {
 
     console.log('Altering ap_floors...');
     try { await conn.execute("ALTER TABLE ap_floors ADD COLUMN project_id VARCHAR(100) DEFAULT 'default' AFTER id"); } catch(e) { if(e.code !== 'ER_DUP_FIELDNAME') throw e; }
+    try { await conn.execute("ALTER TABLE ap_floors ADD COLUMN building_id VARCHAR(100) DEFAULT 'bldg_default' AFTER project_id"); } catch(e) { if(e.code !== 'ER_DUP_FIELDNAME') throw e; }
+    try { await conn.execute("ALTER TABLE ap_floors ADD INDEX idx_building (building_id)"); } catch(e) { if(e.code !== 'ER_DUP_KEYNAME') throw e; }
     
     console.log('Altering ap_nodes...');
     try { await conn.execute("ALTER TABLE ap_nodes ADD COLUMN project_id VARCHAR(100) DEFAULT 'default' AFTER id"); } catch(e) { if(e.code !== 'ER_DUP_FIELDNAME') throw e; }

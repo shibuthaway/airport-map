@@ -5,7 +5,7 @@ import { FiSun, FiMoon, FiPlus, FiMinus, FiMaximize2, FiShare2, FiMaximize, FiMi
 import Search from '../Search/Search';
 
 export default function MapHeader() {
-  const { floors, currentFloor, setFloor, theme, toggleTheme, zoomActions, isAdminMode, mapRotation, setMapRotation, isFullScreen, toggleFullScreen } = useMapStore();
+  const { buildings, currentBuilding, setBuilding, theme, toggleTheme, zoomActions, isAdminMode, mapRotation, setMapRotation, isFullScreen, toggleFullScreen } = useMapStore();
 
   const defaultTheme = {
     gradient: 'from-blue-500 to-cyan-600 shadow-blue-500/25',
@@ -39,7 +39,20 @@ export default function MapHeader() {
       {!isFullScreen && (
         <div className="h-14 md:h-16 border-b border-slate-200/50 dark:border-slate-800/40 bg-white/80 dark:bg-slate-950/60 backdrop-blur-xl flex items-center justify-between px-2 sm:px-4 md:px-6 z-20 select-none">
           
-        {/* Removed horizontal floor tabs in favor of floating FloorSelector */}
+          {/* Terminal / Building Selector */}
+          <div className="flex items-center">
+            {buildings && buildings.length > 0 && (
+              <select
+                value={currentBuilding || ''}
+                onChange={(e) => setBuilding(e.target.value)}
+                className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-bold text-sm md:text-base px-3 py-1.5 md:py-2 rounded-xl outline-none focus:border-sky-500 cursor-pointer shadow-sm transition-all"
+              >
+                {buildings.map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            )}
+          </div>
 
       {/* 3. Utility options & Theme Switcher (Right) */}
       <div className="flex items-center gap-1.5 md:gap-3 flex-shrink-0">
