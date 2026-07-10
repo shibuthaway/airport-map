@@ -403,7 +403,7 @@ export const useMapStore = create((set, get) => ({
     }
   },
 
-  loadMapData: async () => {
+  loadMapData: async (retries = 3) => {
     try {
       const [floorsRes, graphRes] = await Promise.all([
         fetch('/api/load-floors'),
@@ -427,12 +427,29 @@ export const useMapStore = create((set, get) => ({
         }
 
         set({ floors, nodes, edges, pois: computedPois, currentFloor: topFloorId, dataLoaded: true });
+        
+        // Auto-center map to the middle of the floor plan when data is loaded
+        setTimeout(() => {
+          if (typeof window !== 'undefined' && window.innerWidth < 768) {
+            useMapStore.getState().zoomMapTo(500, 300, 0.42);
+          } else {
+            useMapStore.getState().zoomMapTo(500, 300, 0.9);
+          }
+        }, 500);
       } else {
-        // Even on error, mark loaded so UI doesn't block forever
+        if (retries > 0) {
+          console.warn(`API returned ${floorsRes.status}, retrying...`);
+          setTimeout(() => useMapStore.getState().loadMapData(retries - 1), 2000);
+          return;
+        }
         set({ dataLoaded: true });
       }
     } catch (e) {
       console.error('Failed to load map data from APIs', e);
+      if (retries > 0) {
+        setTimeout(() => useMapStore.getState().loadMapData(retries - 1), 2000);
+        return;
+      }
       set({ dataLoaded: true });
     }
   },

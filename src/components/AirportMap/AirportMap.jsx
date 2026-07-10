@@ -735,7 +735,7 @@ export default function AirportMap() {
 
       <TransformWrapper
         ref={transformRef}
-        initialScale={typeof window !== 'undefined' && window.innerWidth < 768 ? 0.38 : 1} 
+        initialScale={1}
         minScale={0.15} 
         maxScale={6}
         centerOnInit={true}
