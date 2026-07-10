@@ -11,7 +11,7 @@ const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
 const jwt     = require('jsonwebtoken');
-const bcrypt  = require('bcrypt');
+const bcrypt  = require('bcryptjs');
 require('dotenv').config();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_airport_jwt_key_2026';
