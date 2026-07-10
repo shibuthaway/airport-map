@@ -90,7 +90,7 @@ export default function AirportMap() {
       touchStateRef.current = { active: true, lastAngle: angle };
       setIsTouchRotating(true);
     }
-  }, []);
+  }, [setIsTouchRotating]);
 
   const handleTouchMove = useCallback((e) => {
     if (e.touches.length === 2 && touchStateRef.current.active) {
@@ -99,7 +99,6 @@ export default function AirportMap() {
       
       let deltaAngle = currentAngle - touchStateRef.current.lastAngle;
       
-      // Fix boundary jump (-180 to +180)
       if (deltaAngle > 180) deltaAngle -= 360;
       else if (deltaAngle < -180) deltaAngle += 360;
       
@@ -115,7 +114,7 @@ export default function AirportMap() {
       touchStateRef.current.active = false;
       setIsTouchRotating(false);
     }
-  }, []);
+  }, [setIsTouchRotating]);
 
   useEffect(() => {
     loadMapData();
