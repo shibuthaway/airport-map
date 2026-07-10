@@ -27,6 +27,20 @@ async function migrate() {
 
     console.log('Creating ap_users...');
     await conn.execute(`
+      CREATE TABLE IF NOT EXISTS ap_floors (
+        id VARCHAR(100) PRIMARY KEY,
+        project_id VARCHAR(100) NOT NULL,
+        building_id VARCHAR(100) NOT NULL,
+        level VARCHAR(20) NOT NULL,
+        name VARCHAR(200) NOT NULL,
+        image LONGTEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_project (project_id),
+        INDEX idx_building (building_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    await conn.execute(`
       CREATE TABLE IF NOT EXISTS ap_users (
         id VARCHAR(100) PRIMARY KEY,
         username VARCHAR(100) NOT NULL UNIQUE,
