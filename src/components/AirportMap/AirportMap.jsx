@@ -5,6 +5,7 @@ import { useMapStore } from '../../store/useMapStore';
 import { getEffectiveEdges } from '../../utils/pathfinder';
 import { useIndoorPositioning } from '../../hooks/useIndoorPositioning';
 import UserLocationMarker from './UserLocationMarker';
+import FloorSelector from '../FloorSelector/FloorSelector';
 
 const getLabelLines = (name) => {
   const words = name.split(' ');
@@ -792,6 +793,9 @@ export default function AirportMap() {
             onTouchEndCapture={handleTouchEnd}
             onTouchCancelCapture={handleTouchEnd}
           >
+            {/* Overlay UI components */}
+            <FloorSelector />
+            
             <TransformWrapper
             ref={transformRef}
             initialScale={targetScale}
