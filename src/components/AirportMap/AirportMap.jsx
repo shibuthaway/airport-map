@@ -1027,6 +1027,8 @@ export default function AirportMap() {
           </div>
         )}
       </TransformWrapper>
+        );
+      })()}
 
       {/* ── Blocked Edge Hover Tooltip (HTML overlay, tracks mouse) ── */}
       {hoveredBlockedEdge && (
