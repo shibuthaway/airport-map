@@ -68,6 +68,7 @@ export default function AirportMap() {
     taggingMode, taggingCoords, setTaggingCoords,
     loadMapData, theme,
     mapRotation, setMapRotation,
+    pendingZoom, clearPendingZoom,
     
     // Graph states & actions
     nodes, edges, dragNode, toggleEdge, isDrawingEdges, setIsDrawingEdges,
@@ -215,7 +216,21 @@ export default function AirportMap() {
     transformRef.current.setTransform(posX, posY, targetScale, 500, 'easeOut');
   }, []);
 
-  // ── Auto-zoom + blink to selected POI ───────────────────────────────────
+  // ── pendingZoom watcher — fires immediately when store sets a zoom target ──
+  useEffect(() => {
+    if (!pendingZoom || !transformRef.current) return;
+    const { x, y, scale } = pendingZoom;
+    zoomToSvgPoint(x, y, scale);
+    // Blink the nearest node
+    const nearest = nodes.find(n => n.floor === currentFloor && Math.hypot(n.x - x, n.y - y) < 40);
+    if (nearest) {
+      setBlinkPoiId(nearest.id);
+      setTimeout(() => setBlinkPoiId(null), 2000);
+    }
+    clearPendingZoom();
+  }, [pendingZoom, zoomToSvgPoint, clearPendingZoom, currentFloor, nodes]);
+
+  // ── Auto-zoom + blink to selected POI (search/explore) ───────────────────
   useEffect(() => {
     if (!selectedPoi) return;
     // Give floor transition time if needed

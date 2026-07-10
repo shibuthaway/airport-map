@@ -48,19 +48,14 @@ export default function Sidebar() {
     if (!navigationStart) return;
     setIsOpen(false);
 
-    const { setFloor: switchFloor } = useMapStore.getState();
+    const { setFloor: switchFloor, zoomMapTo } = useMapStore.getState();
 
-    // Tell AirportMap to skip the auto-reset on this floor change
+    // Switch to start floor (skip auto-reset)
     window.__mapSkipNextReset = true;
-    // Step 1: Switch to the starting floor
     switchFloor(navigationStart.floor);
 
-    // Step 2: Zoom to start point (after sidebar close animation ~400ms)
-    setTimeout(() => {
-      if (window.__mapZoomToPoint) {
-        window.__mapZoomToPoint(navigationStart.x, navigationStart.y, 3.5);
-      }
-    }, 450);
+    // Queue zoom via store — AirportMap useEffect will fire it
+    setTimeout(() => zoomMapTo(navigationStart.x, navigationStart.y, 3.5), 300);
   };
 
   const flatPois = getFlatPois();
@@ -433,20 +428,17 @@ export default function Sidebar() {
                                       <button
                                         onClick={() => {
                                           const targetFloor = step.action.floor;
+                                          const { setFloor: switchFloor, navigationPath, zoomMapTo } = useMapStore.getState();
 
-                                          // Tell AirportMap to skip reset so our zoom wins
+                                          // Skip auto-reset so our zoom wins
                                           window.__mapSkipNextReset = true;
-                                          useMapStore.getState().setFloor(targetFloor);
+                                          switchFloor(targetFloor);
 
-                                          // Find first node on the new floor in navigation path
-                                          const { navigationPath } = useMapStore.getState();
-                                          const firstNodeOnFloor = navigationPath?.find(pt => pt.floor === targetFloor);
-
-                                          // Zoom to that entry point after floor renders
-                                          if (firstNodeOnFloor && window.__mapZoomToPoint) {
-                                            setTimeout(() => {
-                                              window.__mapZoomToPoint(firstNodeOnFloor.x, firstNodeOnFloor.y, 3.5);
-                                            }, 250);
+                                          // Find first node on the new floor in the path
+                                          const entry = navigationPath?.find(pt => pt.floor === targetFloor);
+                                          if (entry) {
+                                            // Queue zoom via store — AirportMap will execute after floor renders
+                                            setTimeout(() => zoomMapTo(entry.x, entry.y, 3.5), 200);
                                           }
                                         }}
                                         className="mt-2 bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-800/50 hover:bg-sky-500 hover:text-white hover:border-transparent px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider w-fit transition-all active:scale-95 shadow-sm"

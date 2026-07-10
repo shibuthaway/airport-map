@@ -280,6 +280,12 @@ export const useMapStore = create((set, get) => ({
   mapRotation: 0,
   setMapRotation: (deg) => set({ mapRotation: ((deg % 360) + 360) % 360 }),
 
+  // Pending zoom target — set this to zoom map to a specific SVG point
+  // { x, y, scale } — AirportMap watches this and executes zoom, then clears it
+  pendingZoom: null,
+  zoomMapTo: (x, y, scale = 3.5) => set({ pendingZoom: { x, y, scale } }),
+  clearPendingZoom: () => set({ pendingZoom: null }),
+
   // Zoom Actions (Registered by Map Viewport)
   zoomActions: null,
   setZoomActions: (actions) => set({ zoomActions: actions }),
