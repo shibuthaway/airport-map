@@ -260,7 +260,11 @@ export default function Sidebar() {
                   <div className="flex flex-col gap-1.5">
                     {categoryPlaces.map(poi => (
                       <div key={poi.id} className="flex flex-col">
-                        <button onClick={() => { selectPoi(poi); if (isMobile) setIsOpen(false); }}
+                        <button onClick={() => { 
+                          selectPoi(poi); 
+                          useMapStore.getState().zoomMapTo(poi.x, poi.y, 3.5);
+                          if (isMobile) setIsOpen(false); 
+                        }}
                           className={`flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-98 text-left ${selectedPoi?.id === poi.id ? 'bg-sky-500/10 dark:bg-sky-500/10 ring-1 ring-sky-500/30' : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
                           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-base flex-shrink-0 overflow-hidden">
                             {poi.imageUrl ? <img src={poi.imageUrl} alt="" className="w-full h-full object-cover" /> : (poi.isCustom ? '📍' : activeCatObj?.icon || '🏢')}

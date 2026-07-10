@@ -17,13 +17,11 @@ const MapLayout = () => {
       <LoadingScreen />
 
       {/* 2. Sidebar/Bottom-Sheet Navigation */}
-      {!isFullScreen && (
-        <div className="absolute md:relative z-40 h-full pointer-events-none md:pointer-events-auto">
-          <div className="h-full pointer-events-auto">
-            <Sidebar />
-          </div>
+      <div className={`absolute md:relative z-40 h-full pointer-events-none md:pointer-events-auto ${isFullScreen ? 'hidden' : ''}`}>
+        <div className="h-full pointer-events-auto">
+          <Sidebar />
         </div>
-      )}
+      </div>
 
       {/* 3. Map + Header */}
       <div className="flex-1 h-full w-full relative flex flex-col min-w-0 overflow-hidden">
