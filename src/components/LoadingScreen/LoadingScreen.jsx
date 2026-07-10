@@ -86,11 +86,15 @@ export default function LoadingScreen() {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
-              className="relative z-10 w-16 h-16 rounded-full bg-sky-600/20 border border-sky-500/40 flex items-center justify-center shadow-[0_0_30px_rgba(14,165,233,0.15)]"
+              className="relative z-10 w-20 h-20 rounded-full bg-white/5 border border-sky-500/40 flex items-center justify-center shadow-[0_0_30px_rgba(14,165,233,0.15)] overflow-hidden"
             >
-              <svg viewBox="0 0 24 24" className="w-8 h-8 fill-sky-400" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/>
-              </svg>
+              {useMapStore.getState().appSettings?.logo_url ? (
+                <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-14 h-14 object-contain" />
+              ) : (
+                <svg viewBox="0 0 24 24" className="w-10 h-10 fill-sky-400" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/>
+                </svg>
+              )}
             </motion.div>
           </div>
 
@@ -104,16 +108,13 @@ export default function LoadingScreen() {
             <div className="flex items-center justify-center gap-2 mb-3">
               <div className="h-px w-10 bg-sky-500/40" />
               <span className="text-[10px] font-bold tracking-[0.3em] text-sky-500/80 uppercase">
-                Airports Authority of India
+                Indoor Navigation
               </span>
               <div className="h-px w-10 bg-sky-500/40" />
             </div>
-            <h1 className="text-3xl font-extrabold tracking-wider text-white mb-1 leading-tight">
-              CHENNAI<span className="text-sky-400"> AIRPORT</span>
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-wider text-white mb-2 leading-tight px-4 max-w-sm mx-auto">
+              {useMapStore.getState().appSettings?.name || 'Airport Authority of India Navigation'}
             </h1>
-            <p className="text-sm font-semibold text-slate-400 tracking-[0.2em] uppercase mb-0.5">
-              Terminal 1 · Domestic
-            </p>
             <p className="text-xs text-sky-500/70 font-medium tracking-widest uppercase">
               Interactive Floor Map
             </p>

@@ -735,21 +735,20 @@ export default function AirportMap() {
 
       {(() => {
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-        const targetScale = isMobile ? 0.38 : 0.9;
         const w = typeof window !== 'undefined' ? window.innerWidth : 1000;
         const h = typeof window !== 'undefined' ? window.innerHeight : 600;
-        const initX = (w - 1000 * targetScale) / 2;
-        const initY = ((h - (isMobile ? 120 : 0)) - 600 * targetScale) / 2; // Offset for mobile bottom sheet slightly
+        
+        // Let the library center it automatically; we just give it a good default scale
+        const targetScale = isMobile ? 0.35 : 0.8;
         
         return (
           <TransformWrapper
             ref={transformRef}
             initialScale={targetScale}
-            initialPositionX={initX}
-            initialPositionY={initY}
             minScale={0.15} 
             maxScale={6}
-            centerOnInit={false}
+            centerOnInit={true}
+            centerZoomedOut={true}
             limitToBounds={false}
             doubleClick={{ disabled: false }}
         panning={{ 
@@ -799,6 +798,17 @@ export default function AirportMap() {
               >
                 {/* 1. Base Map */}
                 {renderMap()}
+
+                {/* Empty State Fallback */}
+                {(!floors || floors.length === 0) && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
+                    <div className="bg-slate-900/80 backdrop-blur-md text-slate-300 px-8 py-6 rounded-3xl border border-slate-800 shadow-2xl flex flex-col items-center text-center max-w-sm">
+                      <span className="text-5xl mb-4">🗺️</span>
+                      <h2 className="text-2xl font-black text-white mb-2">Blank Canvas</h2>
+                      <p className="text-sm">There are no floors in this project yet. Open the <strong className="text-sky-400">Floor Manager</strong> in the sidebar to upload your first map image!</p>
+                    </div>
+                  </div>
+                )}
 
                 {/* 2. Overlay SVG */}
                 <svg

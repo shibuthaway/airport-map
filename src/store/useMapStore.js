@@ -2,10 +2,14 @@ import { create } from 'zustand';
 import { calculateShortestPath } from '../utils/pathfinder';
 
 const saveGraph = async (nodes, edges) => {
+  const state = useMapStore.getState();
   try {
     await fetch('/api/save-graph', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(state.token ? { 'Authorization': `Bearer ${state.token}` } : {})
+      },
       body: JSON.stringify({ nodes, edges })
     });
   } catch (e) {
@@ -32,8 +36,22 @@ const genId = (name, floor) =>
 
 
 export const useMapStore = create((set, get) => ({
+  // Auth State
+  user: null,
+  token: typeof window !== 'undefined' ? localStorage.getItem('ap_token') : null,
+  logout: () => {
+    localStorage.removeItem('ap_token');
+    set({ user: null, token: null, isAdminMode: false });
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+  },
+
+  // App Settings (Branding)
+  appSettings: { name: 'Airport Indoor Map', logo_url: null },
+
   // Mode Selection
-  isAdminMode: typeof window !== 'undefined' ? !window.location.href.includes('mode=public') : true,
+  isAdminMode: typeof window !== 'undefined' ? !!localStorage.getItem('ap_token') : false,
 
   // Loading State
   dataLoaded: false,
@@ -405,13 +423,26 @@ export const useMapStore = create((set, get) => ({
 
   loadMapData: async (retries = 3) => {
     try {
-      const [floorsRes, graphRes] = await Promise.all([
-        fetch('/api/load-floors'),
-        fetch('/api/load-graph')
+      let projectId = 'default';
+      if (typeof window !== 'undefined') {
+        const pathMatch = window.location.pathname.match(/^\/map\/([^/]+)/);
+        if (pathMatch) {
+          projectId = pathMatch[1];
+        } else {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('project')) projectId = params.get('project');
+        }
+      }
+
+      const [floorsRes, graphRes, settingsRes] = await Promise.all([
+        fetch(`/api/load-floors?project=${projectId}`),
+        fetch(`/api/load-graph?project=${projectId}`),
+        fetch(`/api/load-settings?project=${projectId}`)
       ]);
       if (floorsRes.ok && graphRes.ok) {
         const floors = await floorsRes.json();
         const graph = await graphRes.json();
+        const settings = settingsRes.ok ? await settingsRes.json() : { name: 'Airport Indoor Map', logo_url: null };
         const nodes = graph.nodes || [];
         const edges = graph.edges || [];
         const computedPois = computePoisFromNodes(nodes);
@@ -426,7 +457,7 @@ export const useMapStore = create((set, get) => ({
           topFloorId = sorted[sorted.length - 1].id;
         }
 
-        set({ floors, nodes, edges, pois: computedPois, currentFloor: topFloorId, dataLoaded: true });
+        set({ floors, nodes, edges, pois: computedPois, currentFloor: topFloorId, appSettings: settings, dataLoaded: true });
       } else {
         if (retries > 0) {
           console.warn(`API returned ${floorsRes.status}, retrying...`);
@@ -446,7 +477,7 @@ export const useMapStore = create((set, get) => ({
   },
 
   addFloor: async (level, name, imageUrl) => {
-    const { floors, nodes, edges } = get();
+    const { floors } = get();
     const id = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') + '_' + Date.now();
     const newFloor = { id, level, name, image: imageUrl };
     const updatedFloors = [...floors, newFloor];
@@ -454,7 +485,10 @@ export const useMapStore = create((set, get) => ({
     try {
       await fetch('/api/save-floors', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
+        },
         body: JSON.stringify(updatedFloors)
       });
       set({ floors: updatedFloors, currentFloor: id });
@@ -470,7 +504,10 @@ export const useMapStore = create((set, get) => ({
     try {
       await fetch('/api/save-floors', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
+        },
         body: JSON.stringify(updatedFloors)
       });
       set({ floors: updatedFloors });
@@ -497,7 +534,10 @@ export const useMapStore = create((set, get) => ({
     try {
       await fetch('/api/save-floors', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
+        },
         body: JSON.stringify(updatedFloors)
       });
       set({ floors: updatedFloors, nodes: updatedNodes, edges: updatedEdges, pois: computePoisFromNodes(updatedNodes), currentFloor: nextFloor });

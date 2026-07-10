@@ -10,7 +10,11 @@ const cors    = require('cors');
 const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
+const jwt     = require('jsonwebtoken');
+const bcrypt  = require('bcrypt');
 require('dotenv').config();
+
+const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_airport_jwt_key_2026';
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -38,8 +42,46 @@ async function initDB() {
   const conn = await pool.getConnection();
   try {
     await conn.execute(`
+      CREATE TABLE IF NOT EXISTS ap_projects (
+        id VARCHAR(100) PRIMARY KEY,
+        name VARCHAR(200) NOT NULL,
+        logo_url VARCHAR(500),
+        public_slug VARCHAR(255) UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // Safely attempt to add the 'public_slug' column if it doesn't exist
+    try {
+      await conn.execute("ALTER TABLE ap_projects ADD COLUMN public_slug VARCHAR(255) UNIQUE");
+    } catch (e) {
+      // Ignored if column already exists
+    }
+
+    await conn.execute(`
+      CREATE TABLE IF NOT EXISTS ap_users (
+        id VARCHAR(100) PRIMARY KEY,
+        username VARCHAR(100) NOT NULL UNIQUE,
+        password_hash VARCHAR(255) NOT NULL,
+        role VARCHAR(50) DEFAULT 'client',
+        project_id VARCHAR(100),
+        status VARCHAR(20) DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_project (project_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // Safely attempt to add the 'status' column if it doesn't exist (for existing DBs)
+    try {
+      await conn.execute("ALTER TABLE ap_users ADD COLUMN status VARCHAR(20) DEFAULT 'active'");
+    } catch (e) {
+      // Ignored if column already exists (Error 1060)
+    }
+
+    await conn.execute(`
       CREATE TABLE IF NOT EXISTS ap_floors (
         id         VARCHAR(100) PRIMARY KEY,
+        project_id VARCHAR(100) DEFAULT 'default',
         level      VARCHAR(20)  NOT NULL,
         name       VARCHAR(100) NOT NULL,
         image      VARCHAR(255),
@@ -50,6 +92,7 @@ async function initDB() {
     await conn.execute(`
       CREATE TABLE IF NOT EXISTS ap_nodes (
         id          VARCHAR(200) PRIMARY KEY,
+        project_id  VARCHAR(100) DEFAULT 'default',
         floor       VARCHAR(100) NOT NULL,
         x           FLOAT        NOT NULL,
         y           FLOAT        NOT NULL,
@@ -61,13 +104,15 @@ async function initDB() {
         image_url   VARCHAR(500),
         is_custom   TINYINT(1)   DEFAULT 1,
         created_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_floor (floor)
+        INDEX idx_floor (floor),
+        INDEX idx_project (project_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
     await conn.execute(`
       CREATE TABLE IF NOT EXISTS ap_edges (
         id            VARCHAR(300) PRIMARY KEY,
+        project_id    VARCHAR(100) DEFAULT 'default',
         \`from\`        VARCHAR(200) NOT NULL,
         \`to\`          VARCHAR(200) NOT NULL,
         distance      FLOAT        DEFAULT 0,
@@ -76,13 +121,15 @@ async function initDB() {
         blocked       TINYINT(1)   DEFAULT 0,
         created_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
         INDEX idx_from (\`from\`),
-        INDEX idx_to   (\`to\`)
+        INDEX idx_to   (\`to\`),
+        INDEX idx_project (project_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
     await conn.execute(`
       CREATE TABLE IF NOT EXISTS ap_categories (
         id         VARCHAR(100) PRIMARY KEY,
+        project_id VARCHAR(100) DEFAULT 'default',
         name       VARCHAR(100) NOT NULL,
         icon       VARCHAR(20),
         color      VARCHAR(20),
@@ -93,6 +140,7 @@ async function initDB() {
     await conn.execute(`
       CREATE TABLE IF NOT EXISTS ap_custom_routes (
         id         VARCHAR(200) PRIMARY KEY,
+        project_id VARCHAR(100) DEFAULT 'default',
         name       VARCHAR(200),
         node_ids   LONGTEXT,
         distance   FLOAT,
@@ -100,7 +148,20 @@ async function initDB() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
-    console.log('✅ Prefixed MySQL tables ready');
+    // Insert Default Project if not exists
+    await conn.execute(`
+      INSERT IGNORE INTO ap_projects (id, name, logo_url) 
+      VALUES ('default', 'Chennai Airport T1', null)
+    `);
+
+    // Create Super Admin if not exists
+    const superHash = await bcrypt.hash('admin123', 10);
+    await conn.execute(`
+      INSERT IGNORE INTO ap_users (id, username, password_hash, role, project_id) 
+      VALUES ('superadmin_1', 'admin', ?, 'superadmin', null)
+    `, [superHash]);
+
+    console.log('✅ Prefixed MySQL tables ready (Multi-Tenant)');
   } finally {
     conn.release();
   }
@@ -397,33 +458,212 @@ app.get('/admin/db', async (req, res) => {
   }
 });
 
-// ── FLOORS ─────────────────────────────────────────────────────────────────────
-app.get('/api/load-floors', async (req, res) => {
+// ── AUTHENTICATION ─────────────────────────────────────────────────────────────
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
   try {
-    const [rows] = await pool.execute('SELECT id, level, name, image FROM ap_floors ORDER BY sort_order');
-    if (rows.length === 0) {
-      return res.json([
-        { id: 'arrival',   level: 'L1', name: 'Arrival',   image: '/maps/arrival.jpg' },
-        { id: 'departure', level: 'L2', name: 'Departure', image: '/maps/departure.jpg' },
-      ]);
+    const [rows] = await pool.execute('SELECT * FROM ap_users WHERE username = ?', [username]);
+    if (rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
+    const user = rows[0];
+
+    if (user.status === 'disabled') {
+      return res.status(403).json({ error: 'Account disabled. Please contact support.' });
     }
+
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+    const token = jwt.sign({ id: user.id, role: user.role, project_id: user.project_id }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { id: user.id, username: user.username, role: user.role, project_id: user.project_id } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+  const token = authHeader.split(' ')[1];
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) return res.status(401).json({ error: 'Invalid token' });
+    req.user = decoded;
+    next();
+  });
+};
+
+app.post('/api/superadmin/create-client', verifyToken, async (req, res) => {
+  if (req.user.role !== 'superadmin') return res.status(403).json({ error: 'Forbidden' });
+  
+  const { username, password, project_id, project_name } = req.body;
+  if (!username || !password || !project_id || !project_name) {
+    return res.status(400).json({ error: 'Missing fields' });
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    
+    // Create Project
+    await conn.execute(
+      'INSERT INTO ap_projects (id, name) VALUES (?, ?)',
+      [project_id, project_name]
+    );
+
+    // Create User
+    const hash = await bcrypt.hash(password, 10);
+    const userId = `client_${Date.now()}`;
+    await conn.execute(
+      'INSERT INTO ap_users (id, username, password_hash, role, project_id) VALUES (?, ?, ?, ?, ?)',
+      [userId, username, hash, 'client', project_id]
+    );
+
+    await conn.commit();
+    res.json({ success: true });
+  } catch (err) {
+    await conn.rollback();
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'Username or Project ID already exists' });
+    }
+    res.status(500).json({ error: err.message });
+  } finally {
+    conn.release();
+  }
+});
+
+// GET list of clients
+app.get('/api/superadmin/list-clients', verifyToken, async (req, res) => {
+  if (req.user.role !== 'superadmin') return res.status(403).json({ error: 'Forbidden' });
+  try {
+    const [rows] = await pool.execute(`
+      SELECT u.id as user_id, u.username, u.status, u.created_at, p.id as project_id, p.name as project_name 
+      FROM ap_users u 
+      LEFT JOIN ap_projects p ON u.project_id = p.id 
+      WHERE u.role = 'client'
+      ORDER BY u.created_at DESC
+    `);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/save-floors', async (req, res) => {
-  const floors = req.body;
+// UPDATE client status
+app.put('/api/superadmin/client/:id/status', verifyToken, async (req, res) => {
+  if (req.user.role !== 'superadmin') return res.status(403).json({ error: 'Forbidden' });
+  const { status } = req.body;
+  try {
+    await pool.execute('UPDATE ap_users SET status = ? WHERE id = ?', [status, req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE client and ALL their project data permanently
+app.delete('/api/superadmin/client/:id', verifyToken, async (req, res) => {
+  if (req.user.role !== 'superadmin') return res.status(403).json({ error: 'Forbidden' });
+  const userId = req.params.id;
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    await conn.execute('DELETE FROM ap_floors');
+    // 1. Get the project_id associated with this user
+    const [users] = await conn.execute('SELECT project_id FROM ap_users WHERE id = ?', [userId]);
+    if (users.length > 0) {
+      const projectId = users[0].project_id;
+      // 2. Cascade delete project data manually
+      await conn.execute('DELETE FROM ap_floors WHERE project_id = ?', [projectId]);
+      await conn.execute('DELETE FROM ap_nodes WHERE project_id = ?', [projectId]);
+      await conn.execute('DELETE FROM ap_edges WHERE project_id = ?', [projectId]);
+      await conn.execute('DELETE FROM ap_custom_routes WHERE project_id = ?', [projectId]);
+      await conn.execute('DELETE FROM ap_projects WHERE id = ?', [projectId]);
+    }
+    // 3. Delete the user
+    await conn.execute('DELETE FROM ap_users WHERE id = ?', [userId]);
+    
+    await conn.commit();
+    res.json({ success: true });
+  } catch (err) {
+    await conn.rollback();
+    res.status(500).json({ error: err.message });
+  } finally {
+    conn.release();
+  }
+});
+
+// GET platform stats
+app.get('/api/superadmin/stats', verifyToken, async (req, res) => {
+  if (req.user.role !== 'superadmin') return res.status(403).json({ error: 'Forbidden' });
+  try {
+    const [[{ total_clients }]] = await pool.execute("SELECT COUNT(*) as total_clients FROM ap_users WHERE role='client'");
+    const [[{ total_projects }]] = await pool.execute("SELECT COUNT(*) as total_projects FROM ap_projects");
+    const [[{ total_floors }]] = await pool.execute("SELECT COUNT(*) as total_floors FROM ap_floors");
+    const [[{ total_pois }]] = await pool.execute("SELECT COUNT(*) as total_pois FROM ap_nodes");
+    
+    res.json({ total_clients, total_projects, total_floors, total_pois });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Helper to resolve project ID from ID or public slug
+const resolveProjectId = async (identifier) => {
+  if (!identifier || identifier === 'default') return 'default';
+  const [rows] = await pool.execute('SELECT id FROM ap_projects WHERE id = ? OR public_slug = ?', [identifier, identifier]);
+  return rows.length > 0 ? rows[0].id : identifier;
+};
+
+// ── SETTINGS / PROJECT ────────────────────────────────────────────────────────
+app.get('/api/load-settings', async (req, res) => {
+  try {
+    const projectId = await resolveProjectId(req.query.project);
+    const [rows] = await pool.execute('SELECT id, name, logo_url, public_slug FROM ap_projects WHERE id = ?', [projectId]);
+    if (rows.length === 0) return res.json({ id: projectId, name: 'Airport Indoor Map', logo_url: null, public_slug: null });
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/save-settings', verifyToken, async (req, res) => {
+  const { name, logo_url, public_slug } = req.body;
+  const projectId = req.user.project_id || 'default';
+  const slugToSave = public_slug && public_slug.trim() !== '' ? public_slug.trim() : null;
+  try {
+    await pool.execute(
+      'UPDATE ap_projects SET name = ?, logo_url = ?, public_slug = ? WHERE id = ?',
+      [name, logo_url, slugToSave, projectId]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'That public URL is already taken by another project.' });
+    }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── FLOORS ─────────────────────────────────────────────────────────────────────
+app.get('/api/load-floors', async (req, res) => {
+  try {
+    const projectId = await resolveProjectId(req.query.project);
+    const [rows] = await pool.execute('SELECT id, level, name, image FROM ap_floors WHERE project_id = ? ORDER BY sort_order', [projectId]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/save-floors', verifyToken, async (req, res) => {
+  const floors = req.body;
+  const projectId = req.user.project_id || 'default';
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    await conn.execute('DELETE FROM ap_floors WHERE project_id = ?', [projectId]);
     for (let i = 0; i < floors.length; i++) {
       const f = floors[i];
       await conn.execute(
-        'INSERT INTO ap_floors (id, level, name, image, sort_order) VALUES (?,?,?,?,?)',
-        [f.id, f.level, f.name, f.image || null, i]
+        'INSERT INTO ap_floors (id, project_id, level, name, image, sort_order) VALUES (?,?,?,?,?,?)',
+        [f.id, projectId, f.level, f.name, f.image || null, i]
       );
     }
     await conn.commit();
@@ -439,11 +679,14 @@ app.post('/api/save-floors', async (req, res) => {
 // ── GRAPH (nodes + edges) ──────────────────────────────────────────────────────
 app.get('/api/load-graph', async (req, res) => {
   try {
+    const projectId = await resolveProjectId(req.query.project);
     const [nodes] = await pool.execute(
-      'SELECT id, floor, x, y, name, category, type, description, status, image_url AS imageUrl, is_custom AS isCustom FROM ap_nodes'
+      'SELECT id, floor, x, y, name, category, type, description, status, image_url AS imageUrl, is_custom AS isCustom FROM ap_nodes WHERE project_id = ?',
+      [projectId]
     );
     const [edges] = await pool.execute(
-      'SELECT id, `from`, `to`, distance, bidirectional, `accessible`, blocked FROM ap_edges'
+      'SELECT id, `from`, `to`, distance, bidirectional, `accessible`, blocked FROM ap_edges WHERE project_id = ?',
+      [projectId]
     );
     res.json({
       nodes: nodes.map(n => ({ ...n, isCustom: !!n.isCustom })),
@@ -459,8 +702,9 @@ app.get('/api/load-graph', async (req, res) => {
   }
 });
 
-app.post('/api/save-graph', async (req, res) => {
+app.post('/api/save-graph', verifyToken, async (req, res) => {
   const { nodes = [], edges = [] } = req.body;
+  const projectId = req.user.project_id || 'default';
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
@@ -468,14 +712,14 @@ app.post('/api/save-graph', async (req, res) => {
     // Upsert nodes
     for (const n of nodes) {
       await conn.execute(`
-        INSERT INTO ap_nodes (id, floor, x, y, name, category, type, description, status, image_url, is_custom)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?)
+        INSERT INTO ap_nodes (id, project_id, floor, x, y, name, category, type, description, status, image_url, is_custom)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
         ON DUPLICATE KEY UPDATE
           floor=VALUES(floor), x=VALUES(x), y=VALUES(y), name=VALUES(name),
           category=VALUES(category), type=VALUES(type), description=VALUES(description),
           status=VALUES(status), image_url=VALUES(image_url), is_custom=VALUES(is_custom)
       `, [
-        n.id, n.floor, n.x, n.y, n.name,
+        n.id, projectId, n.floor, n.x, n.y, n.name,
         n.category||null, n.type||null, n.description||'',
         n.status||'Open', n.imageUrl||null, n.isCustom ? 1 : 0
       ]);
@@ -483,21 +727,21 @@ app.post('/api/save-graph', async (req, res) => {
     // Delete removed nodes
     if (nodes.length > 0) {
       const ph = nodes.map(() => '?').join(',');
-      await conn.execute(`DELETE FROM ap_nodes WHERE id NOT IN (${ph})`, nodes.map(n => n.id));
+      await conn.execute(`DELETE FROM ap_nodes WHERE project_id = ? AND id NOT IN (${ph})`, [projectId, ...nodes.map(n => n.id)]);
     } else {
-      await conn.execute('DELETE FROM ap_nodes');
+      await conn.execute('DELETE FROM ap_nodes WHERE project_id = ?', [projectId]);
     }
 
     // Upsert edges
     for (const e of edges) {
       await conn.execute(`
-        INSERT INTO ap_edges (id, \`from\`, \`to\`, distance, bidirectional, \`accessible\`, blocked)
-        VALUES (?,?,?,?,?,?,?)
+        INSERT INTO ap_edges (id, project_id, \`from\`, \`to\`, distance, bidirectional, \`accessible\`, blocked)
+        VALUES (?,?,?,?,?,?,?,?)
         ON DUPLICATE KEY UPDATE
           \`from\`=VALUES(\`from\`), \`to\`=VALUES(\`to\`), distance=VALUES(distance),
           bidirectional=VALUES(bidirectional), \`accessible\`=VALUES(\`accessible\`), blocked=VALUES(blocked)
       `, [
-        e.id, e.from, e.to, e.distance||0,
+        e.id, projectId, e.from, e.to, e.distance||0,
         e.bidirectional !== false ? 1 : 0,
         e.accessible    !== false ? 1 : 0,
         e.blocked ? 1 : 0
@@ -506,9 +750,9 @@ app.post('/api/save-graph', async (req, res) => {
     // Delete removed edges
     if (edges.length > 0) {
       const ph = edges.map(() => '?').join(',');
-      await conn.execute(`DELETE FROM ap_edges WHERE id NOT IN (${ph})`, edges.map(e => e.id));
+      await conn.execute(`DELETE FROM ap_edges WHERE project_id = ? AND id NOT IN (${ph})`, [projectId, ...edges.map(e => e.id)]);
     } else {
-      await conn.execute('DELETE FROM ap_edges');
+      await conn.execute('DELETE FROM ap_edges WHERE project_id = ?', [projectId]);
     }
 
     await conn.commit();
@@ -523,24 +767,26 @@ app.post('/api/save-graph', async (req, res) => {
 
 // ── CUSTOM ROUTES ──────────────────────────────────────────────────────────────
 app.get('/api/load-routes', async (req, res) => {
+  const projectId = req.query.project || 'default';
   try {
-    const [rows] = await pool.execute('SELECT * FROM ap_custom_routes');
+    const [rows] = await pool.execute('SELECT * FROM ap_custom_routes WHERE project_id = ?', [projectId]);
     res.json(rows.map(r => ({ ...r, node_ids: JSON.parse(r.node_ids || '[]') })));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/save-routes', async (req, res) => {
+app.post('/api/save-routes', verifyToken, async (req, res) => {
   const routes = Array.isArray(req.body) ? req.body : [];
+  const projectId = req.user.project_id || 'default';
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    await conn.execute('DELETE FROM ap_custom_routes');
+    await conn.execute('DELETE FROM ap_custom_routes WHERE project_id = ?', [projectId]);
     for (const r of routes) {
       await conn.execute(
-        'INSERT INTO ap_custom_routes (id, name, node_ids, distance) VALUES (?,?,?,?)',
-        [r.id, r.name||'', JSON.stringify(r.node_ids||[]), r.distance||0]
+        'INSERT INTO ap_custom_routes (id, project_id, name, node_ids, distance) VALUES (?,?,?,?,?)',
+        [r.id, projectId, r.name||'', JSON.stringify(r.node_ids||[]), r.distance||0]
       );
     }
     await conn.commit();
@@ -565,14 +811,19 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-app.post('/api/upload-poi-image',  upload.single('image'), (req, res) => {
+app.post('/api/upload-poi-image', verifyToken, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file' });
   res.json({ url: `/poi-images/${req.file.filename}` });
 });
 
-app.post('/api/upload-floor-map', upload.single('map'), (req, res) => {
+app.post('/api/upload-floor-map', verifyToken, upload.single('map'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file' });
   res.json({ url: `/maps/${req.file.filename}` });
+});
+
+app.post('/api/upload-logo', verifyToken, upload.single('logo'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file' });
+  res.json({ url: `/poi-images/${req.file.filename}` });
 });
 
 // ── Serve React Build ──────────────────────────────────────────────────────────

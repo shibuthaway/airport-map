@@ -5,10 +5,11 @@ import Search from '../Search/Search';
 import SearchableSelect from './SearchableSelect';
 import TaggingPanel from './TaggingPanel';
 import FloorManager from './FloorManager';
+import SettingsManager from './SettingsManager';
 import {
   FiCompass, FiNavigation, FiChevronsLeft, FiChevronsRight,
   FiClock, FiTag, FiSearch, FiEdit3, FiGitCommit, FiLoader, FiLayers,
-  FiArrowUp, FiCornerUpRight, FiCornerUpLeft, FiMapPin, FiTrendingUp, FiCheck
+  FiArrowUp, FiCornerUpRight, FiCornerUpLeft, FiMapPin, FiTrendingUp, FiCheck, FiSettings
 } from 'react-icons/fi';
 
 export default function Sidebar() {
@@ -94,6 +95,7 @@ export default function Sidebar() {
     { id: 'navigate',   label: 'Directions', icon: <FiCompass className="w-3.5 h-3.5" /> },
     { id: 'tagging',    label: 'Tag',        icon: <FiEdit3 className="w-3.5 h-3.5" /> },
     { id: 'floors',     label: 'Floors',     icon: <FiLayers className="w-3.5 h-3.5" /> },
+    { id: 'settings',   label: 'Settings',   icon: <FiSettings className="w-3.5 h-3.5" /> },
   ];
   
   const tabs = isAdminMode ? allTabs : allTabs.filter(t => t.id === 'explore' || t.id === 'navigate');
@@ -407,6 +409,7 @@ export default function Sidebar() {
 
       {activeTab === 'floors' && isAdminMode && <motion.div key="floors" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><FloorManager /></motion.div>}
       {activeTab === 'tagging' && isAdminMode && <motion.div key="tagging" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><TaggingPanel /></motion.div>}
+      {activeTab === 'settings' && isAdminMode && <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><SettingsManager /></motion.div>}
     </AnimatePresence>
   );
 
@@ -445,9 +448,15 @@ export default function Sidebar() {
             {/* Header */}
             <div className="px-5 pt-2 pb-4 flex items-center justify-between flex-shrink-0 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-sm shadow-md">✈️</div>
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-sm shadow-md overflow-hidden p-1 bg-white">
+                  {useMapStore.getState().appSettings?.logo_url ? (
+                    <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-full h-full object-contain" />
+                  ) : (
+                    '✈️'
+                  )}
+                </div>
                 <div>
-                  <p className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-wide">Chennai Airport T1</p>
+                  <p className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-wide max-w-[180px] truncate">{useMapStore.getState().appSettings?.name || 'Admin Navigation'}</p>
                   <p className="text-[10px] font-bold text-sky-500 uppercase tracking-widest">Indoor Map</p>
                 </div>
               </div>
@@ -511,10 +520,16 @@ export default function Sidebar() {
       >
         {/* Branding */}
         <div className="p-5 pb-4 flex items-center gap-3 border-b border-slate-200/20 dark:border-slate-800/30 flex-shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg text-white text-lg">✈️</div>
-          <div>
-            <h1 className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-wide">CHENNAI AIRPORT T1</h1>
-            <p className="text-[10px] text-sky-500 font-bold tracking-widest uppercase">Domestic Interactive Map</p>
+          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden p-1.5">
+            {useMapStore.getState().appSettings?.logo_url ? (
+              <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-full h-full object-contain" />
+            ) : (
+              '✈️'
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-wide truncate">{useMapStore.getState().appSettings?.name || 'Admin Navigation'}</h1>
+            <p className="text-[10px] text-sky-500 font-bold tracking-widest uppercase">Interactive Map</p>
           </div>
         </div>
         <div className="px-5 py-4 flex-shrink-0"><Search /></div>
