@@ -80,7 +80,7 @@ export default function SettingsManager() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 text-[16px] md:text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none"
+              className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 text-[16px] text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none"
               placeholder="e.g. Chennai Airport Navigation"
             />
           </div>
@@ -91,7 +91,7 @@ export default function SettingsManager() {
               type="text"
               value={publicSlug}
               onChange={(e) => setPublicSlug(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-              className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 text-[16px] md:text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none"
+              className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 text-[16px] text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none"
               placeholder="e.g. apollo_hosp"
             />
             <p className="text-[10px] text-slate-400 mt-1.5">No spaces. Use lowercase letters, numbers, hyphens, and underscores.</p>

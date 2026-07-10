@@ -872,7 +872,11 @@ app.post('/api/save-routes', verifyToken, async (req, res) => {
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
-    const dir = isVercel ? '/tmp' : path.join(__dirname, 'public', 'poi-images');
+    // Determine directory based on URL path
+    const isMap = req.originalUrl.includes('upload-floor-map');
+    const targetFolder = isMap ? 'maps' : 'poi-images';
+    const dir = isVercel ? '/tmp' : path.join(__dirname, 'public', targetFolder);
+    
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },

@@ -114,7 +114,7 @@ export default function FloorManager() {
               placeholder="e.g. Terminal 2"
               value={newBuildingName}
               onChange={(e) => setNewBuildingName(e.target.value)}
-              className="flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 outline-none focus:border-sky-500 text-[16px] md:text-sm"
+              className="flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 outline-none focus:border-sky-500 text-[16px]"
             />
             <button
               onClick={() => {
@@ -133,7 +133,7 @@ export default function FloorManager() {
           <select
             value={currentBuilding || ''}
             onChange={(e) => setBuilding(e.target.value)}
-            className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 outline-none focus:border-sky-500 cursor-pointer text-slate-800 dark:text-slate-200 font-bold text-[16px] md:text-sm"
+            className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 outline-none focus:border-sky-500 cursor-pointer text-slate-800 dark:text-slate-200 font-bold text-[16px]"
           >
             {buildings.map(b => (
               <option key={b.id} value={b.id}>{b.name}</option>
@@ -183,7 +183,7 @@ export default function FloorManager() {
                 value={level}
                 onChange={(e) => setLevel(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-950 focus:ring-1 focus:ring-sky-500 focus:outline-none dark:text-white text-[16px] md:text-sm"
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-950 focus:ring-1 focus:ring-sky-500 focus:outline-none dark:text-white text-[16px]"
               />
             </div>
             <div className="col-span-2">
@@ -194,7 +194,7 @@ export default function FloorManager() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-950 focus:ring-1 focus:ring-sky-500 focus:outline-none dark:text-white text-[16px] md:text-sm"
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-950 focus:ring-1 focus:ring-sky-500 focus:outline-none dark:text-white text-[16px]"
               />
             </div>
           </div>
