@@ -31,7 +31,7 @@ export default function Sidebar() {
   }, []);
 
   const {
-    currentFloor, pois, selectPoi,
+    currentFloor, setFloor, floors, pois, selectPoi,
     navigationMode, setNavigationMode,
     navigationStart, setNavigationStart,
     navigationEnd, setNavigationEnd,
@@ -198,6 +198,30 @@ export default function Sidebar() {
       {/* Explore */}
       {activeTab === 'explore' && (
         <motion.div key="explore" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col gap-5">
+          
+          {/* Floor Selector */}
+          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-200/50 dark:border-slate-800/30 shadow-inner">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex justify-between items-center">
+              <span>Current Floor</span>
+              <span className="text-sky-500 bg-sky-50 dark:bg-sky-500/10 px-2 py-0.5 rounded-md">{floors.find(f => f.id === currentFloor)?.name || 'Unknown'}</span>
+            </h3>
+            <div className="flex gap-2 overflow-x-auto custom-scrollbar pb-2 pt-1 -mx-2 px-2 snap-x">
+              {floors.map(f => (
+                <button
+                  key={f.id}
+                  onClick={() => setFloor(f.id)}
+                  className={`snap-center flex-shrink-0 px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all active:scale-95 ${
+                    currentFloor === f.id 
+                      ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg shadow-sky-500/30 border border-transparent' 
+                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-sky-300/50 dark:hover:border-sky-500/30'
+                  }`}
+                >
+                  {f.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div>
             <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Categories</h3>
             <div className="grid grid-cols-3 gap-2">
