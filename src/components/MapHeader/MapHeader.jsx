@@ -45,7 +45,7 @@ export default function MapHeader() {
               <select
                 value={currentBuilding || ''}
                 onChange={(e) => setBuilding(e.target.value)}
-                className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-bold text-sm md:text-base px-3 py-1.5 md:py-2 rounded-xl outline-none focus:border-sky-500 cursor-pointer shadow-sm transition-all"
+                className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-bold text-[16px] md:text-base px-3 py-1.5 md:py-2 rounded-xl outline-none focus:border-sky-500 cursor-pointer shadow-sm transition-all"
               >
                 {buildings.map(b => (
                   <option key={b.id} value={b.id}>{b.name}</option>
