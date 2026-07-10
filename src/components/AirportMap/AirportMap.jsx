@@ -227,8 +227,13 @@ export default function AirportMap() {
     setTimeout(doZoom, 200);
   }, [selectedPoi, zoomToSvgPoint]);
 
-  // ── Reset on floor change ─────────────────────────────────────────────────
+  // ── Reset on floor change (skip if navigating to not override zoom) ────────
   useEffect(() => {
+    // If navigation is active, don't reset - we'll zoom to the entry point instead
+    if (window.__mapSkipNextReset) {
+      window.__mapSkipNextReset = false;
+      return;
+    }
     if (transformRef.current) transformRef.current.resetTransform(400, 'easeOut');
   }, [currentFloor]);
 
