@@ -17,30 +17,11 @@ export default function Sidebar() {
   const [activeTab, setActiveTab] = useState('explore');
   const [activeCategory, setActiveCategory] = useState('gate');
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-  // iOS keyboard offset — how many px keyboard has pushed the viewport up
-  const [kbOffset, setKbOffset] = useState(0);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Fix iOS keyboard pushing fixed elements off-screen
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const onResize = () => {
-      // offsetTop = distance keyboard has pushed viewport up
-      const offset = window.innerHeight - vv.height - vv.offsetTop;
-      setKbOffset(Math.max(0, offset));
-    };
-    vv.addEventListener('resize', onResize);
-    vv.addEventListener('scroll', onResize);
-    return () => {
-      vv.removeEventListener('resize', onResize);
-      vv.removeEventListener('scroll', onResize);
-    };
   }, []);
 
   // Auto-close sidebar on mobile when a POI is selected via search
@@ -453,8 +434,8 @@ export default function Sidebar() {
           initial={false}
           animate={{ y: isOpen ? 0 : '100%' }}
           transition={{ type: 'spring', damping: 30, stiffness: 250 }}
-          className="fixed left-0 right-0 z-50 pointer-events-auto"
-          style={{ bottom: `${64 + kbOffset}px`, maxHeight: '72vh' }}
+          className="fixed bottom-16 left-0 right-0 z-50 pointer-events-auto"
+          style={{ maxHeight: '72vh' }}
         >
           <div className="mx-2 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/50 dark:border-slate-700/30 overflow-hidden flex flex-col" style={{ maxHeight: '72vh' }}>
             {/* Handle */}
@@ -497,7 +478,7 @@ export default function Sidebar() {
         </motion.div>
 
         {/* Bottom Navigation Bar */}
-        <div className="fixed left-0 right-0 z-50 pointer-events-auto" style={{ bottom: `${kbOffset}px` }}>
+        <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-auto">
           <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-t border-slate-200/60 dark:border-slate-800/60 px-2 pb-safe">
             <div className="flex items-center justify-around py-1">
               <button onClick={() => { setActiveTab('explore'); setIsOpen(true); }}
