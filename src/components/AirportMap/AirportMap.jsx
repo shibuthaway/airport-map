@@ -740,11 +740,11 @@ export default function AirportMap() {
         
         const targetScale = isMobile ? 0.35 : 0.8;
         
-        // On mobile, the bottom sheet covers ~70% of the screen height. 
-        // We want to center the map in the visible top 30% area.
-        const visibleHeight = isMobile ? h * 0.35 : h;
+        // On mobile, the search bar is around 110px from the top.
+        // The bottom sheet covers 72vh from the bottom.
+        // Setting initY to 130 ensures it's placed nicely in the visible gap.
         const initX = (w - 1000 * targetScale) / 2;
-        const initY = (visibleHeight - 600 * targetScale) / 2;
+        const initY = isMobile ? 130 : (h - 600 * targetScale) / 2;
         
         return (
           <TransformWrapper

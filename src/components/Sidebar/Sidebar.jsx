@@ -446,25 +446,28 @@ export default function Sidebar() {
               <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
             </div>
             {/* Header */}
-            <div className="px-5 pt-2 pb-4 flex items-center justify-between flex-shrink-0 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-sm shadow-md overflow-hidden p-1 bg-white">
-                  {useMapStore.getState().appSettings?.logo_url ? (
-                    <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-full h-full object-contain" />
-                  ) : (
-                    '✈️'
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-wide max-w-[180px] truncate">{useMapStore.getState().appSettings?.name || 'Admin Navigation'}</p>
-                  <p className="text-[10px] font-bold text-sky-500 uppercase tracking-widest">Indoor Map</p>
+            <div className="px-5 pt-2 pb-3 flex flex-col gap-3 flex-shrink-0 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-sm shadow-md overflow-hidden p-1 bg-white flex-shrink-0">
+                    {useMapStore.getState().appSettings?.logo_url ? (
+                      <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-full h-full object-contain" />
+                    ) : (
+                      '✈️'
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-wide truncate">{useMapStore.getState().appSettings?.name || 'Admin Navigation'}</p>
+                    <p className="text-[10px] font-bold text-sky-500 uppercase tracking-widest">Indoor Map</p>
+                  </div>
                 </div>
               </div>
-              {/* Mini tab pills */}
-              <div className="flex gap-1">
+              
+              {/* Mini tab pills (Moved to own row to prevent squishing) */}
+              <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar snap-x">
                 {tabs.map(t => (
                   <button key={t.id} onClick={() => setActiveTab(t.id)}
-                    className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all ${activeTab === t.id ? 'bg-sky-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
+                    className={`snap-center whitespace-nowrap px-4 py-2 rounded-xl text-[11px] font-bold transition-all ${activeTab === t.id ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
                     {t.label}
                   </button>
                 ))}
