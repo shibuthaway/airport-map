@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMapStore } from '../../store/useMapStore';
 import { FiSun, FiMoon, FiPlus, FiMinus, FiMaximize2, FiChevronLeft, FiChevronRight, FiShare2, FiMaximize, FiMinimize } from 'react-icons/fi';
+import Search from '../Search/Search';
 
 export default function MapHeader() {
   const { floors, currentFloor, setFloor, theme, toggleTheme, zoomActions, isAdminMode, mapRotation, setMapRotation, isFullScreen, toggleFullScreen } = useMapStore();
@@ -248,6 +249,13 @@ export default function MapHeader() {
             <FiMoon className="w-4.5 h-4.5 text-slate-650" />
           )}
         </button>
+      </div>
+
+      {/* Mobile Floating Search Bar */}
+      <div className="md:hidden fixed top-[60px] left-3 right-3 z-[60] pointer-events-auto">
+        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-slate-200/60 dark:border-slate-700/40 px-3 py-1.5">
+          <Search />
+        </div>
       </div>
 
     </div>

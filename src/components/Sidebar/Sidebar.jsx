@@ -421,13 +421,6 @@ export default function Sidebar() {
   if (isMobile) {
     return (
       <>
-        {/* Floating Search Bar */}
-        <div className="fixed top-[57px] left-3 right-3 z-50 pointer-events-auto">
-          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-slate-200/60 dark:border-slate-700/40 px-4 py-2">
-            <Search />
-          </div>
-        </div>
-
         {/* Bottom Sheet Overlay */}
         <AnimatePresence>
           {isOpen && (
