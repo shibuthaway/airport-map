@@ -58,7 +58,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
                 placeholder="Type to search..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full bg-transparent text-sm text-slate-800 dark:text-slate-100 outline-none placeholder:text-slate-400"
+                className="w-full bg-transparent text-base text-slate-800 dark:text-slate-100 outline-none placeholder:text-slate-400"
               />
               {search && (
                 <button onClick={() => setSearch('')} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
