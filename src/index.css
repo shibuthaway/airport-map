@@ -35,13 +35,17 @@ body {
   padding: 0;
   overflow: hidden;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
+  height: 100vh; /* fallback */
 }
 
-/* Prevent iOS Safari auto-zoom when focusing inputs */
-@media screen and (max-width: 768px) {
-  input, textarea, select, button {
+/* Prevent iOS Safari auto-zoom — only on touch/mobile devices, not desktop */
+@media (pointer: coarse) {
+  input, textarea, select {
     font-size: 16px !important;
+    touch-action: manipulation;
+  }
+  button, a {
     touch-action: manipulation;
   }
 }
