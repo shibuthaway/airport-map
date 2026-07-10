@@ -57,10 +57,16 @@ export default function Search() {
     if (poi.floor && poi.floor !== currentFloor && setFloor) {
       setFloor(poi.floor);
       // Slight delay to allow floor transition before highlighting the POI
-      setTimeout(() => selectPoi(poi), 100);
+      setTimeout(() => {
+        selectPoi(poi);
+        // Dispatch custom event so Sidebar can close on mobile
+        window.dispatchEvent(new CustomEvent('map:poi-selected'));
+      }, 150);
     } else {
       selectPoi(poi);
+      window.dispatchEvent(new CustomEvent('map:poi-selected'));
     }
+    setSearchQuery('');
     setIsOpen(false);
   };
 

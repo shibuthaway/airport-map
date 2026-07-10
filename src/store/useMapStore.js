@@ -273,6 +273,10 @@ export const useMapStore = create((set, get) => ({
     set({ theme: next });
   },
 
+  // Map Rotation (degrees)
+  mapRotation: 0,
+  setMapRotation: (deg) => set({ mapRotation: ((deg % 360) + 360) % 360 }),
+
   // Zoom Actions (Registered by Map Viewport)
   zoomActions: null,
   setZoomActions: (actions) => set({ zoomActions: actions }),

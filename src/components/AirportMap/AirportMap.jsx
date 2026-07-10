@@ -66,6 +66,7 @@ export default function AirportMap() {
     setNavigationMode, setNavigationStart, setNavigationEnd,
     taggingMode, taggingCoords, setTaggingCoords,
     loadMapData, theme,
+    mapRotation, setMapRotation,
     
     // Graph states & actions
     nodes, edges, dragNode, toggleEdge, isDrawingEdges, setIsDrawingEdges,
@@ -203,7 +204,11 @@ export default function AirportMap() {
   useEffect(() => {
     if (selectedPoi && transformRef.current) {
       const el = document.getElementById(selectedPoi.id);
-      if (el) setTimeout(() => transformRef.current.zoomToElement(el, 2.0, 800, 'easeOut'), 100);
+      if (el) {
+        setTimeout(() => {
+          transformRef.current.zoomToElement(el, 2.5, 600, 'easeOut');
+        }, 100);
+      }
     }
   }, [selectedPoi]);
 
@@ -722,6 +727,7 @@ export default function AirportMap() {
             >
               <div
                 className="w-[1000px] h-[600px] relative select-none"
+                style={{ transform: `rotate(${mapRotation}deg)`, transformOrigin: 'center center', transition: 'transform 0.3s ease' }}
                 onMouseMove={handleSvgMouseMove}
                 onMouseUp={handleSvgMouseUp}
                 onMouseLeave={handleSvgMouseUp}
@@ -949,6 +955,31 @@ export default function AirportMap() {
           </div>
         )}
       </TransformWrapper>
+
+      {/* ── Map Rotation Controls (bottom-right) ── */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 pointer-events-auto">
+        <div className="flex items-center gap-1 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-full px-3 py-1.5 shadow-lg border border-slate-200/50 dark:border-slate-700/50">
+          <button
+            onClick={() => setMapRotation(mapRotation - 45)}
+            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition active:scale-90 text-sm font-bold"
+            title="Rotate Left"
+          >↺</button>
+          <div className="flex items-center gap-1 px-2">
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 select-none">🧭 {Math.round(mapRotation)}°</span>
+          </div>
+          <button
+            onClick={() => setMapRotation(mapRotation + 45)}
+            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition active:scale-90 text-sm font-bold"
+            title="Rotate Right"
+          >↻</button>
+          {mapRotation !== 0 && (
+            <button
+              onClick={() => setMapRotation(0)}
+              className="ml-1 text-[9px] font-bold text-sky-500 hover:text-sky-600 uppercase tracking-wider px-1.5 py-0.5 rounded-full hover:bg-sky-50 dark:hover:bg-sky-950/30 transition"
+            >Reset</button>
+          )}
+        </div>
+      </div>
 
       {/* ── Blocked Edge Hover Tooltip (HTML overlay, tracks mouse) ── */}
       {hoveredBlockedEdge && (

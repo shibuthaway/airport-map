@@ -21,6 +21,13 @@ export default function Sidebar() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Auto-close sidebar on mobile when a POI is selected via search
+  useEffect(() => {
+    const handler = () => { if (window.innerWidth < 768) setIsOpen(false); };
+    window.addEventListener('map:poi-selected', handler);
+    return () => window.removeEventListener('map:poi-selected', handler);
+  }, []);
+
   const {
     currentFloor, pois, selectPoi,
     navigationMode, setNavigationMode,
@@ -35,6 +42,11 @@ export default function Sidebar() {
     navigationRoutes, activeRouteIndex, setActiveRouteIndex,
     nodes, isAdminMode
   } = useMapStore();
+
+  // Helper: close sidebar and jump to map on mobile
+  const viewOnMap = () => {
+    setIsOpen(false);
+  };
 
   const flatPois = getFlatPois();
 
@@ -296,7 +308,10 @@ export default function Sidebar() {
                   <div className="flex flex-col gap-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Start Point</label>
-                      <select value={navigationStart?.id || ''} onChange={e => setNavigationStart(nodes.find(p => p.id === e.target.value))}
+                      <select value={navigationStart?.id || ''} onChange={e => {
+                        setNavigationStart(nodes.find(p => p.id === e.target.value));
+                        if (isMobile && e.target.value) setTimeout(() => setIsOpen(false), 300);
+                      }}
                         className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500">
                         <option value="">Select starting location...</option>
                         {allNavigableNodes.map(p => <option key={p.id} value={p.id}>{p.name} ({capitalize(p.floor)})</option>)}
@@ -304,7 +319,10 @@ export default function Sidebar() {
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Destination</label>
-                      <select value={navigationEnd?.id || ''} onChange={e => setNavigationEnd(nodes.find(p => p.id === e.target.value))}
+                      <select value={navigationEnd?.id || ''} onChange={e => {
+                        setNavigationEnd(nodes.find(p => p.id === e.target.value));
+                        if (isMobile && e.target.value) setTimeout(() => setIsOpen(false), 300);
+                      }}
                         className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500">
                         <option value="">Select destination...</option>
                         {allNavigableNodes.map(p => <option key={p.id} value={p.id}>{p.name} ({capitalize(p.floor)})</option>)}
@@ -422,6 +440,16 @@ export default function Sidebar() {
                     <button onClick={() => setNavigationMode(false)} className="mt-4 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#0f172a] font-semibold text-xs transition">
                       Clear Selection
                     </button>
+
+                    {/* View on Map - Mobile only */}
+                    {isMobile && (navigationStart || navigationEnd) && (
+                      <button
+                        onClick={viewOnMap}
+                        className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-sky-500/30 flex items-center justify-center gap-2 active:scale-95 transition"
+                      >
+                        <span>🗺️</span> View on Map
+                      </button>
+                    )}
                   </div>
                 )}
               </motion.div>
