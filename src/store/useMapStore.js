@@ -35,6 +35,9 @@ export const useMapStore = create((set, get) => ({
   // Mode Selection
   isAdminMode: typeof window !== 'undefined' ? !window.location.href.includes('mode=public') : true,
 
+  // Loading State
+  dataLoaded: false,
+
   // Floors
   floors: [],
   currentFloor: 'lounge',
@@ -396,8 +399,10 @@ export const useMapStore = create((set, get) => ({
 
   loadMapData: async () => {
     try {
-      const floorsRes = await fetch('/api/load-floors');
-      const graphRes = await fetch('/api/load-graph');
+      const [floorsRes, graphRes] = await Promise.all([
+        fetch('/api/load-floors'),
+        fetch('/api/load-graph')
+      ]);
       if (floorsRes.ok && graphRes.ok) {
         const floors = await floorsRes.json();
         const graph = await graphRes.json();
@@ -405,7 +410,7 @@ export const useMapStore = create((set, get) => ({
         const edges = graph.edges || [];
         const computedPois = computePoisFromNodes(nodes);
         
-        let topFloorId = 'lounge';
+        let topFloorId = floors[0]?.id || 'lounge';
         if (floors && floors.length > 0) {
           const sorted = [...floors].sort((a, b) => {
             const numA = parseInt(a.level.replace(/[^0-9]/g, '')) || 0;
@@ -415,10 +420,14 @@ export const useMapStore = create((set, get) => ({
           topFloorId = sorted[sorted.length - 1].id;
         }
 
-        set({ floors, nodes, edges, pois: computedPois, currentFloor: topFloorId });
+        set({ floors, nodes, edges, pois: computedPois, currentFloor: topFloorId, dataLoaded: true });
+      } else {
+        // Even on error, mark loaded so UI doesn't block forever
+        set({ dataLoaded: true });
       }
     } catch (e) {
       console.error('Failed to load map data from APIs', e);
+      set({ dataLoaded: true });
     }
   },
 
