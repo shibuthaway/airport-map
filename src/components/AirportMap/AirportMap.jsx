@@ -59,6 +59,10 @@ export default function AirportMap() {
   const [hoveredBlockedEdge, setHoveredBlockedEdge] = useState(null);
   const [blinkPoiId, setBlinkPoiId] = useState(null); // for search/nav flash effect
 
+  // Touch Rotation State
+  const [initialTouchAngle, setInitialTouchAngle] = useState(null);
+  const [initialMapRotation, setInitialMapRotation] = useState(0);
+
   const {
     floors, currentFloor, pois, selectedPoi, selectPoi,
     hoveredPoi, setHoveredPoi,
@@ -77,6 +81,31 @@ export default function AirportMap() {
   } = useMapStore();
 
   const { isActive, error: ipsError, startTracking, stopTracking } = useIndoorPositioning();
+
+  // ── Multi-Touch Rotation Handlers ───────────────────────────────────────────
+  const handleTouchStart = useCallback((e) => {
+    if (e.touches.length === 2) {
+      const { touches } = e;
+      const angle = Math.atan2(touches[1].clientY - touches[0].clientY, touches[1].clientX - touches[0].clientX) * 180 / Math.PI;
+      setInitialTouchAngle(angle);
+      setInitialMapRotation(useMapStore.getState().mapRotation);
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    if (e.touches.length === 2 && initialTouchAngle !== null) {
+      const { touches } = e;
+      const currentAngle = Math.atan2(touches[1].clientY - touches[0].clientY, touches[1].clientX - touches[0].clientX) * 180 / Math.PI;
+      const angleDiff = currentAngle - initialTouchAngle;
+      useMapStore.getState().setMapRotation(initialMapRotation + angleDiff);
+    }
+  }, [initialTouchAngle, initialMapRotation]);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (e.touches.length < 2) {
+      setInitialTouchAngle(null);
+    }
+  }, []);
 
   useEffect(() => {
     loadMapData();
@@ -747,7 +776,14 @@ export default function AirportMap() {
         const initY = isMobile ? 130 : (h - 600 * targetScale) / 2;
         
         return (
-          <TransformWrapper
+          <div 
+            className="w-full h-full relative"
+            onTouchStartCapture={handleTouchStart}
+            onTouchMoveCapture={handleTouchMove}
+            onTouchEndCapture={handleTouchEnd}
+            onTouchCancelCapture={handleTouchEnd}
+          >
+            <TransformWrapper
             ref={transformRef}
             initialScale={targetScale}
             initialPositionX={isMobile ? initX : undefined}
@@ -1044,6 +1080,7 @@ export default function AirportMap() {
           </div>
         )}
       </TransformWrapper>
+          </div>
         );
       })()}
 

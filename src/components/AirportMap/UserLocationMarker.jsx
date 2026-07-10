@@ -5,19 +5,27 @@ export default function UserLocationMarker({ position, heading, isWalking, isOff
 
   return (
     <g transform={`translate(${position.x}, ${position.y})`} className="pointer-events-none drop-shadow-xl" style={{ zIndex: 100 }}>
-      {/* Directional Cone (Heading) */}
+      {/* Directional Cone (Heading) & Solid Arrow */}
       <g transform={`rotate(${heading})`}>
-        {/* Radar sweeping effect or simple cone */}
+        {/* Larger Radar sweeping effect */}
         <path 
-          d="M 0 0 L -30 -80 A 80 80 0 0 1 30 -80 Z" 
+          d="M 0 0 L -45 -120 A 120 120 0 0 1 45 -120 Z" 
           fill="url(#headingGradient)" 
-          opacity="0.3" 
+          opacity="0.4" 
+        />
+        {/* Solid Pointer Arrow */}
+        <path 
+          d="M -8 -14 L 0 -26 L 8 -14 Z" 
+          fill={isOffRoute ? '#ef4444' : '#2563eb'} 
+          stroke="#ffffff"
+          strokeWidth="2"
+          className="drop-shadow-md"
         />
       </g>
 
       {/* Pulse effect if walking */}
       {isWalking && (
-        <circle r="25" fill="#3b82f6" className="animate-ping opacity-40" />
+        <circle r="25" fill={isOffRoute ? '#ef4444' : '#3b82f6'} className="animate-ping opacity-40" />
       )}
       
       {/* Off-route warning halo */}
