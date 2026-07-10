@@ -43,16 +43,16 @@ export default function Sidebar() {
     nodes, isAdminMode
   } = useMapStore();
 
-  // Helper: close sidebar and jump to map on mobile
+  // Helper: close sidebar and zoom map to starting point
   const viewOnMap = () => {
+    if (!navigationStart) return; // Don't do anything if no start selected
     setIsOpen(false);
-    // Trigger zoom to start point after sidebar closes
-    if (navigationStart) {
-      setTimeout(() => {
-        const { selectPoi } = useMapStore.getState();
-        selectPoi(navigationStart);
-      }, 350);
-    }
+    // After sidebar closes, smooth-zoom to the navigation start point
+    setTimeout(() => {
+      if (window.__mapZoomToPoint) {
+        window.__mapZoomToPoint(navigationStart.x, navigationStart.y, 3.5);
+      }
+    }, 400); // Wait for sidebar close animation
   };
 
   const flatPois = getFlatPois();
@@ -317,7 +317,7 @@ export default function Sidebar() {
                       <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Start Point</label>
                       <select value={navigationStart?.id || ''} onChange={e => {
                         setNavigationStart(nodes.find(p => p.id === e.target.value));
-                        if (isMobile && e.target.value) setTimeout(() => setIsOpen(false), 300);
+                        // Do NOT auto-close - user must click View on Map
                       }}
                         className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500">
                         <option value="">Select starting location...</option>
@@ -328,7 +328,7 @@ export default function Sidebar() {
                       <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Destination</label>
                       <select value={navigationEnd?.id || ''} onChange={e => {
                         setNavigationEnd(nodes.find(p => p.id === e.target.value));
-                        if (isMobile && e.target.value) setTimeout(() => setIsOpen(false), 300);
+                        // Do NOT auto-close - user must click View on Map
                       }}
                         className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500">
                         <option value="">Select destination...</option>
@@ -448,13 +448,13 @@ export default function Sidebar() {
                       Clear Selection
                     </button>
 
-                    {/* View on Map - Mobile only */}
-                    {isMobile && (navigationStart || navigationEnd) && (
+                    {/* View on Map - shown when both start & destination are selected */}
+                    {navigationStart && navigationEnd && (
                       <button
                         onClick={viewOnMap}
-                        className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-sky-500/30 flex items-center justify-center gap-2 active:scale-95 transition"
+                        className="w-full mt-2 py-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-sky-500/30 flex items-center justify-center gap-2.5 active:scale-95 transition-all"
                       >
-                        <span>🗺️</span> View on Map
+                        <span>🗺️</span> View Route on Map
                       </button>
                     )}
                   </div>

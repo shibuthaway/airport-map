@@ -201,22 +201,31 @@ export default function AirportMap() {
 
   const activePoiIds = getActivePoiIds();
 
+  // ── Helper: smooth zoom to SVG coordinate (Google Maps style) ─────────────
+  const zoomToSvgPoint = useCallback((svgX, svgY, targetScale = 4) => {
+    if (!transformRef.current) return;
+    const wrapper = transformRef.current.instance?.wrapperComponent;
+    if (!wrapper) return;
+    const rect = wrapper.getBoundingClientRect();
+    const W = rect.width || window.innerWidth;
+    const H = rect.height || window.innerHeight;
+    // Center the target SVG point on screen at the given scale
+    const posX = W / 2 - svgX * targetScale;
+    const posY = H / 2 - svgY * targetScale;
+    transformRef.current.setTransform(posX, posY, targetScale, 500, 'easeOut');
+  }, []);
+
   // ── Auto-zoom + blink to selected POI ───────────────────────────────────
   useEffect(() => {
-    if (selectedPoi && transformRef.current) {
-      // Switch to correct floor first if needed
-      const doZoom = () => {
-        const el = document.getElementById(selectedPoi.id);
-        if (el && transformRef.current) {
-          transformRef.current.zoomToElement(el, 3, 500, 'easeOut');
-          // Trigger blink animation
-          setBlinkPoiId(selectedPoi.id);
-          setTimeout(() => setBlinkPoiId(null), 2000);
-        }
-      };
-      setTimeout(doZoom, 150);
-    }
-  }, [selectedPoi]);
+    if (!selectedPoi) return;
+    // Give floor transition time if needed
+    const doZoom = () => {
+      zoomToSvgPoint(selectedPoi.x, selectedPoi.y, 3.5);
+      setBlinkPoiId(selectedPoi.id);
+      setTimeout(() => setBlinkPoiId(null), 2000);
+    };
+    setTimeout(doZoom, 200);
+  }, [selectedPoi, zoomToSvgPoint]);
 
   // ── Reset on floor change ─────────────────────────────────────────────────
   useEffect(() => {
@@ -725,8 +734,18 @@ export default function AirportMap() {
             zoomOut: () => ref.zoomOut(),
             resetTransform: () => ref.resetTransform()
           });
-          // Expose transformRef globally so Sidebar can call zoomToElement
+          // Expose globally so Sidebar viewOnMap can trigger zoom
           window.__mapTransformRef = ref;
+          window.__mapZoomToPoint = (svgX, svgY, scale = 3.5) => {
+            const wrapper = ref.instance?.wrapperComponent;
+            if (!wrapper) return;
+            const rect = wrapper.getBoundingClientRect();
+            const W = rect.width || window.innerWidth;
+            const H = rect.height || window.innerHeight;
+            const posX = W / 2 - svgX * scale;
+            const posY = H / 2 - svgY * scale;
+            ref.setTransform(posX, posY, scale, 600, 'easeOut');
+          };
           setZoomScale(ref.state.scale);
         }}
         onTransform={(ref) => {
