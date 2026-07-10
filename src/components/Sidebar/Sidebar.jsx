@@ -14,6 +14,7 @@ import {
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('explore');
+  const [activeCategory, setActiveCategory] = useState('gate');
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
 
   useEffect(() => {
@@ -202,45 +203,63 @@ export default function Sidebar() {
             <div className="grid grid-cols-3 gap-2">
               {categories.map(cat => {
                 const count = pois[currentFloor]?.filter(p => p.category === cat.key).length || 0;
+                const isActive = activeCategory === cat.key;
                 return (
-                  <button key={cat.key} onClick={() => { const p = pois[currentFloor]?.find(x => x.category === cat.key); if (p) { selectPoi(p); if (isMobile) setIsOpen(false); } }}
-                    className="flex flex-col items-center p-3 rounded-2xl bg-slate-50 hover:bg-sky-50 dark:bg-slate-900/60 dark:hover:bg-sky-950/40 border border-slate-200/50 dark:border-slate-800/30 hover:border-sky-300/50 transition-all active:scale-95 gap-1.5">
+                  <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
+                    className={`flex flex-col items-center p-3 rounded-2xl transition-all active:scale-95 gap-1.5 border ${isActive ? 'bg-sky-50 dark:bg-slate-800/80 border-sky-400/50 shadow-sm shadow-sky-500/20' : 'bg-slate-50 hover:bg-sky-50 dark:bg-slate-900/60 dark:hover:bg-sky-950/40 border-slate-200/50 dark:border-slate-800/30'}`}>
                     <span className="text-2xl">{cat.icon}</span>
-                    <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 leading-tight text-center">{cat.label}</span>
+                    <span className={`text-[10px] font-bold leading-tight text-center ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-600 dark:text-slate-300'}`}>{cat.label}</span>
                     <span className="text-[9px] text-slate-400 font-medium">{count}</span>
                   </button>
                 );
               })}
             </div>
           </div>
-          <div>
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Nearby Places</h3>
-            <div className="flex flex-col gap-1.5">
-              {pois[currentFloor]?.slice(0, 8).map(poi => (
-                <div key={poi.id} className="flex flex-col">
-                  <button onClick={() => { selectPoi(poi); if (isMobile) setIsOpen(false); }}
-                    className={`flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-98 text-left ${selectedPoi?.id === poi.id ? 'bg-sky-500/10 dark:bg-sky-500/10 ring-1 ring-sky-500/30' : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-base flex-shrink-0 overflow-hidden">
-                      {poi.imageUrl ? <img src={poi.imageUrl} alt="" className="w-full h-full object-cover" /> : (poi.isCustom ? '📍' : '🏢')}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{poi.name}</p>
-                      <p className="text-xs text-slate-400 truncate">{poi.description || poi.category}</p>
-                    </div>
-                    <span className="text-[9px] font-bold px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex-shrink-0">{poi.category}</span>
-                  </button>
-                  {selectedPoi?.id === poi.id && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="pl-12 pr-3 pb-2 flex gap-2">
-                      <button onClick={() => { setNavigationMode(true); if (navigationEnd?.id === poi.id) setNavigationEnd(null); setNavigationStart(poi); setActiveTab('navigate'); }}
-                        className="flex-1 py-2 text-[11px] font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition active:scale-95">From Here</button>
-                      <button onClick={() => { setNavigationMode(true); if (navigationStart?.id === poi.id) setNavigationStart(null); setNavigationEnd(poi); setActiveTab('navigate'); }}
-                        className="flex-1 py-2 text-[11px] font-bold bg-sky-500 hover:bg-sky-600 text-white rounded-xl transition active:scale-95">To Here</button>
-                    </motion.div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          
+          {(() => {
+            const categoryPlaces = pois[currentFloor]?.filter(p => p.category === activeCategory) || [];
+            const activeCatObj = categories.find(c => c.key === activeCategory);
+            
+            return (
+              <div>
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">
+                  {activeCatObj ? activeCatObj.label : 'Places'} ({categoryPlaces.length})
+                </h3>
+                {categoryPlaces.length === 0 ? (
+                  <div className="py-8 text-center bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200/50 dark:border-slate-800/30">
+                    <span className="text-3xl opacity-50 block mb-2">🤷‍♂️</span>
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">No places found in this category.</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-1.5">
+                    {categoryPlaces.map(poi => (
+                      <div key={poi.id} className="flex flex-col">
+                        <button onClick={() => { selectPoi(poi); if (isMobile) setIsOpen(false); }}
+                          className={`flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-98 text-left ${selectedPoi?.id === poi.id ? 'bg-sky-500/10 dark:bg-sky-500/10 ring-1 ring-sky-500/30' : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-base flex-shrink-0 overflow-hidden">
+                            {poi.imageUrl ? <img src={poi.imageUrl} alt="" className="w-full h-full object-cover" /> : (poi.isCustom ? '📍' : activeCatObj?.icon || '🏢')}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{poi.name}</p>
+                            <p className="text-xs text-slate-400 truncate">{poi.description || poi.category}</p>
+                          </div>
+                          <span className="text-[9px] font-bold px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex-shrink-0">{poi.category}</span>
+                        </button>
+                        {selectedPoi?.id === poi.id && (
+                          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="pl-12 pr-3 pb-2 flex gap-2">
+                            <button onClick={() => { setNavigationMode(true); if (navigationEnd?.id === poi.id) setNavigationEnd(null); setNavigationStart(poi); setActiveTab('navigate'); }}
+                              className="flex-1 py-2 text-[11px] font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition active:scale-95">From Here</button>
+                            <button onClick={() => { setNavigationMode(true); if (navigationStart?.id === poi.id) setNavigationStart(null); setNavigationEnd(poi); setActiveTab('navigate'); }}
+                              className="flex-1 py-2 text-[11px] font-bold bg-sky-500 hover:bg-sky-600 text-white rounded-xl transition active:scale-95">To Here</button>
+                          </motion.div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </motion.div>
       )}
 
