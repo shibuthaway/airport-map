@@ -869,35 +869,31 @@ app.post('/api/save-routes', verifyToken, async (req, res) => {
   }
 });
 
-// ── IMAGE UPLOAD ───────────────────────────────────────────────────────────────
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
-    // Determine directory based on URL path
-    const isMap = req.originalUrl.includes('upload-floor-map');
-    const targetFolder = isMap ? 'maps' : 'poi-images';
-    const dir = isVercel ? '/tmp' : path.join(__dirname, 'public', targetFolder);
-    
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => cb(null, `${Date.now()}${path.extname(file.originalname)}`)
-});
-const upload = multer({ storage });
-
-app.post('/api/upload-poi-image', verifyToken, upload.single('image'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file' });
-  res.json({ url: `/poi-images/${req.file.filename}` });
+// ── IMAGE UPLOAD (Memory → Base64 → MySQL) ─────────────────────────────────────
+// Using memory storage so images are NEVER written to disk.
+// This works on Vercel serverless, local, and any other platform.
+// Images are returned as base64 data URLs and stored directly in MySQL (LONGTEXT).
+const uploadMiddleware = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024 } // 8MB max
 });
 
-app.post('/api/upload-floor-map', verifyToken, upload.single('map'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file' });
-  res.json({ url: `/maps/${req.file.filename}` });
+app.post('/api/upload-poi-image', verifyToken, uploadMiddleware.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const base64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+  res.json({ url: base64 });
 });
 
-app.post('/api/upload-logo', verifyToken, upload.single('logo'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file' });
-  res.json({ url: `/poi-images/${req.file.filename}` });
+app.post('/api/upload-floor-map', verifyToken, uploadMiddleware.single('map'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const base64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+  res.json({ url: base64 });
+});
+
+app.post('/api/upload-logo', verifyToken, uploadMiddleware.single('logo'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const base64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+  res.json({ url: base64 });
 });
 
 // ── Serve React Build ──────────────────────────────────────────────────────────
