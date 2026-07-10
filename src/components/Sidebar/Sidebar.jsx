@@ -190,320 +190,301 @@ export default function Sidebar() {
     return steps;
   };
 
-  return (
-    <div className="relative h-full flex z-40">
-      {/* ── Main Drawer ── */}
-      <motion.div
-        animate={{ width: isOpen ? (isMobile ? 'calc(100vw - 48px)' : '380px') : '0px' }}
-        transition={{ type: 'spring', damping: 25, stiffness: 150 }}
-        className="h-full overflow-hidden bg-white/70 dark:bg-slate-950/60 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-900/50 shadow-2xl flex flex-col"
-      >
-        {/* Branding */}
-        <div className="p-6 pb-4 flex items-center gap-3 border-b border-slate-200/20 dark:border-slate-800/30 flex-shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg text-white text-lg font-bold">✈️</div>
+  // ── Shared tab content renderer ───────────────────────────────────────────
+  const renderTabContent = () => (
+    <AnimatePresence mode="wait">
+      {/* Explore */}
+      {activeTab === 'explore' && (
+        <motion.div key="explore" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col gap-5">
           <div>
-            <h1 className="text-md font-bold text-slate-800 dark:text-slate-100 tracking-wide">CHENNAI AIRPORT T1</h1>
-            <p className="text-xs text-sky-500 dark:text-sky-400 font-semibold tracking-wider uppercase">Domestic Interactive Map</p>
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Categories</h3>
+            <div className="grid grid-cols-3 gap-2">
+              {categories.map(cat => {
+                const count = pois[currentFloor]?.filter(p => p.category === cat.key).length || 0;
+                return (
+                  <button key={cat.key} onClick={() => { const p = pois[currentFloor]?.find(x => x.category === cat.key); if (p) { selectPoi(p); if (isMobile) setIsOpen(false); } }}
+                    className="flex flex-col items-center p-3 rounded-2xl bg-slate-50 hover:bg-sky-50 dark:bg-slate-900/60 dark:hover:bg-sky-950/40 border border-slate-200/50 dark:border-slate-800/30 hover:border-sky-300/50 transition-all active:scale-95 gap-1.5">
+                    <span className="text-2xl">{cat.icon}</span>
+                    <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 leading-tight text-center">{cat.label}</span>
+                    <span className="text-[9px] text-slate-400 font-medium">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Nearby Places</h3>
+            <div className="flex flex-col gap-1.5">
+              {pois[currentFloor]?.slice(0, 8).map(poi => (
+                <div key={poi.id} className="flex flex-col">
+                  <button onClick={() => { selectPoi(poi); if (isMobile) setIsOpen(false); }}
+                    className={`flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-98 text-left ${selectedPoi?.id === poi.id ? 'bg-sky-500/10 dark:bg-sky-500/10 ring-1 ring-sky-500/30' : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-base flex-shrink-0 overflow-hidden">
+                      {poi.imageUrl ? <img src={poi.imageUrl} alt="" className="w-full h-full object-cover" /> : (poi.isCustom ? '📍' : '🏢')}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{poi.name}</p>
+                      <p className="text-xs text-slate-400 truncate">{poi.description || poi.category}</p>
+                    </div>
+                    <span className="text-[9px] font-bold px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex-shrink-0">{poi.category}</span>
+                  </button>
+                  {selectedPoi?.id === poi.id && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="pl-12 pr-3 pb-2 flex gap-2">
+                      <button onClick={() => { setNavigationMode(true); if (navigationEnd?.id === poi.id) setNavigationEnd(null); setNavigationStart(poi); setActiveTab('navigate'); }}
+                        className="flex-1 py-2 text-[11px] font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition active:scale-95">From Here</button>
+                      <button onClick={() => { setNavigationMode(true); if (navigationStart?.id === poi.id) setNavigationStart(null); setNavigationEnd(poi); setActiveTab('navigate'); }}
+                        className="flex-1 py-2 text-[11px] font-bold bg-sky-500 hover:bg-sky-600 text-white rounded-xl transition active:scale-95">To Here</button>
+                    </motion.div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Navigate */}
+      {activeTab === 'navigate' && (
+        <motion.div key="navigate" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col gap-4">
+          {!navigationMode ? (
+            <div className="flex flex-col items-center py-8 gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-3xl shadow-lg shadow-sky-500/30">🧭</div>
+              <div className="text-center"><h3 className="font-bold text-slate-800 dark:text-slate-100 mb-1">Indoor Navigation</h3><p className="text-xs text-slate-400 max-w-[220px]">Find the fastest path between any two points in the airport.</p></div>
+              <button onClick={() => setNavigationMode(true)} className="px-6 py-3 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm shadow-lg shadow-sky-500/25 transition active:scale-95">Start Route Finder</button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {/* Start/End selects */}
+              <div className="flex flex-col gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/30">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0"><span className="text-white text-xs font-black">A</span></div>
+                  <select value={navigationStart?.id || ''} onChange={e => setNavigationStart(nodes.find(p => p.id === e.target.value))}
+                    className="flex-1 py-2 px-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/50">
+                    <option value="">Starting point...</option>
+                    {allNavigableNodes.map(p => <option key={p.id} value={p.id}>{p.name} · {capitalize(p.floor)}</option>)}
+                  </select>
+                </div>
+                <div className="ml-4 w-0.5 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center flex-shrink-0"><span className="text-white text-xs font-black">B</span></div>
+                  <select value={navigationEnd?.id || ''} onChange={e => setNavigationEnd(nodes.find(p => p.id === e.target.value))}
+                    className="flex-1 py-2 px-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/50">
+                    <option value="">Destination...</option>
+                    {allNavigableNodes.map(p => <option key={p.id} value={p.id}>{p.name} · {capitalize(p.floor)}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Options */}
+              <div className="flex gap-3 px-1 text-xs">
+                <label className="flex items-center gap-1.5 cursor-pointer font-medium text-slate-500 dark:text-slate-400">
+                  <input type="checkbox" checked={navigationOptions?.wheelchairOnly || false} onChange={e => setNavigationOptions({ wheelchairOnly: e.target.checked })} className="rounded border-slate-300 text-sky-500" />♿ Wheelchair
+                </label>
+                <label className="flex items-center gap-1.5 cursor-pointer font-medium text-slate-500 dark:text-slate-400">
+                  <input type="checkbox" checked={navigationOptions?.avoidClosed !== false} onChange={e => setNavigationOptions({ avoidClosed: e.target.checked })} className="rounded border-slate-300 text-sky-500" />🚧 Avoid Blocked
+                </label>
+              </div>
+
+              {/* View on Map CTA */}
+              {navigationStart && navigationEnd && (
+                <button onClick={viewOnMap} className="w-full py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-sm shadow-xl shadow-sky-500/30 flex items-center justify-center gap-2 active:scale-95 transition-all">
+                  <span>🗺️</span> View Route on Map
+                </button>
+              )}
+
+              {/* Directions timeline */}
+              {navigationPath && (
+                <div className="mt-1">
+                  {navigationRoutes && navigationRoutes.length > 1 && (
+                    <div className="flex gap-1 p-1 mb-3 bg-slate-100 dark:bg-slate-800/80 rounded-xl">
+                      {navigationRoutes.map((r, idx) => (
+                        <button key={idx} onClick={() => setActiveRouteIndex(idx)}
+                          className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-all ${activeRouteIndex === idx ? 'bg-white dark:bg-slate-700 text-sky-500 shadow-sm' : 'text-slate-400'}`}>
+                          Via {r.type}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Directions</span>
+                    <span className="text-[10px] font-bold text-sky-500 flex items-center gap-1">
+                      <FiClock className="w-3 h-3"/>
+                      {navigationDistance > 0 ? `${navigationDistance}m · ~${Math.max(1, Math.round(navigationDistance/80))} min` : '~3 min'}
+                    </span>
+                  </div>
+                  <div className="relative pl-6">
+                    <div className="absolute left-[11px] top-4 bottom-6 w-0.5 bg-slate-200 dark:bg-slate-700 rounded" />
+                    <div className="flex flex-col gap-5">
+                      {compileDirections().map((step, i) => {
+                        const isStart = step.type === 'start', isEnd = step.type === 'end', isElevator = step.type === 'elevator', isTurn = ['left','right','uturn'].includes(step.type);
+                        let iconCls = "bg-slate-100 dark:bg-slate-800 text-slate-500";
+                        if (isStart) iconCls = "bg-emerald-500 text-white shadow-md shadow-emerald-500/30";
+                        if (isEnd) iconCls = "bg-sky-500 text-white shadow-md shadow-sky-500/30";
+                        if (isElevator) iconCls = "bg-violet-500 text-white shadow-md shadow-violet-500/30";
+                        if (isTurn) iconCls = "bg-slate-700 dark:bg-slate-300 text-white dark:text-slate-900";
+                        return (
+                          <div key={i} className="relative flex items-start gap-3 text-xs">
+                            <div className={`absolute -left-[27px] z-10 w-7 h-7 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-950 ${iconCls}`}>
+                              {step.icon ? React.cloneElement(step.icon, { className: "w-3.5 h-3.5" }) : <FiArrowUp className="w-3.5 h-3.5" />}
+                            </div>
+                            <div className="flex flex-col gap-1 pt-1 w-full">
+                              <span className={`font-semibold leading-snug ${isStart || isEnd ? 'text-slate-800 dark:text-slate-100' : 'text-slate-600 dark:text-slate-300'}`}>{step.text}</span>
+                              {step.desc && <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{step.desc}</span>}
+                              {step.action?.type === 'switch_floor' && step.action.floor !== currentFloor && (
+                                <button onClick={() => {
+                                  const { setFloor: sf, navigationPath: np, zoomMapTo: zmt } = useMapStore.getState();
+                                  window.__mapSkipNextReset = true; sf(step.action.floor);
+                                  const entry = np?.find(pt => pt.floor === step.action.floor);
+                                  if (entry) setTimeout(() => zmt(entry.x, entry.y, 3.5), 200);
+                                }} className="mt-1.5 bg-sky-500/10 hover:bg-sky-500 text-sky-600 hover:text-white dark:text-sky-400 border border-sky-300/50 dark:border-sky-800/50 px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-wider w-fit transition-all active:scale-95">
+                                  Go to {capitalize(step.action.floor)} ➔
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {!navigationPath && navigationStart && navigationEnd && (
+                <div className="p-4 rounded-2xl border border-dashed border-red-200 dark:border-red-900/30 bg-red-50/50 dark:bg-red-950/20 text-center">
+                  <p className="text-xs text-red-500 font-medium">No route found between these points.</p>
+                </div>
+              )}
+              <button onClick={() => setNavigationMode(false)} className="py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-900/30 transition">Clear</button>
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {activeTab === 'floors' && isAdminMode && <motion.div key="floors" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><FloorManager /></motion.div>}
+      {activeTab === 'tagging' && isAdminMode && <motion.div key="tagging" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><TaggingPanel /></motion.div>}
+    </AnimatePresence>
+  );
+
+  // ── MOBILE: Bottom Sheet + Bottom Nav ─────────────────────────────────────
+  if (isMobile) {
+    return (
+      <>
+        {/* Floating Search Bar */}
+        <div className="fixed top-[57px] left-3 right-3 z-50 pointer-events-auto">
+          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-slate-200/60 dark:border-slate-700/40 px-4 py-2">
+            <Search />
           </div>
         </div>
 
-        {/* Search */}
-        <div className="px-6 py-4 flex-shrink-0">
-          <Search />
-        </div>
+        {/* Bottom Sheet Overlay */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px]" onClick={() => setIsOpen(false)} />
+          )}
+        </AnimatePresence>
 
-        {/* Tabs */}
-        <div className="flex border-b border-slate-200/20 dark:border-slate-800/30 px-4 flex-shrink-0 gap-0.5">
+        {/* Bottom Sheet Panel */}
+        <motion.div
+          initial={false}
+          animate={{ y: isOpen ? 0 : '100%' }}
+          transition={{ type: 'spring', damping: 30, stiffness: 250 }}
+          className="fixed bottom-16 left-0 right-0 z-50 pointer-events-auto"
+          style={{ maxHeight: '72vh' }}
+        >
+          <div className="mx-2 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/50 dark:border-slate-700/30 overflow-hidden flex flex-col" style={{ maxHeight: '72vh' }}>
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-1 flex-shrink-0 cursor-pointer" onClick={() => setIsOpen(false)}>
+              <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+            </div>
+            {/* Header */}
+            <div className="px-5 pt-2 pb-4 flex items-center justify-between flex-shrink-0 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-sm shadow-md">✈️</div>
+                <div>
+                  <p className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-wide">Chennai Airport T1</p>
+                  <p className="text-[10px] font-bold text-sky-500 uppercase tracking-widest">Indoor Map</p>
+                </div>
+              </div>
+              {/* Mini tab pills */}
+              <div className="flex gap-1">
+                {tabs.map(t => (
+                  <button key={t.id} onClick={() => setActiveTab(t.id)}
+                    className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all ${activeTab === t.id ? 'bg-sky-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Scrollable content */}
+            <div className="overflow-y-auto flex-1 p-4 custom-scrollbar overscroll-contain">
+              {renderTabContent()}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Bottom Navigation Bar */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-auto">
+          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-t border-slate-200/60 dark:border-slate-800/60 px-2 pb-safe">
+            <div className="flex items-center justify-around py-1">
+              <button onClick={() => { setActiveTab('explore'); setIsOpen(true); }}
+                className={`flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl transition-all active:scale-90 ${activeTab === 'explore' && isOpen ? 'text-sky-500' : 'text-slate-400 dark:text-slate-500'}`}>
+                <span className={`text-xl transition-transform ${activeTab === 'explore' && isOpen ? 'scale-110' : ''}`}>🔍</span>
+                <span className="text-[10px] font-bold">Explore</span>
+              </button>
+              <button onClick={() => { setActiveTab('navigate'); setIsOpen(true); setNavigationMode(true); }}
+                className={`flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl transition-all active:scale-90 ${activeTab === 'navigate' && isOpen ? 'text-sky-500' : 'text-slate-400 dark:text-slate-500'}`}>
+                <span className={`text-xl transition-transform ${activeTab === 'navigate' && isOpen ? 'scale-110' : ''}`}>🧭</span>
+                <span className="text-[10px] font-bold">Navigate</span>
+              </button>
+              <button onClick={() => setIsOpen(false)}
+                className="flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl text-slate-400 dark:text-slate-500 active:scale-90 transition-all">
+                <span className="text-xl">🗺️</span>
+                <span className="text-[10px] font-bold">Map</span>
+              </button>
+              {isAdminMode && (
+                <button onClick={() => { setActiveTab('tagging'); setIsOpen(true); }}
+                  className={`flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl transition-all active:scale-90 ${activeTab === 'tagging' && isOpen ? 'text-sky-500' : 'text-slate-400 dark:text-slate-500'}`}>
+                  <span className="text-xl">⚙️</span>
+                  <span className="text-[10px] font-bold">Admin</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // ── DESKTOP: Sidebar ───────────────────────────────────────────────────────
+  return (
+    <div className="relative h-full flex z-40">
+      <motion.div
+        animate={{ width: isOpen ? '380px' : '0px' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 150 }}
+        className="h-full overflow-hidden bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 shadow-2xl flex flex-col"
+      >
+        {/* Branding */}
+        <div className="p-5 pb-4 flex items-center gap-3 border-b border-slate-200/20 dark:border-slate-800/30 flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg text-white text-lg">✈️</div>
+          <div>
+            <h1 className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-wide">CHENNAI AIRPORT T1</h1>
+            <p className="text-[10px] text-sky-500 font-bold tracking-widest uppercase">Domestic Interactive Map</p>
+          </div>
+        </div>
+        <div className="px-5 py-4 flex-shrink-0"><Search /></div>
+        <div className="flex border-b border-slate-200/20 dark:border-slate-800/30 px-4 flex-shrink-0">
           {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 pb-3 pt-1 text-xs font-semibold border-b-2 transition duration-200 flex-1 justify-center ${
-                activeTab === tab.id
-                  ? 'border-sky-500 text-sky-500 dark:text-sky-400'
-                  : 'border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 pb-3 pt-1 text-xs font-bold border-b-2 transition flex-1 justify-center ${activeTab === tab.id ? 'border-sky-500 text-sky-500' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
+              {tab.icon}{tab.label}
             </button>
           ))}
         </div>
-
-        {/* Tab body */}
-        <div className="flex-1 overflow-y-auto p-5 custom-scrollbar relative">
-          <AnimatePresence mode="wait">
-
-            {/* ── Explore ── */}
-            {activeTab === 'explore' && (
-              <motion.div key="explore" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="flex flex-col gap-6">
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">Categories on current level</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {categories.map(cat => {
-                      const count = pois[currentFloor]?.filter(p => p.category === cat.key).length || 0;
-                      return (
-                        <button key={cat.key} onClick={() => { 
-                          const p = pois[currentFloor]?.find(x => x.category === cat.key); 
-                          if (p) {
-                            selectPoi(p);
-                            if (isMobile) setIsOpen(false);
-                          }
-                        }}
-                          className="flex flex-col items-start p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/40 dark:hover:bg-slate-900/80 border border-slate-200/50 dark:border-slate-800/30 transition text-left group">
-                          <span className="text-xl mb-2 group-hover:scale-110 transition-transform duration-200">{cat.icon}</span>
-                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{cat.label}</span>
-                          <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">{count} places</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">Places on this level</h3>
-                  <div className="flex flex-col gap-2">
-                    {pois[currentFloor]?.slice(0, 6).map(poi => (
-                      <div key={poi.id} className="flex flex-col">
-                        <button onClick={() => {
-                            selectPoi(poi);
-                            if (isMobile) setIsOpen(false);
-                          }}
-                          className={`flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/60 border border-transparent hover:border-slate-200/30 transition text-left ${selectedPoi?.id === poi.id ? 'bg-sky-500/10 dark:bg-sky-500/5 border-sky-500/20' : ''}`}>
-                          <div className="w-8 h-8 rounded-lg bg-sky-100 dark:bg-sky-950/40 flex items-center justify-center text-sm overflow-hidden flex-shrink-0">
-                            {poi.imageUrl ? (
-                              <img src={poi.imageUrl} alt={poi.name} className="w-full h-full object-cover" />
-                            ) : (
-                              poi.isCustom ? '📍' : '🏢'
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">{poi.name}</h4>
-                            <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{poi.description}</p>
-                          </div>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">{poi.category}</span>
-                        </button>
-                        {selectedPoi?.id === poi.id && (
-                          <div className="pl-14 pr-3 pb-3 flex gap-2 animate-in slide-in-from-top-1 -mt-1">
-                            <button
-                              onClick={() => { setNavigationMode(true); if (navigationEnd?.id === poi.id) setNavigationEnd(null); setNavigationStart(poi); setActiveTab('navigate'); }}
-                              className="text-[10px] font-bold bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg flex-1 shadow-sm transition uppercase tracking-wider text-center cursor-pointer outline-none"
-                            >From Here</button>
-                            <button
-                              onClick={() => { setNavigationMode(true); if (navigationStart?.id === poi.id) setNavigationStart(null); setNavigationEnd(poi); setActiveTab('navigate'); }}
-                              className="text-[10px] font-bold bg-sky-500 hover:bg-sky-600 text-white px-2.5 py-1.5 rounded-lg flex-1 shadow-sm transition uppercase tracking-wider text-center cursor-pointer outline-none"
-                            >To Here</button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* ── Directions ── */}
-            {activeTab === 'navigate' && (
-              <motion.div key="navigate" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="flex flex-col gap-6">
-                {!navigationMode ? (
-                  <div className="text-center py-6 flex flex-col items-center">
-                    <div className="w-16 h-16 rounded-full bg-sky-100 dark:bg-sky-950/30 flex items-center justify-center text-sky-500 text-2xl mb-4 animate-bounce">🧭</div>
-                    <h3 className="text-base font-semibold text-slate-700 dark:text-slate-200 mb-2">Indoor Navigation</h3>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-4 max-w-[240px]">Get precise path directions between gates, shops, lounges, and facilities.</p>
-                    <button onClick={() => setNavigationMode(true)} className="px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-semibold text-sm shadow-lg shadow-sky-500/20 transition active:scale-95">
-                      Start Route Finder
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Start Point</label>
-                      <select value={navigationStart?.id || ''} onChange={e => {
-                        setNavigationStart(nodes.find(p => p.id === e.target.value));
-                        // Do NOT auto-close - user must click View on Map
-                      }}
-                        className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500">
-                        <option value="">Select starting location...</option>
-                        {allNavigableNodes.map(p => <option key={p.id} value={p.id}>{p.name} ({capitalize(p.floor)})</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Destination</label>
-                      <select value={navigationEnd?.id || ''} onChange={e => {
-                        setNavigationEnd(nodes.find(p => p.id === e.target.value));
-                        // Do NOT auto-close - user must click View on Map
-                      }}
-                        className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500">
-                        <option value="">Select destination...</option>
-                        {allNavigableNodes.map(p => <option key={p.id} value={p.id}>{p.name} ({capitalize(p.floor)})</option>)}
-                      </select>
-                    </div>
-
-                    {/* Routing Criteria */}
-                    <div className="flex gap-4 p-3 rounded-xl bg-slate-100/50 dark:bg-slate-900/30 border border-slate-200/30 dark:border-slate-800/30 text-xs">
-                      <label className="flex items-center gap-1.5 cursor-pointer font-medium text-slate-600 dark:text-slate-400">
-                        <input type="checkbox" checked={navigationOptions?.wheelchairOnly || false}
-                          onChange={(e) => setNavigationOptions({ wheelchairOnly: e.target.checked })}
-                          className="rounded border-slate-300 dark:border-slate-700 text-sky-500 focus:ring-sky-400" />
-                        Wheelchair Route
-                      </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer font-medium text-slate-600 dark:text-slate-400">
-                        <input type="checkbox" checked={navigationOptions?.avoidClosed !== false}
-                          onChange={(e) => setNavigationOptions({ avoidClosed: e.target.checked })}
-                          className="rounded border-slate-300 dark:border-slate-700 text-sky-500 focus:ring-sky-400" />
-                        Avoid Blocked Paths
-                      </label>
-                    </div>
-
-                    {navigationPath ? (
-                      <div className="mt-2">
-                        {/* Alternative Route Selector */}
-                        {navigationRoutes && navigationRoutes.length > 1 && (
-                          <div className="flex gap-2 p-1 mb-4 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl">
-                            {navigationRoutes.map((route, idx) => (
-                              <button
-                                key={idx}
-                                onClick={() => setActiveRouteIndex(idx)}
-                                className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-all ${
-                                  activeRouteIndex === idx
-                                    ? 'bg-white dark:bg-slate-700 text-sky-500 shadow-sm'
-                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-                                }`}
-                              >
-                                Via {route.type}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        <div className="flex items-center justify-between mb-3 border-b border-slate-200/20 dark:border-slate-800/30 pb-2">
-                          <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Route Directions</h4>
-                          <span className="text-[10px] text-sky-500 dark:text-sky-400 font-bold flex items-center gap-1">
-                            <FiClock className="w-3 h-3" />
-                            {navigationDistance > 0 ? (
-                              `${navigationDistance} m • ~${Math.max(1, Math.round(navigationDistance / 80))} min walk`
-                            ) : (
-                              `~${navigationStart.floor === navigationEnd.floor ? '3' : '6'} min walk`
-                            )}
-                          </span>
-                        </div>
-                        <div className="relative pl-6 pb-4">
-                          {/* Timeline vertical line */}
-                          <div className="absolute left-[11px] top-4 bottom-6 w-[2px] bg-slate-200 dark:bg-slate-800 rounded-full" />
-                          
-                          <div className="flex flex-col gap-6">
-                            {compileDirections().map((step, i, arr) => {
-                              const isStart = step.type === 'start';
-                              const isEnd = step.type === 'end';
-                              const isElevator = step.type === 'elevator';
-                              const isTurn = step.type === 'left' || step.type === 'right' || step.type === 'uturn';
-                              
-                              let iconBg = "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400";
-                              let iconBorder = "border-4 border-white/70 dark:border-slate-950/60";
-                              if (isStart) iconBg = "bg-emerald-500 text-white shadow-md shadow-emerald-500/20";
-                              if (isEnd) iconBg = "bg-sky-500 text-white shadow-md shadow-sky-500/20";
-                              if (isElevator) iconBg = "bg-purple-500 text-white shadow-md shadow-purple-500/20";
-                              if (isTurn) iconBg = "bg-slate-700 dark:bg-slate-300 text-white dark:text-slate-900 shadow-sm";
-                              
-                              return (
-                                <div key={i} className="relative flex items-start gap-3.5 text-xs leading-normal group">
-                                  {/* Icon Bubble */}
-                                  <div className={`absolute -left-[27.5px] z-10 w-7 h-7 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${iconBg} ${iconBorder}`}>
-                                    {step.icon ? React.cloneElement(step.icon, { className: "w-3.5 h-3.5" }) : <FiArrowUp className="w-3.5 h-3.5" />}
-                                  </div>
-                                  
-                                  {/* Content */}
-                                  <div className="flex flex-col gap-0.5 w-full pt-1.5">
-                                    <span className={`font-semibold ${isStart || isEnd ? 'text-slate-800 dark:text-slate-100' : 'text-slate-600 dark:text-slate-300'}`}>
-                                      {step.text}
-                                    </span>
-                                    {step.desc && (
-                                      <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold mt-0.5 block">
-                                        {step.desc}
-                                      </span>
-                                    )}
-                                    
-                                    {/* Floor Switch Action */}
-                                    {step.action && step.action.type === 'switch_floor' && step.action.floor !== currentFloor && (
-                                      <button
-                                        onClick={() => {
-                                          const targetFloor = step.action.floor;
-                                          const { setFloor: switchFloor, navigationPath, zoomMapTo } = useMapStore.getState();
-
-                                          // Skip auto-reset so our zoom wins
-                                          window.__mapSkipNextReset = true;
-                                          switchFloor(targetFloor);
-
-                                          // Find first node on the new floor in the path
-                                          const entry = navigationPath?.find(pt => pt.floor === targetFloor);
-                                          if (entry) {
-                                            // Queue zoom via store — AirportMap will execute after floor renders
-                                            setTimeout(() => zoomMapTo(entry.x, entry.y, 3.5), 200);
-                                          }
-                                        }}
-                                        className="mt-2 bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-800/50 hover:bg-sky-500 hover:text-white hover:border-transparent px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider w-fit transition-all active:scale-95 shadow-sm"
-                                      >
-                                        View {capitalize(step.action.floor)} Level ➔
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (navigationStart && navigationEnd && (
-                      <div className="mt-2 p-3 rounded-lg border border-dashed border-red-200 dark:border-red-900/30 bg-red-50/50 dark:bg-red-950/20 text-center">
-                        <p className="text-xs text-red-600 dark:text-red-500 font-medium">
-                          No route found. Verify that the start and destination locations are connected by nodes on the map.
-                        </p>
-                      </div>
-                    ))}
-
-                    <button onClick={() => setNavigationMode(false)} className="mt-4 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#0f172a] font-semibold text-xs transition">
-                      Clear Selection
-                    </button>
-
-                    {/* View on Map - shown when both start & destination are selected */}
-                    {navigationStart && navigationEnd && (
-                      <button
-                        onClick={viewOnMap}
-                        className="w-full mt-2 py-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-sky-500/30 flex items-center justify-center gap-2.5 active:scale-95 transition-all"
-                      >
-                        <span>🗺️</span> View Route on Map
-                      </button>
-                    )}
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            {/* ── Floor Manager ── */}
-            {activeTab === 'floors' && isAdminMode && (
-              <motion.div key="floors" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
-                <FloorManager />
-              </motion.div>
-            )}
-
-            {/* ── Editor/Tagging ── */}
-            {activeTab === 'tagging' && isAdminMode && (
-              <motion.div key="tagging" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
-                <TaggingPanel />
-              </motion.div>
-            )}
-
-          </AnimatePresence>
-        </div>
+        <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">{renderTabContent()}</div>
       </motion.div>
-
-      {/* Toggle Button */}
-      <div className="h-full flex items-center justify-center p-2 pointer-events-none">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-8 h-10 flex items-center justify-center rounded-r-xl bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border-y border-r border-slate-200/50 dark:border-slate-800/50 text-slate-500 dark:text-slate-300 shadow-xl pointer-events-auto hover:bg-white dark:hover:bg-slate-800 transition active:scale-95"
-          aria-label={isOpen ? 'Close Sidebar' : 'Open Sidebar'}
-        >
+      <div className="h-full flex items-center p-2 pointer-events-none">
+        <button onClick={() => setIsOpen(!isOpen)}
+          className="w-8 h-10 flex items-center justify-center rounded-r-xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-md border-y border-r border-slate-200/50 dark:border-slate-800/50 text-slate-500 shadow-xl pointer-events-auto hover:bg-white dark:hover:bg-slate-800 transition active:scale-95">
           {isOpen ? <FiChevronsLeft className="w-5 h-5" /> : <FiChevronsRight className="w-5 h-5" />}
         </button>
       </div>

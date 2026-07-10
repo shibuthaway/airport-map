@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 import Sidebar from './components/Sidebar/Sidebar';
 import AirportMap from './components/AirportMap/AirportMap';
-import Legend from './components/Legend/Legend';
 import Popup from './components/Popup/Popup';
 import MapHeader from './components/MapHeader/MapHeader';
 import { useMapStore } from './store/useMapStore';
@@ -17,40 +16,33 @@ export default function App() {
     } else {
       document.documentElement.classList.remove('dark');
     }
+    // PWA-like meta: prevent overscroll bounce on iOS
+    document.body.style.overscrollBehavior = 'none';
   }, []);
 
   return (
-    <div className="w-screen h-screen flex overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-500">
+    <div className="w-screen h-[100dvh] flex overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-500 relative">
       {/* 1. Preloader */}
       <LoadingScreen />
 
-      {/* 2. Interactive Sliding Navigation Drawer */}
+      {/* 2. Sidebar/Bottom-Sheet Navigation */}
       <div className="absolute md:relative z-40 h-full pointer-events-none md:pointer-events-auto">
         <div className="h-full pointer-events-auto">
           <Sidebar />
         </div>
       </div>
 
-      {/* 3. Map Viewport & Overlays Container */}
+      {/* 3. Map + Header */}
       <div className="flex-1 h-full w-full relative flex flex-col min-w-0 overflow-hidden">
-        {/* Top Header Dashboard Bar */}
+        {/* Top Header */}
         <MapHeader />
 
-
-
-        {/* Floating Bottom-Right Explanatory Map Legend */}
-        <div className="absolute bottom-6 right-6 z-20 pointer-events-none">
-          <div className="pointer-events-auto">
-            <Legend />
-          </div>
-        </div>
-
-        {/* 4. Canvas mapping core */}
+        {/* Map Canvas */}
         <div className="flex-1 w-full relative z-10 min-h-0">
           <AirportMap />
         </div>
 
-        {/* 5. Point of Interest Detailed popup */}
+        {/* POI Detail Popup */}
         <Popup />
       </div>
     </div>
