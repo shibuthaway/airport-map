@@ -38,30 +38,12 @@ body {
   height: 100vh;
 }
 
-/* 
-  ── iOS Safari Auto-Zoom Prevention ──────────────────────────────────────────
-  iOS Safari zooms in whenever an input/select has font-size < 16px.
-  This rule is applied GLOBALLY (no media query) so it cannot be overridden
-  by Tailwind responsive classes like md:text-sm or lg:text-xs.
-  touch-action: manipulation disables double-tap zoom on interactive elements.
-*/
-input,
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-input[type="search"],
-input[type="tel"],
-input[type="url"],
-input[type="date"],
-textarea,
-select {
-  font-size: 16px !important;
-  touch-action: manipulation;
-}
-
-button, a {
-  touch-action: manipulation;
+/* Prevent iOS Safari auto-zoom when focusing inputs */
+@media screen and (max-width: 768px) {
+  input, textarea, select, button {
+    font-size: 16px !important;
+    touch-action: manipulation;
+  }
 }
 
 #root {
