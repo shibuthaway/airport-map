@@ -738,17 +738,24 @@ export default function AirportMap() {
         const w = typeof window !== 'undefined' ? window.innerWidth : 1000;
         const h = typeof window !== 'undefined' ? window.innerHeight : 600;
         
-        // Let the library center it automatically; we just give it a good default scale
         const targetScale = isMobile ? 0.35 : 0.8;
+        
+        // On mobile, the bottom sheet covers ~70% of the screen height. 
+        // We want to center the map in the visible top 30% area.
+        const visibleHeight = isMobile ? h * 0.35 : h;
+        const initX = (w - 1000 * targetScale) / 2;
+        const initY = (visibleHeight - 600 * targetScale) / 2;
         
         return (
           <TransformWrapper
             ref={transformRef}
             initialScale={targetScale}
+            initialPositionX={isMobile ? initX : undefined}
+            initialPositionY={isMobile ? initY : undefined}
             minScale={0.15} 
             maxScale={6}
-            centerOnInit={true}
-            centerZoomedOut={true}
+            centerOnInit={!isMobile}
+            centerZoomedOut={!isMobile}
             limitToBounds={false}
             doubleClick={{ disabled: false }}
         panning={{ 
