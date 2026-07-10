@@ -26,22 +26,21 @@ export default function FloorManager() {
     setUploading(true);
     setPreview(URL.createObjectURL(file));
 
-    // Convert file to base64
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = async () => {
-      try {
-        const res = await fetch('/api/upload-map', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            filename: file.name,
-            base64: reader.result
-          })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setImageUrl(data.url);
+    // Send file as FormData for multer
+    const formData = new FormData();
+    formData.append('map', file);
+
+    try {
+      const res = await fetch('/api/upload-floor-map', {
+        method: 'POST',
+        headers: {
+          ...(useMapStore.getState().token ? { 'Authorization': `Bearer ${useMapStore.getState().token}` } : {})
+        },
+        body: formData
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setImageUrl(data.url);
         } else {
           alert('Upload failed. Please try again.');
         }
@@ -51,7 +50,6 @@ export default function FloorManager() {
       } finally {
         setUploading(false);
       }
-    };
   };
 
   const handleSave = async (e) => {

@@ -103,7 +103,7 @@ export default function Search() {
           onChange={handleInputChange}
           onFocus={() => searchQuery.trim().length > 0 && setIsOpen(true)}
           placeholder="Search on this floor..."
-          className="w-full pl-12 pr-10 py-3.5 rounded-2xl bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition duration-300 shadow-sm"
+          className="w-full pl-12 pr-10 py-3.5 rounded-2xl bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-slate-800 text-[16px] md:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition duration-300 shadow-sm"
         />
         {searchQuery.length > 0 && (
           <button
