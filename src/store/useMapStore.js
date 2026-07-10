@@ -427,15 +427,6 @@ export const useMapStore = create((set, get) => ({
         }
 
         set({ floors, nodes, edges, pois: computedPois, currentFloor: topFloorId, dataLoaded: true });
-        
-        // Auto-center map to the middle of the floor plan when data is loaded
-        setTimeout(() => {
-          if (typeof window !== 'undefined' && window.innerWidth < 768) {
-            useMapStore.getState().zoomMapTo(500, 300, 0.42);
-          } else {
-            useMapStore.getState().zoomMapTo(500, 300, 0.9);
-          }
-        }, 500);
       } else {
         if (retries > 0) {
           console.warn(`API returned ${floorsRes.status}, retrying...`);

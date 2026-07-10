@@ -733,14 +733,25 @@ export default function AirportMap() {
         </div>
       )}
 
-      <TransformWrapper
-        ref={transformRef}
-        initialScale={1}
-        minScale={0.15} 
-        maxScale={6}
-        centerOnInit={true}
-        limitToBounds={false}
-        doubleClick={{ disabled: false }}
+      {(() => {
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        const targetScale = isMobile ? 0.38 : 0.9;
+        const w = typeof window !== 'undefined' ? window.innerWidth : 1000;
+        const h = typeof window !== 'undefined' ? window.innerHeight : 600;
+        const initX = (w - 1000 * targetScale) / 2;
+        const initY = ((h - (isMobile ? 120 : 0)) - 600 * targetScale) / 2; // Offset for mobile bottom sheet slightly
+        
+        return (
+          <TransformWrapper
+            ref={transformRef}
+            initialScale={targetScale}
+            initialPositionX={initX}
+            initialPositionY={initY}
+            minScale={0.15} 
+            maxScale={6}
+            centerOnInit={false}
+            limitToBounds={false}
+            doubleClick={{ disabled: false }}
         panning={{ 
           velocityDisabled: true,
           disabled: taggingMode || isDrawingEdges || draggedNodeId !== null,
