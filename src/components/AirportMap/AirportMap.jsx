@@ -56,7 +56,8 @@ export default function AirportMap() {
   const [draggedNodeId, setDraggedNodeId] = useState(null);
   const [edgeStartNodeId, setEdgeStartNodeId] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [hoveredBlockedEdge, setHoveredBlockedEdge] = useState(null); // { edge, screenX, screenY }
+  const [hoveredBlockedEdge, setHoveredBlockedEdge] = useState(null);
+  const [blinkPoiId, setBlinkPoiId] = useState(null); // for search/nav flash effect
 
   const {
     floors, currentFloor, pois, selectedPoi, selectPoi,
@@ -200,15 +201,20 @@ export default function AirportMap() {
 
   const activePoiIds = getActivePoiIds();
 
-  // ── Auto-zoom to selected POI ─────────────────────────────────────────────
+  // ── Auto-zoom + blink to selected POI ───────────────────────────────────
   useEffect(() => {
     if (selectedPoi && transformRef.current) {
-      const el = document.getElementById(selectedPoi.id);
-      if (el) {
-        setTimeout(() => {
-          transformRef.current.zoomToElement(el, 2.5, 600, 'easeOut');
-        }, 100);
-      }
+      // Switch to correct floor first if needed
+      const doZoom = () => {
+        const el = document.getElementById(selectedPoi.id);
+        if (el && transformRef.current) {
+          transformRef.current.zoomToElement(el, 3, 500, 'easeOut');
+          // Trigger blink animation
+          setBlinkPoiId(selectedPoi.id);
+          setTimeout(() => setBlinkPoiId(null), 2000);
+        }
+      };
+      setTimeout(doZoom, 150);
     }
   }, [selectedPoi]);
 
@@ -702,17 +708,25 @@ export default function AirportMap() {
         ref={transformRef}
         initialScale={typeof window !== 'undefined' && window.innerWidth < 768 ? 0.38 : 1} 
         minScale={0.15} 
-        maxScale={4}
+        maxScale={6}
         centerOnInit={true}
         limitToBounds={false}
         doubleClick={{ disabled: false }}
-        panning={{ velocityDisabled: true, disabled: taggingMode || isDrawingEdges || draggedNodeId !== null }}
+        panning={{ 
+          velocityDisabled: true,
+          disabled: taggingMode || isDrawingEdges || draggedNodeId !== null,
+          excluded: []
+        }}
+        pinch={{ disabled: false }}
+        wheel={{ disabled: false, touchPadDisabled: false }}
         onInit={(ref) => {
           setZoomActions({
             zoomIn: () => ref.zoomIn(),
             zoomOut: () => ref.zoomOut(),
             resetTransform: () => ref.resetTransform()
           });
+          // Expose transformRef globally so Sidebar can call zoomToElement
+          window.__mapTransformRef = ref;
           setZoomScale(ref.state.scale);
         }}
         onTransform={(ref) => {
@@ -723,7 +737,8 @@ export default function AirportMap() {
           <div className="w-full h-full touch-none">
             <TransformComponent
               wrapperClassName="!w-full !h-full"
-              contentClassName="touch-none"
+              contentClassName=""
+              wrapperStyle={{ touchAction: 'none', minWidth: '320px' }}
             >
               <div
                 className="w-[1000px] h-[600px] relative select-none"
@@ -857,6 +872,13 @@ export default function AirportMap() {
                         {isEdgeStart && (
                           <circle r="22" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeDasharray="3,3" className="animate-spin" style={{ animationDuration: '6s' }} />
                         )}
+                        {/* Blink ring when zoomed to via search */}
+                        {blinkPoiId === poi.id && (
+                          <>
+                            <circle r="28" fill="none" stroke="#fbbf24" strokeWidth="3" className="animate-ping" style={{ animationDuration: '0.6s' }} />
+                            <circle r="20" fill="none" stroke="#f59e0b" strokeWidth="2" className="animate-ping" style={{ animationDuration: '0.8s', animationDelay: '0.1s' }} />
+                          </>
+                        )}
                         {(isSelected || isStart || isEnd) && (
                           <>
                             <circle r="16" fill={color} className="opacity-25 animate-ping" />
@@ -955,31 +977,6 @@ export default function AirportMap() {
           </div>
         )}
       </TransformWrapper>
-
-      {/* ── Map Rotation Controls (bottom-right) ── */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 pointer-events-auto">
-        <div className="flex items-center gap-1 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-full px-3 py-1.5 shadow-lg border border-slate-200/50 dark:border-slate-700/50">
-          <button
-            onClick={() => setMapRotation(mapRotation - 45)}
-            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition active:scale-90 text-sm font-bold"
-            title="Rotate Left"
-          >↺</button>
-          <div className="flex items-center gap-1 px-2">
-            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 select-none">🧭 {Math.round(mapRotation)}°</span>
-          </div>
-          <button
-            onClick={() => setMapRotation(mapRotation + 45)}
-            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition active:scale-90 text-sm font-bold"
-            title="Rotate Right"
-          >↻</button>
-          {mapRotation !== 0 && (
-            <button
-              onClick={() => setMapRotation(0)}
-              className="ml-1 text-[9px] font-bold text-sky-500 hover:text-sky-600 uppercase tracking-wider px-1.5 py-0.5 rounded-full hover:bg-sky-50 dark:hover:bg-sky-950/30 transition"
-            >Reset</button>
-          )}
-        </div>
-      </div>
 
       {/* ── Blocked Edge Hover Tooltip (HTML overlay, tracks mouse) ── */}
       {hoveredBlockedEdge && (

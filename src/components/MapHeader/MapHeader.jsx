@@ -4,7 +4,7 @@ import { useMapStore } from '../../store/useMapStore';
 import { FiSun, FiMoon, FiPlus, FiMinus, FiMaximize2, FiChevronLeft, FiChevronRight, FiShare2 } from 'react-icons/fi';
 
 export default function MapHeader() {
-  const { floors, currentFloor, setFloor, theme, toggleTheme, zoomActions, isAdminMode } = useMapStore();
+  const { floors, currentFloor, setFloor, theme, toggleTheme, zoomActions, isAdminMode, mapRotation, setMapRotation } = useMapStore();
   const [showLeftFade, setShowLeftFade] = useState(false);
   const [showRightFade, setShowRightFade] = useState(false);
   const scrollRef = useRef(null);
@@ -183,6 +183,30 @@ export default function MapHeader() {
           >
             <FiMaximize2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
           </button>
+        </div>
+
+        {/* Rotation Controls */}
+        <div className="flex items-center p-0.5 md:p-1 bg-slate-100/80 dark:bg-slate-900/50 border border-slate-200/30 dark:border-slate-850/40 rounded-xl md:rounded-2xl gap-0.5 md:gap-1">
+          <button
+            onClick={() => setMapRotation(mapRotation - 45)}
+            className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl flex items-center justify-center text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-500/10 transition-all duration-200 active:scale-90 outline-none cursor-pointer text-base font-bold"
+            title="Rotate Map Left"
+          >↺</button>
+          <span className="text-[9px] md:text-[10px] font-bold text-slate-400 dark:text-slate-500 select-none px-0.5 min-w-[28px] md:min-w-[32px] text-center tabular-nums">
+            {Math.round(mapRotation)}°
+          </span>
+          <button
+            onClick={() => setMapRotation(mapRotation + 45)}
+            className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl flex items-center justify-center text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-500/10 transition-all duration-200 active:scale-90 outline-none cursor-pointer text-base font-bold"
+            title="Rotate Map Right"
+          >↻</button>
+          {mapRotation !== 0 && (
+            <button
+              onClick={() => setMapRotation(0)}
+              className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl flex items-center justify-center text-[8px] md:text-[9px] font-extrabold text-sky-500 hover:text-sky-600 hover:bg-sky-500/10 transition-all active:scale-90 cursor-pointer outline-none uppercase tracking-wider"
+              title="Reset Rotation"
+            >N</button>
+          )}
         </div>
 
         {/* Share Public Mode (Admin Only) */}

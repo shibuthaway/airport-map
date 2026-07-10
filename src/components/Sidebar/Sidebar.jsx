@@ -46,6 +46,13 @@ export default function Sidebar() {
   // Helper: close sidebar and jump to map on mobile
   const viewOnMap = () => {
     setIsOpen(false);
+    // Trigger zoom to start point after sidebar closes
+    if (navigationStart) {
+      setTimeout(() => {
+        const { selectPoi } = useMapStore.getState();
+        selectPoi(navigationStart);
+      }, 350);
+    }
   };
 
   const flatPois = getFlatPois();
