@@ -43,16 +43,22 @@ export default function Sidebar() {
     nodes, isAdminMode
   } = useMapStore();
 
-  // Helper: close sidebar and zoom map to starting point
+  // Helper: close sidebar, switch to start floor, then zoom to starting point
   const viewOnMap = () => {
-    if (!navigationStart) return; // Don't do anything if no start selected
+    if (!navigationStart) return;
     setIsOpen(false);
-    // After sidebar closes, smooth-zoom to the navigation start point
+
+    const { setFloor: switchFloor } = useMapStore.getState();
+
+    // Step 1: Switch to the starting floor
+    switchFloor(navigationStart.floor);
+
+    // Step 2: After floor animation + sidebar close, zoom to start point
     setTimeout(() => {
       if (window.__mapZoomToPoint) {
         window.__mapZoomToPoint(navigationStart.x, navigationStart.y, 3.5);
       }
-    }, 400); // Wait for sidebar close animation
+    }, 500); // Give floor transition time to complete
   };
 
   const flatPois = getFlatPois();
