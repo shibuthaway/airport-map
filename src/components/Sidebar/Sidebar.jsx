@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMapStore } from '../../store/useMapStore';
 import Search from '../Search/Search';
+import SearchableSelect from './SearchableSelect';
 import TaggingPanel from './TaggingPanel';
 import FloorManager from './FloorManager';
 import {
@@ -256,22 +257,24 @@ export default function Sidebar() {
             <div className="flex flex-col gap-4">
               {/* Start/End selects */}
               <div className="flex flex-col gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/30">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 relative z-[60]">
                   <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0"><span className="text-white text-xs font-black">A</span></div>
-                  <select value={navigationStart?.id || ''} onChange={e => setNavigationStart(nodes.find(p => p.id === e.target.value))}
-                    className="flex-1 py-2 px-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/50">
-                    <option value="">Starting point...</option>
-                    {allNavigableNodes.map(p => <option key={p.id} value={p.id}>{p.name} · {capitalize(p.floor)}</option>)}
-                  </select>
+                  <SearchableSelect
+                    placeholder="Starting point..."
+                    options={allNavigableNodes.map(p => ({ value: p.id, label: `${p.name} · ${capitalize(p.floor)}` }))}
+                    value={navigationStart?.id || ''}
+                    onChange={val => setNavigationStart(nodes.find(p => p.id === val))}
+                  />
                 </div>
                 <div className="ml-4 w-0.5 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 relative z-[50]">
                   <div className="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center flex-shrink-0"><span className="text-white text-xs font-black">B</span></div>
-                  <select value={navigationEnd?.id || ''} onChange={e => setNavigationEnd(nodes.find(p => p.id === e.target.value))}
-                    className="flex-1 py-2 px-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/50">
-                    <option value="">Destination...</option>
-                    {allNavigableNodes.map(p => <option key={p.id} value={p.id}>{p.name} · {capitalize(p.floor)}</option>)}
-                  </select>
+                  <SearchableSelect
+                    placeholder="Destination..."
+                    options={allNavigableNodes.map(p => ({ value: p.id, label: `${p.name} · ${capitalize(p.floor)}` }))}
+                    value={navigationEnd?.id || ''}
+                    onChange={val => setNavigationEnd(nodes.find(p => p.id === val))}
+                  />
                 </div>
               </div>
 
