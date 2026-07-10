@@ -429,7 +429,22 @@ export default function Sidebar() {
                                     {/* Floor Switch Action */}
                                     {step.action && step.action.type === 'switch_floor' && step.action.floor !== currentFloor && (
                                       <button
-                                        onClick={() => useMapStore.getState().setFloor(step.action.floor)}
+                                        onClick={() => {
+                                          const targetFloor = step.action.floor;
+                                          // Switch floor
+                                          useMapStore.getState().setFloor(targetFloor);
+
+                                          // Find the first node on the new floor in the navigation path
+                                          const { navigationPath, nodes } = useMapStore.getState();
+                                          const firstNodeOnFloor = navigationPath?.find(pt => pt.floor === targetFloor);
+
+                                          // Zoom to that entry point after floor transition
+                                          if (firstNodeOnFloor && window.__mapZoomToPoint) {
+                                            setTimeout(() => {
+                                              window.__mapZoomToPoint(firstNodeOnFloor.x, firstNodeOnFloor.y, 3.5);
+                                            }, 350);
+                                          }
+                                        }}
                                         className="mt-2 bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-800/50 hover:bg-sky-500 hover:text-white hover:border-transparent px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider w-fit transition-all active:scale-95 shadow-sm"
                                       >
                                         View {capitalize(step.action.floor)} Level ➔
