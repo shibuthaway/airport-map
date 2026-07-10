@@ -66,10 +66,33 @@ export default function MapHeader() {
   };
 
   return (
-    <div className="h-14 md:h-16 border-b border-slate-200/50 dark:border-slate-800/40 bg-white/80 dark:bg-slate-950/60 backdrop-blur-xl flex items-center justify-between px-2 sm:px-4 md:px-6 z-20 select-none">
-      
-      {/* 2. Floor selector Horizontal tabs (Left) */}
-      <div className="relative flex items-center max-w-[50%] md:max-w-[60%] overflow-hidden group">
+    <>
+      {/* Immersive Exit Full Screen Button */}
+      <AnimatePresence>
+        {isFullScreen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            className="absolute top-4 right-4 z-[70] pointer-events-auto"
+          >
+            <button
+              onClick={toggleFullScreen}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 shadow-2xl shadow-indigo-500/30 text-white hover:scale-105 active:scale-95 transition-all cursor-pointer border border-indigo-400/50"
+              title="Exit Full Screen"
+            >
+              <FiMinimize className="w-6 h-6" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Normal Header */}
+      {!isFullScreen && (
+        <div className="h-14 md:h-16 border-b border-slate-200/50 dark:border-slate-800/40 bg-white/80 dark:bg-slate-950/60 backdrop-blur-xl flex items-center justify-between px-2 sm:px-4 md:px-6 z-20 select-none">
+          
+          {/* 2. Floor selector Horizontal tabs (Left) */}
+          <div className="relative flex items-center max-w-[50%] md:max-w-[60%] overflow-hidden group">
         
         {/* Left Fade Overlay & Slider Button */}
         {showLeftFade && (
@@ -251,13 +274,15 @@ export default function MapHeader() {
         </button>
       </div>
 
-      {/* Mobile Floating Search Bar */}
-      <div className="md:hidden fixed top-[60px] left-3 right-3 z-[60] pointer-events-auto">
-        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-slate-200/60 dark:border-slate-700/40 px-3 py-1.5">
-          <Search />
+        {/* Mobile Floating Search Bar */}
+        <div className="md:hidden fixed top-[60px] left-3 right-3 z-[60] pointer-events-auto">
+          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-slate-200/60 dark:border-slate-700/40 px-3 py-1.5">
+            <Search />
+          </div>
         </div>
-      </div>
 
-    </div>
+        </div>
+      )}
+    </>
   );
 }
