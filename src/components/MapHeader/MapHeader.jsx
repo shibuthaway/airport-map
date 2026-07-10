@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMapStore } from '../../store/useMapStore';
-import { FiSun, FiMoon, FiPlus, FiMinus, FiMaximize2, FiChevronLeft, FiChevronRight, FiShare2 } from 'react-icons/fi';
+import { FiSun, FiMoon, FiPlus, FiMinus, FiMaximize2, FiChevronLeft, FiChevronRight, FiShare2, FiMaximize, FiMinimize } from 'react-icons/fi';
 
 export default function MapHeader() {
-  const { floors, currentFloor, setFloor, theme, toggleTheme, zoomActions, isAdminMode, mapRotation, setMapRotation } = useMapStore();
+  const { floors, currentFloor, setFloor, theme, toggleTheme, zoomActions, isAdminMode, mapRotation, setMapRotation, isFullScreen, toggleFullScreen } = useMapStore();
   const [showLeftFade, setShowLeftFade] = useState(false);
   const [showRightFade, setShowRightFade] = useState(false);
   const scrollRef = useRef(null);
@@ -220,6 +220,21 @@ export default function MapHeader() {
             <span>Public</span>
           </button>
         )}
+
+        {/* Full Screen Toggle (Mobile Only) */}
+        <div className="md:hidden">
+          <button
+            onClick={toggleFullScreen}
+            className="w-10 h-10 rounded-xl flex items-center justify-center border border-indigo-200/50 dark:border-indigo-800/40 bg-indigo-50/50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-all active:scale-95 cursor-pointer outline-none"
+            title={isFullScreen ? 'Exit Full Screen' : 'Enter Full Screen'}
+          >
+            {isFullScreen ? (
+              <FiMinimize className="w-4.5 h-4.5 text-indigo-600 dark:text-indigo-400" />
+            ) : (
+              <FiMaximize className="w-4.5 h-4.5 text-indigo-600 dark:text-indigo-400" />
+            )}
+          </button>
+        </div>
 
         {/* Theme Toggler */}
         <button

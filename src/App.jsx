@@ -9,33 +9,38 @@ import Login from './components/Auth/Login';
 import SuperAdminDashboard from './components/Admin/SuperAdminDashboard';
 import { useMapStore } from './store/useMapStore';
 
-const MapLayout = () => (
-  <div className="w-screen h-[100dvh] flex overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-500 relative">
-    {/* 1. Preloader */}
-    <LoadingScreen />
+const MapLayout = () => {
+  const { isFullScreen } = useMapStore();
+  return (
+    <div className="w-screen h-[100dvh] flex overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-500 relative">
+      {/* 1. Preloader */}
+      <LoadingScreen />
 
-    {/* 2. Sidebar/Bottom-Sheet Navigation */}
-    <div className="absolute md:relative z-40 h-full pointer-events-none md:pointer-events-auto">
-      <div className="h-full pointer-events-auto">
-        <Sidebar />
+      {/* 2. Sidebar/Bottom-Sheet Navigation */}
+      {!isFullScreen && (
+        <div className="absolute md:relative z-40 h-full pointer-events-none md:pointer-events-auto">
+          <div className="h-full pointer-events-auto">
+            <Sidebar />
+          </div>
+        </div>
+      )}
+
+      {/* 3. Map + Header */}
+      <div className="flex-1 h-full w-full relative flex flex-col min-w-0 overflow-hidden">
+        {/* Top Header */}
+        <MapHeader />
+
+        {/* Map Canvas */}
+        <div className="flex-1 w-full relative z-10 min-h-0">
+          <AirportMap />
+        </div>
+
+        {/* POI Detail Popup */}
+        <Popup />
       </div>
     </div>
-
-    {/* 3. Map + Header */}
-    <div className="flex-1 h-full w-full relative flex flex-col min-w-0 overflow-hidden">
-      {/* Top Header */}
-      <MapHeader />
-
-      {/* Map Canvas */}
-      <div className="flex-1 w-full relative z-10 min-h-0">
-        <AirportMap />
-      </div>
-
-      {/* POI Detail Popup */}
-      <Popup />
-    </div>
-  </div>
-);
+  );
+};
 
 export default function App() {
   useEffect(() => {

@@ -73,6 +73,10 @@ export const useMapStore = create((set, get) => ({
   selectPoi: (poi) => poi ? set({ selectedPoi: poi, currentFloor: poi.floor }) : set({ selectedPoi: null }),
   hoveredPoi: null,
   setHoveredPoi: (poi) => set({ hoveredPoi: poi }),
+  
+  // Full Screen Mode
+  isFullScreen: false,
+  toggleFullScreen: () => set((state) => ({ isFullScreen: !state.isFullScreen })),
 
   // Indoor Positioning State
   userPosition: null, // { x, y, heading, isOffRoute, isWalking, floor }

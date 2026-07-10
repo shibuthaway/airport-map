@@ -18,7 +18,7 @@ export default function Search() {
   useEffect(() => {
     fuseRef.current = new Fuse(allPois, {
       keys: ['name', 'category', 'description', 'facilities'],
-      threshold: 0.3, // slightly stricter for better exact matches
+      threshold: 0.4, // more lenient for better matching
       distance: 100,
     });
   }, [pois]);
