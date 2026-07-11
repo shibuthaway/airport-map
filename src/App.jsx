@@ -9,6 +9,7 @@ import Login from './components/Auth/Login';
 import SuperAdminDashboard from './components/Admin/SuperAdminDashboard';
 import { useMapStore } from './store/useMapStore';
 import OfflineBanner from './components/OfflineBanner/OfflineBanner';
+import ToastContainer from './components/Toast/ToastContainer';
 
 const MapLayout = () => {
   const { isFullScreen } = useMapStore();
@@ -56,12 +57,15 @@ export default function App() {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<MapLayout />} />
-      <Route path="/map/:slug" element={<MapLayout />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/superadmin" element={<SuperAdminDashboard />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<MapLayout />} />
+        <Route path="/map/:slug" element={<MapLayout />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/superadmin" element={<SuperAdminDashboard />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <ToastContainer />
+    </>
   );
 }

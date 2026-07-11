@@ -53,6 +53,19 @@ export const useMapStore = create((set, get) => ({
   // Loading State
   dataLoaded: false,
 
+  // Toast Notifications
+  toasts: [],
+  addToast: (message, type = 'success') => {
+    const id = Date.now();
+    set(state => ({ toasts: [...state.toasts, { id, message, type }] }));
+    setTimeout(() => {
+      set(state => ({ toasts: state.toasts.filter(t => t.id !== id) }));
+    }, 4000);
+  },
+  removeToast: (id) => {
+    set(state => ({ toasts: state.toasts.filter(t => t.id !== id) }));
+  },
+
   // Buildings & Categories
   buildings: [],
   currentBuilding: null,

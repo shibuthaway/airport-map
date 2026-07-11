@@ -4,7 +4,7 @@ import { useMapStore } from '../../store/useMapStore';
 import { FiUploadCloud, FiTrash2, FiPlus, FiEdit3, FiSave, FiX, FiLayers } from 'react-icons/fi';
 
 export default function FloorManager() {
-  const { floors, addFloor, editFloor, deleteFloor, buildings, currentBuilding, setBuilding, addBuilding } = useMapStore();
+  const { floors, addFloor, editFloor, deleteFloor, buildings, currentBuilding, setBuilding, addBuilding, addToast } = useMapStore();
   const [isAdding, setIsAdding] = useState(false);
   const [isAddingBuilding, setIsAddingBuilding] = useState(false);
   const [newBuildingName, setNewBuildingName] = useState('');
@@ -42,11 +42,11 @@ export default function FloorManager() {
         const data = await res.json();
         setImageUrl(data.url);
         } else {
-          alert('Upload failed. Please try again.');
+          addToast('Upload failed. Please try again.', 'error');
         }
       } catch (err) {
         console.error(err);
-        alert('Error uploading blueprint.');
+        addToast('Error uploading blueprint.', 'error');
       } finally {
         setUploading(false);
       }
@@ -55,7 +55,7 @@ export default function FloorManager() {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!level || !name || !imageUrl) {
-      alert('Please fill out all fields and upload a blueprint image.');
+      addToast('Please fill out all fields and upload a blueprint image.', 'error');
       return;
     }
 

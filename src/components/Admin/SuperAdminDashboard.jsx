@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
-  const { token, logout } = useMapStore();
+  const { token, logout, addToast } = useMapStore();
   const [clients, setClients] = useState([]);
   const [stats, setStats] = useState({ total_clients: 0, total_projects: 0, total_floors: 0, total_pois: 0 });
   const [loading, setLoading] = useState(true);
@@ -62,33 +62,50 @@ export default function SuperAdminDashboard() {
         body: JSON.stringify({ username, password, project_id: projectId, project_name: projectName, project_type: projectType })
       });
       if (res.ok) {
-        alert('Client Created Successfully!');
+        addToast('Client Created Successfully!', 'success');
         setShowCreateModal(false);
         setUsername(''); setPassword(''); setProjectId(''); setProjectName(''); setProjectType('Airport');
         fetchData();
       } else {
         const data = await res.json();
-        alert(data.error || 'Failed to create client');
+        addToast(data.error || 'Failed to create client', 'error');
       }
     } catch (err) {
-      alert(err.message);
+      addToast(err.message, 'error');
     } finally {
       setCreating(false);
     }
   };
 
-  const handleToggleStatus = async (client) => {
-    const newStatus = client.status === 'active' ? 'disabled' : 'active';
-    if (!window.confirm(`Are you sure you want to ${newStatus} ${client.username}?`)) return;
+  // For toggle status confirmation
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [clientToToggle, setClientToToggle] = useState(null);
+
+  const confirmToggleStatus = (client) => {
+    setClientToToggle(client);
+    setShowStatusModal(true);
+  };
+
+  const executeToggleStatus = async () => {
+    if (!clientToToggle) return;
+    const newStatus = clientToToggle.status === 'active' ? 'disabled' : 'active';
     try {
-      const res = await fetch(`/api/superadmin/client/${client.user_id}/status`, {
+      const res = await fetch(`/api/superadmin/client/${clientToToggle.user_id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ status: newStatus })
       });
-      if (res.ok) fetchData();
+      if (res.ok) {
+        fetchData();
+        addToast(`Client status changed to ${newStatus}`, 'success');
+      } else {
+        addToast('Failed to change status', 'error');
+      }
     } catch (err) {
-      alert(err.message);
+      addToast(err.message, 'error');
+    } finally {
+      setShowStatusModal(false);
+      setClientToToggle(null);
     }
   };
 
@@ -108,12 +125,13 @@ export default function SuperAdminDashboard() {
         setShowDeleteModal(false);
         setClientToDelete(null);
         fetchData();
+        addToast('Client and all their data deleted.', 'success');
       } else {
         const data = await res.json();
-        alert(data.error || 'Failed to delete client');
+        addToast(data.error || 'Failed to delete client', 'error');
       }
     } catch (err) {
-      alert(err.message);
+      addToast(err.message, 'error');
     }
   };
 
@@ -184,7 +202,7 @@ export default function SuperAdminDashboard() {
                     <td className="px-6 py-4 text-sm text-slate-400">{new Date(c.created_at).toLocaleDateString()}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => handleToggleStatus(c)} title={c.status === 'active' ? 'Disable Access' : 'Enable Access'} className={`p-2 rounded-lg border transition ${c.status === 'active' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-white' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white'}`}>
+                        <button onClick={() => confirmToggleStatus(c)} title={c.status === 'active' ? 'Disable Access' : 'Enable Access'} className={`p-2 rounded-lg border transition ${c.status === 'active' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-white' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white'}`}>
                           <FiPower />
                         </button>
                         <button onClick={() => confirmDeleteClient(c)} title="Delete Project & User" className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition">
@@ -267,6 +285,32 @@ export default function SuperAdminDashboard() {
                 </button>
                 <button onClick={handleDeleteClient} className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold transition flex justify-center items-center gap-2">
                   <FiTrash2 /> Delete
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Status Toggle Modal */}
+        {showStatusModal && clientToToggle && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-md w-full shadow-2xl relative text-center">
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl ${clientToToggle.status === 'active' ? 'bg-amber-500/10 border border-amber-500/20 text-amber-500' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500'}`}>
+                <FiPower />
+              </div>
+              <h2 className="text-xl font-bold mb-2">
+                {clientToToggle.status === 'active' ? 'Disable Access?' : 'Enable Access?'}
+              </h2>
+              <p className="text-sm text-slate-400 mb-6">
+                Are you sure you want to {clientToToggle.status === 'active' ? 'disable' : 'enable'} access for <strong className="text-white">{clientToToggle.username}</strong>?
+              </p>
+              
+              <div className="flex gap-4">
+                <button onClick={() => setShowStatusModal(false)} className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition">
+                  Cancel
+                </button>
+                <button onClick={executeToggleStatus} className={`flex-1 py-3 rounded-xl text-white font-bold transition flex justify-center items-center gap-2 ${clientToToggle.status === 'active' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-emerald-500 hover:bg-emerald-600'}`}>
+                  <FiCheck /> Confirm
                 </button>
               </div>
             </motion.div>

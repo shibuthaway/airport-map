@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { FiPlus, FiTrash2, FiSave, FiX, FiCheck } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiPlus, FiTrash2, FiSave, FiX, FiCheck, FiLoader, FiAlertTriangle } from 'react-icons/fi';
 import * as LucideIcons from 'lucide-react';
 import { useMapStore } from '../../store/useMapStore';
 
@@ -13,9 +13,10 @@ const AVAILABLE_ICONS = [
 ];
 
 export default function CategoryManager() {
-  const { categories: storeCategories, token, loadMapData, currentBuilding } = useMapStore();
+  const { categories: storeCategories, token, loadMapData, currentBuilding, addToast } = useMapStore();
   const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
 
   useEffect(() => {
     // Clone categories for local editing
@@ -40,9 +41,14 @@ export default function CategoryManager() {
   };
 
   const handleDelete = (index) => {
-    if (!window.confirm('Remove this category? Any POIs using it will remain but without their category icon.')) return;
-    const updated = categories.filter((_, i) => i !== index);
+    setCategoryToDelete(index);
+  };
+
+  const confirmDelete = () => {
+    if (categoryToDelete === null) return;
+    const updated = categories.filter((_, i) => i !== categoryToDelete);
     setCategories(updated);
+    setCategoryToDelete(null);
   };
 
   const handleSave = async () => {
@@ -58,13 +64,14 @@ export default function CategoryManager() {
       });
       
       if (res.ok) {
-        alert('Categories saved successfully!');
+        addToast('Categories saved successfully!', 'success');
         loadMapData(); // Refresh to update store and POIs
       } else {
-        alert('Failed to save categories');
+        const data = await res.json();
+        addToast(data.error || 'Failed to save categories', 'error');
       }
     } catch (err) {
-      alert(err.message);
+      addToast(err.message, 'error');
     } finally {
       setSaving(false);
     }
@@ -173,6 +180,31 @@ export default function CategoryManager() {
           <FiPlus /> Add New Category
         </button>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {categoryToDelete !== null && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-slate-900 border border-rose-500/30 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative text-center">
+              <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mx-auto mb-3 text-2xl">
+                <FiAlertTriangle />
+              </div>
+              <h2 className="text-lg font-bold mb-2 text-white">Remove Category?</h2>
+              <p className="text-xs text-slate-400 mb-6">
+                Any POIs using this category will remain, but they will lose their icon until reassigned.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setCategoryToDelete(null)} className="flex-1 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold transition">
+                  Cancel
+                </button>
+                <button onClick={confirmDelete} className="flex-1 py-2 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-sm font-bold transition flex justify-center items-center gap-2">
+                  <FiTrash2 /> Remove
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

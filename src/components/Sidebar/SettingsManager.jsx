@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function SettingsManager() {
   const navigate = useNavigate();
-  const { appSettings, token, logout, user } = useMapStore();
+  const { appSettings, token, logout, user, addToast } = useMapStore();
   const [name, setName] = useState(appSettings?.name || '');
   const [logoUrl, setLogoUrl] = useState(appSettings?.logo_url || '');
   const [publicSlug, setPublicSlug] = useState(appSettings?.public_slug || '');
@@ -48,14 +48,14 @@ export default function SettingsManager() {
       });
       if (res.ok) {
         useMapStore.setState({ appSettings: { name, logo_url: logoUrl, public_slug: publicSlug } });
-        alert('Settings saved successfully!');
+        addToast('Settings saved successfully!', 'success');
       } else {
         const data = await res.json();
-        alert(data.error || 'Failed to save settings');
+        addToast(data.error || 'Failed to save settings', 'error');
       }
     } catch (err) {
       console.error('Failed to save settings:', err);
-      alert('Failed to save settings');
+      addToast('Failed to save settings', 'error');
     } finally {
       setIsSaving(false);
     }
@@ -65,7 +65,7 @@ export default function SettingsManager() {
     const slugToUse = appSettings?.public_slug || user?.project_id || 'default';
     const url = `${window.location.origin}/map/${slugToUse}`;
     navigator.clipboard.writeText(url);
-    alert('Public Map Link copied to clipboard!');
+    addToast('Public Map Link copied to clipboard!', 'success');
   };
 
   const handleLogout = () => {
