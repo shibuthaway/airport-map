@@ -12,32 +12,43 @@ export function useVoiceGuidance() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const lastSpokenRef = useRef('');
 
-  const speak = useCallback((text, { priority = false, lang = 'en-IN', force = false } = {}) => {
-    if (!isSupported || (!voiceEnabledRef.current && !force)) return;
-    // Avoid repeating the exact same phrase
+  const speak = useCallback((text, { priority = false, lang = 'en-US' } = {}) => {
+    if (!isSupported || !voiceEnabledRef.current) return;
+    
+    // Avoid repeating the exact same phrase unless priority
     if (!priority && lastSpokenRef.current === text) return;
 
-    window.speechSynthesis.cancel();          // cut any current speech
+    // Safari/Chrome bug: calling cancel() blindly can freeze speech synthesis.
+    // Only cancel if it's currently speaking something else.
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+    
     lastSpokenRef.current = text;
 
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = lang;
-    utt.rate = 0.92;
-    utt.pitch = 1.05;
-    utt.volume = 1;
+    // Small delay ensures cancel() resolves before new speak (fixes stuck queues)
+    setTimeout(() => {
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.lang = lang;
+      
+      // Removed rate/pitch tweaks as they break some Android TTS engines
+      
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const preferred = voices.find(v => v.lang.startsWith('en') && v.localService) 
+                       || voices.find(v => v.lang.startsWith('en'));
+        if (preferred) utt.voice = preferred;
+      }
 
-    // Pick best voice available
-    const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v =>
-      v.lang.startsWith('en') && v.localService
-    ) || voices.find(v => v.lang.startsWith('en')) || voices[0];
-    if (preferred) utt.voice = preferred;
+      utt.onstart = () => setIsSpeaking(true);
+      utt.onend = () => setIsSpeaking(false);
+      utt.onerror = (e) => {
+        console.warn('Speech synthesis error or interrupted:', e);
+        setIsSpeaking(false);
+      };
 
-    utt.onstart = () => setIsSpeaking(true);
-    utt.onend = () => setIsSpeaking(false);
-    utt.onerror = () => setIsSpeaking(false);
-
-    window.speechSynthesis.speak(utt);
+      window.speechSynthesis.speak(utt);
+    }, 50);
   }, []);
 
   const stopSpeaking = useCallback(() => {
@@ -51,14 +62,14 @@ export function useVoiceGuidance() {
     setVoiceEnabled(prev => {
       const nextState = !prev;
       voiceEnabledRef.current = nextState;
-      if (nextState) {
-        // Unlock speech synthesis immediately on user interaction
-        const dummy = new SpeechSynthesisUtterance('');
-        dummy.volume = 0;
-        window.speechSynthesis.speak(dummy);
-      } else {
+      if (!nextState) {
         window.speechSynthesis?.cancel();
         setIsSpeaking(false);
+      } else {
+        // If enabling, just do a silent ping to wake up TTS engine (must be synchronous)
+        const wake = new SpeechSynthesisUtterance('');
+        wake.volume = 0;
+        window.speechSynthesis.speak(wake);
       }
       return nextState;
     });
