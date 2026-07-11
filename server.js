@@ -48,16 +48,18 @@ async function initDB() {
         name VARCHAR(200) NOT NULL,
         logo_url VARCHAR(500),
         public_slug VARCHAR(255) UNIQUE,
+        project_type VARCHAR(50) DEFAULT 'Airport',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
-    // Safely attempt to add the 'public_slug' column if it doesn't exist
+    // Safely attempt to add columns if they don't exist
     try {
       await conn.execute("ALTER TABLE ap_projects ADD COLUMN public_slug VARCHAR(255) UNIQUE");
-    } catch (e) {
-      // Ignored if column already exists
-    }
+    } catch (e) {}
+    try {
+      await conn.execute("ALTER TABLE ap_projects ADD COLUMN project_type VARCHAR(50) DEFAULT 'Airport'");
+    } catch (e) {}
 
     await conn.execute(`
       CREATE TABLE IF NOT EXISTS ap_users (
@@ -171,6 +173,26 @@ async function initDB() {
       INSERT IGNORE INTO ap_buildings (id, project_id, name) 
       VALUES ('bldg_default', 'default', 'Chennai Terminal 1')
     `);
+
+    // Seed default categories if empty
+    const [existingCats] = await conn.execute('SELECT count(*) as count FROM ap_categories');
+    if (existingCats[0].count === 0) {
+      const defaultCats = [
+        { id: 'gate', name: 'Gates', icon: 'Plane', color: '#3b82f6' },
+        { id: 'checkin', name: 'Check-in', icon: 'Briefcase', color: '#8b5cf6' },
+        { id: 'security', name: 'Security', icon: 'Shield', color: '#ef4444' },
+        { id: 'washroom', name: 'Washrooms', icon: 'Droplet', color: '#06b6d4' },
+        { id: 'food', name: 'Food & Dining', icon: 'Coffee', color: '#f59e0b' },
+        { id: 'shopping', name: 'Shopping', icon: 'ShoppingBag', color: '#10b981' }
+      ];
+      for (let i = 0; i < defaultCats.length; i++) {
+        const cat = defaultCats[i];
+        await conn.execute(
+          'INSERT IGNORE INTO ap_categories (id, project_id, name, icon, color, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
+          [cat.id, 'default', cat.name, cat.icon, cat.color, i]
+        );
+      }
+    }
 
     // Create Super Admin if not exists
     const superHash = await bcrypt.hash('admin123', 10);
@@ -508,10 +530,65 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+const DEFAULT_CATEGORIES = {
+  'Airport': [
+    { id: 'c_gates', name: 'Gates', icon: 'Plane', color: '#3b82f6' },
+    { id: 'c_security', name: 'Security', icon: 'Shield', color: '#ef4444' },
+    { id: 'c_checkin', name: 'Check-in', icon: 'Briefcase', color: '#8b5cf6' },
+    { id: 'c_washroom', name: 'Washrooms', icon: 'Droplet', color: '#06b6d4' },
+    { id: 'c_food', name: 'Food & Dining', icon: 'Coffee', color: '#f59e0b' },
+    { id: 'c_shopping', name: 'Shopping', icon: 'ShoppingBag', color: '#10b981' }
+  ],
+  'Hospital': [
+    { id: 'c_emergency', name: 'Emergency', icon: 'AlertTriangle', color: '#ef4444' },
+    { id: 'c_opd', name: 'OPD', icon: 'Stethoscope', color: '#3b82f6' },
+    { id: 'c_wards', name: 'Wards', icon: 'Bed', color: '#8b5cf6' },
+    { id: 'c_pharmacy', name: 'Pharmacy', icon: 'Pill', color: '#10b981' },
+    { id: 'c_lifts', name: 'Lifts', icon: 'ChevronsUp', color: '#64748b' },
+    { id: 'c_washroom', name: 'Washrooms', icon: 'Droplet', color: '#06b6d4' }
+  ],
+  'Mall': [
+    { id: 'c_shopping', name: 'Stores', icon: 'ShoppingBag', color: '#10b981' },
+    { id: 'c_food', name: 'Food Court', icon: 'Pizza', color: '#f59e0b' },
+    { id: 'c_washroom', name: 'Washrooms', icon: 'Droplet', color: '#06b6d4' },
+    { id: 'c_lifts', name: 'Lifts', icon: 'ChevronsUp', color: '#64748b' },
+    { id: 'c_escalator', name: 'Escalators', icon: 'TrendingUp', color: '#8b5cf6' },
+    { id: 'c_parking', name: 'Parking', icon: 'Car', color: '#3b82f6' }
+  ],
+  'Metro': [
+    { id: 'c_platforms', name: 'Platforms', icon: 'Train', color: '#3b82f6' },
+    { id: 'c_tickets', name: 'Ticketing', icon: 'Ticket', color: '#f59e0b' },
+    { id: 'c_exits', name: 'Exits', icon: 'LogOut', color: '#ef4444' },
+    { id: 'c_washroom', name: 'Washrooms', icon: 'Droplet', color: '#06b6d4' },
+    { id: 'c_escalator', name: 'Escalators', icon: 'TrendingUp', color: '#8b5cf6' }
+  ],
+  'Exhibition': [
+    { id: 'c_halls', name: 'Exhibition Halls', icon: 'Layout', color: '#3b82f6' },
+    { id: 'c_stalls', name: 'Stalls', icon: 'Store', color: '#10b981' },
+    { id: 'c_food', name: 'Food Court', icon: 'Coffee', color: '#f59e0b' },
+    { id: 'c_exits', name: 'Exits', icon: 'LogOut', color: '#ef4444' },
+    { id: 'c_washroom', name: 'Restrooms', icon: 'Droplet', color: '#06b6d4' }
+  ],
+  'University': [
+    { id: 'c_class', name: 'Classrooms', icon: 'BookOpen', color: '#3b82f6' },
+    { id: 'c_labs', name: 'Laboratories', icon: 'FlaskConical', color: '#8b5cf6' },
+    { id: 'c_library', name: 'Library', icon: 'Library', color: '#10b981' },
+    { id: 'c_cafeteria', name: 'Cafeteria', icon: 'Coffee', color: '#f59e0b' },
+    { id: 'c_admin', name: 'Admin', icon: 'Building', color: '#64748b' },
+    { id: 'c_washroom', name: 'Restrooms', icon: 'Droplet', color: '#06b6d4' }
+  ],
+  'Generic': [
+    { id: 'c_rooms', name: 'Rooms', icon: 'DoorOpen', color: '#3b82f6' },
+    { id: 'c_amenities', name: 'Amenities', icon: 'Star', color: '#f59e0b' },
+    { id: 'c_washroom', name: 'Restrooms', icon: 'Droplet', color: '#06b6d4' },
+    { id: 'c_lifts', name: 'Lifts/Stairs', icon: 'ChevronsUp', color: '#64748b' }
+  ]
+};
+
 app.post('/api/superadmin/create-client', verifyToken, async (req, res) => {
   if (req.user.role !== 'superadmin') return res.status(403).json({ error: 'Forbidden' });
   
-  const { username, password, project_id, project_name } = req.body;
+  const { username, password, project_id, project_name, project_type = 'Airport' } = req.body;
   if (!username || !password || !project_id || !project_name) {
     return res.status(400).json({ error: 'Missing fields' });
   }
@@ -522,8 +599,8 @@ app.post('/api/superadmin/create-client', verifyToken, async (req, res) => {
     
     // Create Project
     await conn.execute(
-      'INSERT INTO ap_projects (id, name) VALUES (?, ?)',
-      [project_id, project_name]
+      'INSERT INTO ap_projects (id, name, project_type) VALUES (?, ?, ?)',
+      [project_id, project_name, project_type]
     );
 
     // Create User
@@ -533,6 +610,16 @@ app.post('/api/superadmin/create-client', verifyToken, async (req, res) => {
       'INSERT INTO ap_users (id, username, password_hash, role, project_id) VALUES (?, ?, ?, ?, ?)',
       [userId, username, hash, 'client', project_id]
     );
+
+    // Seed Categories
+    const categoriesToSeed = DEFAULT_CATEGORIES[project_type] || DEFAULT_CATEGORIES['Generic'];
+    for (let i = 0; i < categoriesToSeed.length; i++) {
+      const cat = categoriesToSeed[i];
+      await conn.execute(
+        'INSERT INTO ap_categories (id, project_id, name, icon, color, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
+        [`${project_id}_${cat.id}`, project_id, cat.name, cat.icon, cat.color, i]
+      );
+    }
 
     await conn.commit();
     res.json({ success: true });
@@ -656,6 +743,45 @@ app.post('/api/save-settings', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'That public URL is already taken by another project.' });
     }
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ── CATEGORIES ─────────────────────────────────────────────────────────────────
+app.get('/api/load-categories', async (req, res) => {
+  try {
+    const projectId = await resolveProjectId(req.query.project);
+    const [rows] = await pool.execute('SELECT id, name, icon, color, sort_order FROM ap_categories WHERE project_id = ? ORDER BY sort_order ASC', [projectId]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/save-categories', verifyToken, async (req, res) => {
+  const categories = req.body; // Expecting an array of categories
+  const projectId = req.user.project_id || 'default';
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    // Delete all existing categories for project
+    await conn.execute('DELETE FROM ap_categories WHERE project_id = ?', [projectId]);
+    
+    // Insert new ones
+    for (let i = 0; i < categories.length; i++) {
+      const c = categories[i];
+      await conn.execute(
+        'INSERT INTO ap_categories (id, project_id, name, icon, color, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
+        [c.id, projectId, c.name, c.icon, c.color, i]
+      );
+    }
+    
+    await conn.commit();
+    res.json({ success: true });
+  } catch (err) {
+    await conn.rollback();
+    res.status(500).json({ error: err.message });
+  } finally {
+    conn.release();
   }
 });
 

@@ -6,7 +6,9 @@ import SearchableSelect from './SearchableSelect';
 import TaggingPanel from './TaggingPanel';
 import FloorManager from './FloorManager';
 import SettingsManager from './SettingsManager';
+import CategoryManager from './CategoryManager';
 import { useVoiceGuidance } from '../../hooks/useVoiceGuidance';
+import * as LucideIcons from 'lucide-react';
 import {
   FiCompass, FiNavigation, FiChevronsLeft, FiChevronsRight,
   FiClock, FiTag, FiSearch, FiEdit3, FiGitCommit, FiLoader, FiLayers,
@@ -99,44 +101,34 @@ export default function Sidebar() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigationPath]);
 
-  const categories = [
-    { key: 'gate',      label: 'Gates',     icon: '✈️',
-      gradLight: 'linear-gradient(135deg,#38bdf8,#3b82f6)',
-      gradDark:  'linear-gradient(135deg,#0369a1,#1d4ed8)',
-      glow: '0 6px 20px rgba(56,189,248,0.45)',
-      badgeLight: '#e0f2fe', badgeDark: '#0c4a6e', badgeTextLight: '#0369a1', badgeTextDark: '#7dd3fc' },
-    { key: 'checkin',   label: 'Check-in',  icon: '🧳',
-      gradLight: 'linear-gradient(135deg,#a78bfa,#8b5cf6)',
-      gradDark:  'linear-gradient(135deg,#6d28d9,#4c1d95)',
-      glow: '0 6px 20px rgba(167,139,250,0.45)',
-      badgeLight: '#ede9fe', badgeDark: '#2e1065', badgeTextLight: '#6d28d9', badgeTextDark: '#c4b5fd' },
-    { key: 'baggage',   label: 'Baggage',   icon: '🛄',
-      gradLight: 'linear-gradient(135deg,#fbbf24,#f97316)',
-      gradDark:  'linear-gradient(135deg,#b45309,#c2410c)',
-      glow: '0 6px 20px rgba(251,191,36,0.45)',
-      badgeLight: '#fef3c7', badgeDark: '#451a03', badgeTextLight: '#b45309', badgeTextDark: '#fcd34d' },
-    { key: 'security',  label: 'Security',  icon: '🛡️',
-      gradLight: 'linear-gradient(135deg,#f87171,#ef4444)',
-      gradDark:  'linear-gradient(135deg,#b91c1c,#7f1d1d)',
-      glow: '0 6px 20px rgba(248,113,113,0.45)',
-      badgeLight: '#fee2e2', badgeDark: '#450a0a', badgeTextLight: '#b91c1c', badgeTextDark: '#fca5a5' },
-    { key: 'lounge',    label: 'Lounges',   icon: '🍷',
-      gradLight: 'linear-gradient(135deg,#e879f9,#ec4899)',
-      gradDark:  'linear-gradient(135deg,#a21caf,#9d174d)',
-      glow: '0 6px 20px rgba(232,121,249,0.45)',
-      badgeLight: '#fdf4ff', badgeDark: '#3b0764', badgeTextLight: '#a21caf', badgeTextDark: '#f0abfc' },
-    { key: 'washroom',  label: 'Restrooms', icon: '🚻',
-      gradLight: 'linear-gradient(135deg,#2dd4bf,#10b981)',
-      gradDark:  'linear-gradient(135deg,#0f766e,#065f46)',
-      glow: '0 6px 20px rgba(45,212,191,0.45)',
-      badgeLight: '#ccfbf1', badgeDark: '#022c22', badgeTextLight: '#0f766e', badgeTextDark: '#5eead4' },
-  ];
+  const DynamicIcon = ({ name, className }) => {
+    const IconCmp = LucideIcons[name] || LucideIcons.HelpCircle;
+    return <IconCmp className={className} />;
+  };
+
+  const storeCategories = useMapStore(state => state.categories);
+  const categories = storeCategories && storeCategories.length > 0 
+    ? storeCategories.map(c => ({
+        key: c.id,
+        label: c.name,
+        iconName: c.icon,
+        color: c.color || '#3b82f6'
+      }))
+    : [{ key: 'default', label: 'Places', iconName: 'MapPin', color: '#3b82f6' }];
+
+  const getGradient = (color, isDark) => {
+    // Generate simple gradient based on hex color
+    return isDark 
+      ? `linear-gradient(135deg, ${color}99, ${color}44)` 
+      : `linear-gradient(135deg, ${color}ff, ${color}cc)`;
+  };
 
   const allTabs = [
     { id: 'explore',    label: 'Explore',    icon: <FiSearch className="w-3.5 h-3.5" /> },
     { id: 'navigate',   label: 'Directions', icon: <FiCompass className="w-3.5 h-3.5" /> },
     { id: 'tagging',    label: 'Tag',        icon: <FiEdit3 className="w-3.5 h-3.5" /> },
     { id: 'floors',     label: 'Floors',     icon: <FiLayers className="w-3.5 h-3.5" /> },
+    { id: 'categories', label: 'Types',      icon: <FiTag className="w-3.5 h-3.5" /> },
     { id: 'settings',   label: 'Settings',   icon: <FiSettings className="w-3.5 h-3.5" /> },
   ];
   
@@ -280,13 +272,13 @@ export default function Sidebar() {
                 const count = pois[currentFloor]?.filter(p => p.category === cat.key).length || 0;
                 const isActive = activeCategory === cat.key;
                 const isDark = document.documentElement.classList.contains('dark');
-                const grad = isDark ? cat.gradDark : cat.gradLight;
+                const grad = getGradient(cat.color, isDark);
                 return (
                   <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
                     style={{
                       backgroundImage: grad,
                       boxShadow: isActive
-                        ? `0 0 0 3px rgba(255,255,255,0.85), ${cat.glow}`
+                        ? `0 0 0 3px rgba(255,255,255,0.85), 0 6px 20px ${cat.color}66`
                         : 'none',
                       transform: isActive ? 'scale(1.06)' : 'scale(1)',
                       opacity: isActive ? 1 : isDark ? 0.65 : 0.75,
@@ -302,7 +294,9 @@ export default function Sidebar() {
                     {isActive && (
                       <div className="absolute inset-0 rounded-2xl" style={{ boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.5)' }} />
                     )}
-                    <span className={`text-2xl drop-shadow transition-transform duration-200 ${isActive ? 'scale-115' : 'scale-100'}`} style={{ transform: isActive ? 'scale(1.18)' : 'scale(1)' }}>{cat.icon}</span>
+                    <span className={`text-2xl drop-shadow text-white transition-transform duration-200 ${isActive ? 'scale-115' : 'scale-100'}`} style={{ transform: isActive ? 'scale(1.18)' : 'scale(1)' }}>
+                      <DynamicIcon name={cat.iconName} className="w-6 h-6" />
+                    </span>
                     <span className="text-[10px] font-extrabold leading-tight text-center text-white drop-shadow-sm">{cat.label}</span>
                     <span
                       className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
@@ -342,8 +336,8 @@ export default function Sidebar() {
                           if (isMobile) setIsOpen(false); 
                         }}
                           className={`flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-98 text-left ${selectedPoi?.id === poi.id ? 'bg-sky-500/10 dark:bg-sky-500/10 ring-1 ring-sky-500/30' : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-base flex-shrink-0 overflow-hidden">
-                            {poi.imageUrl ? <img src={poi.imageUrl} alt="" className="w-full h-full object-cover" /> : (poi.isCustom ? '📍' : activeCatObj?.icon || '🏢')}
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-base flex-shrink-0 overflow-hidden text-slate-500">
+                            {poi.imageUrl ? <img src={poi.imageUrl} alt="" className="w-full h-full object-cover" /> : (poi.isCustom ? <LucideIcons.MapPin className="w-4 h-4"/> : <DynamicIcon name={activeCatObj?.iconName} className="w-4 h-4"/>)}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{poi.name}</p>
@@ -530,6 +524,7 @@ export default function Sidebar() {
 
       {activeTab === 'floors' && isAdminMode && <motion.div key="floors" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><FloorManager /></motion.div>}
       {activeTab === 'tagging' && isAdminMode && <motion.div key="tagging" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><TaggingPanel /></motion.div>}
+      {activeTab === 'categories' && isAdminMode && <motion.div key="categories" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><CategoryManager /></motion.div>}
       {activeTab === 'settings' && isAdminMode && <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><SettingsManager /></motion.div>}
     </AnimatePresence>
   );

@@ -19,9 +19,19 @@ const pool = mysql.createPool({
   user:     process.env.DB_USER     || 'rozgaarsetu',
   password: process.env.DB_PASSWORD || 'rozgaarsetu_dev',
   database: DB_NAME,
+  ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
 });
 
-const TABLES = ['ap_floors', 'ap_nodes', 'ap_edges', 'ap_categories', 'ap_custom_routes'];
+const TABLES = [
+  'ap_projects',
+  'ap_users',
+  'ap_buildings',
+  'ap_floors',
+  'ap_nodes',
+  'ap_edges',
+  'ap_categories',
+  'ap_custom_routes'
+];
 
 async function getCreateTableSQL(conn, table) {
   const [rows] = await conn.execute(`SHOW CREATE TABLE \`${table}\``);
@@ -42,6 +52,9 @@ async function getInsertsSQL(conn, table) {
       if (val === null) return 'NULL';
       if (typeof val === 'number') return val;
       if (typeof val === 'boolean') return val ? 1 : 0;
+      if (val instanceof Date) {
+        return `'${val.toISOString().slice(0, 19).replace('T', ' ')}'`;
+      }
       // Handle string/json
       let escaped = String(val).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
       return `'${escaped}'`;

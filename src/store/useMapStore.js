@@ -56,9 +56,10 @@ export const useMapStore = create((set, get) => ({
   // Loading State
   dataLoaded: false,
 
-  // Buildings
+  // Buildings & Categories
   buildings: [],
   currentBuilding: null,
+  categories: [],
   setBuilding: (buildingId) => {
     set({ currentBuilding: buildingId, floors: [], nodes: [], edges: [], pois: {} });
     get().loadMapData();
@@ -516,15 +517,17 @@ export const useMapStore = create((set, get) => ({
         set({ currentBuilding: activeBuildingId });
       }
 
-      const [floorsRes, graphRes, settingsRes] = await Promise.all([
+      const [floorsRes, graphRes, settingsRes, catRes] = await Promise.all([
         fetch(`/api/load-floors?project=${projectId}&building=${activeBuildingId || 'bldg_default'}`),
         fetch(`/api/load-graph?project=${projectId}`),
-        fetch(`/api/load-settings?project=${projectId}`)
+        fetch(`/api/load-settings?project=${projectId}`),
+        fetch(`/api/load-categories?project=${projectId}`)
       ]);
       if (floorsRes.ok && graphRes.ok) {
         const floors = await floorsRes.json();
         const graph = await graphRes.json();
         const settings = settingsRes.ok ? await settingsRes.json() : { name: 'Airport Indoor Map', logo_url: null };
+        const categories = catRes.ok ? await catRes.json() : [];
         const nodes = graph.nodes || [];
         const edges = graph.edges || [];
         const computedPois = computePoisFromNodes(nodes);
@@ -539,7 +542,7 @@ export const useMapStore = create((set, get) => ({
           topFloorId = sorted[sorted.length - 1].id;
         }
 
-        set({ floors, nodes, edges, pois: computedPois, currentFloor: topFloorId, appSettings: settings, dataLoaded: true });
+        set({ floors, nodes, edges, pois: computedPois, currentFloor: topFloorId, appSettings: settings, categories, dataLoaded: true });
 
         // ── Prefetch all floor map images for offline use ──────────────────
         // This ensures Service Worker caches every floor image immediately,

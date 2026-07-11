@@ -7,29 +7,7 @@ import {
   FiLink, FiAlertTriangle, FiClock, FiShield, FiUnlock,
 } from 'react-icons/fi';
 
-const CATEGORIES = [
-  { value: 'gate',        label: '✈️ Gate' },
-  { value: 'checkin',     label: '🪪 Check-in' },
-  { value: 'baggage',     label: '🧳 Baggage Claim' },
-  { value: 'security',    label: '🛡️ Security' },
-  { value: 'restaurant',  label: '🍔 Restaurant' },
-  { value: 'cafe',        label: '☕ Cafe' },
-  { value: 'shopping',    label: '🛍️ Shop' },
-  { value: 'lounge',      label: '🍷 Lounge' },
-  { value: 'washroom',    label: '🚻 Washroom' },
-  { value: 'atm',         label: '💵 ATM' },
-  { value: 'medical',     label: '🏥 Medical' },
-  { value: 'lift',        label: '🛗 Lift' },
-  { value: 'escalator',   label: '🪜 Escalator' },
-  { value: 'parking',     label: '🅿️ Parking' },
-  { value: 'prayer',      label: '🕌 Prayer Room' },
-  { value: 'babycare',    label: '👶 Baby Care' },
-  { value: 'helpdesk',    label: '🙋 Help Desk' },
-  { value: 'emergency',   label: '🚨 Emergency Exit' },
-  { value: 'office',      label: '🏢 Office' },
-  { value: 'waypoint',    label: '📍 Waypoint / Transit' },
-  { value: 'other',       label: '📍 Other' },
-];
+
 
 const STATUSES = ['Open', 'Closed', 'Under Maintenance', 'Coming Soon'];
 
@@ -41,9 +19,8 @@ export default function TaggingPanel() {
     taggingMode, taggingCoords, editingPoiId,
     setTaggingMode, setTaggingCoords, setEditingPoiId,
     addPoi, editPoi, deletePoi, exportFloorData, resetToDefaults,
-    // Graph additions
     nodes, edges, isDrawingEdges, setIsDrawingEdges, selectedEdge, setSelectedEdge, updateEdge,
-    blockEdge, unblockEdge,
+    blockEdge, unblockEdge, categories,
   } = useMapStore();
 
   const [form, setForm] = useState(emptyForm);
@@ -71,7 +48,7 @@ export default function TaggingPanel() {
     if (editingPoi) {
       setForm({
         name: editingPoi.name || '',
-        category: editingPoi.category || 'gate',
+        category: editingPoi.category || (categories?.[0]?.id || 'default'),
         description: editingPoi.description || '',
         status: editingPoi.status || 'Open',
         imageUrl: editingPoi.imageUrl || null,
@@ -79,9 +56,9 @@ export default function TaggingPanel() {
         imageFile: null,
       });
     } else {
-      setForm(emptyForm);
+      setForm({ ...emptyForm, category: categories?.[0]?.id || 'default' });
     }
-  }, [editingPoiId]);
+  }, [editingPoiId, categories]);
 
   // When user selects a custom POI, offer to edit it
   useEffect(() => {
@@ -150,13 +127,13 @@ export default function TaggingPanel() {
     deletePoi(currentFloor, editingPoiId);
     setEditingPoiId(null);
     setTaggingCoords(null);
-    setForm(emptyForm);
+    setForm({ ...emptyForm, category: categories?.[0]?.id || 'default' });
   };
 
   const handleCancelEdit = () => {
     setEditingPoiId(null);
     setTaggingCoords(null);
-    setForm(emptyForm);
+    setForm({ ...emptyForm, category: categories?.[0]?.id || 'default' });
   };
 
   const customPoisOnFloor = (pois[currentFloor] || []).filter(p => p.isCustom);
@@ -308,7 +285,7 @@ export default function TaggingPanel() {
                 onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
                 className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/50"
               >
-                {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                {categories && categories.length > 0 ? categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>) : <option value="default">Default</option>}
               </select>
             </div>
 

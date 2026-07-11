@@ -15,6 +15,7 @@ export default function SuperAdminDashboard() {
   const [password, setPassword] = useState('');
   const [projectId, setProjectId] = useState('');
   const [projectName, setProjectName] = useState('');
+  const [projectType, setProjectType] = useState('Airport');
   const [creating, setCreating] = useState(false);
 
   const fetchData = async () => {
@@ -45,12 +46,12 @@ export default function SuperAdminDashboard() {
       const res = await fetch('/api/superadmin/create-client', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ username, password, project_id: projectId, project_name: projectName })
+        body: JSON.stringify({ username, password, project_id: projectId, project_name: projectName, project_type: projectType })
       });
       if (res.ok) {
         alert('Client Created Successfully!');
         setShowCreateModal(false);
-        setUsername(''); setPassword(''); setProjectId(''); setProjectName('');
+        setUsername(''); setPassword(''); setProjectId(''); setProjectName(''); setProjectType('Airport');
         fetchData();
       } else {
         const data = await res.json();
@@ -207,6 +208,18 @@ export default function SuperAdminDashboard() {
                     <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Password</label>
                     <input required type="text" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 focus:border-sky-500 outline-none" placeholder="••••••••" />
                   </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Industry / Project Type</label>
+                  <select value={projectType} onChange={e => setProjectType(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 focus:border-sky-500 outline-none appearance-none">
+                    <option value="Airport">Airport</option>
+                    <option value="Hospital">Hospital</option>
+                    <option value="Mall">Mall</option>
+                    <option value="Metro">Metro</option>
+                    <option value="Exhibition">Exhibition</option>
+                    <option value="University">University</option>
+                    <option value="Generic">Generic / Other</option>
+                  </select>
                 </div>
                 <button type="submit" disabled={creating} className="w-full mt-4 bg-sky-500 hover:bg-sky-400 text-white font-bold py-3.5 rounded-xl transition flex justify-center items-center gap-2 shadow-lg shadow-sky-500/20">
                   <FiPlus /> {creating ? 'Provisioning...' : 'Deploy Project & Account'}
