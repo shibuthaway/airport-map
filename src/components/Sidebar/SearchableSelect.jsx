@@ -2,14 +2,20 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FiChevronDown, FiSearch, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function SearchableSelect({ options, value, onChange, placeholder }) {
-  const [isOpen, setIsOpen] = useState(false);
+/**
+ * isControlledOpen: parent controls open state so only one is open at a time
+ * onOpen: called when user taps trigger to open
+ * onClose: called when user dismisses
+ */
+export default function SearchableSelect({
+  options, value, onChange, placeholder,
+  isControlledOpen = false, onOpen, onClose,
+}) {
   const [search, setSearch] = useState('');
-  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-  const containerRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
   const inputRef = useRef(null);
-
-  const selectedOption = options.find(o => o.value === value);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -17,116 +23,123 @@ export default function SearchableSelect({ options, value, onChange, placeholder
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Focus search input on desktop when opened
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setIsOpen(false);
-        setSearch('');
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, []);
-
-  // Focus input automatically only on desktop to avoid aggressive keyboard popping on mobile
-  useEffect(() => {
-    if (isOpen && !isMobile && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+    if (isControlledOpen && !isMobile && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 80);
     }
-  }, [isOpen, isMobile]);
+    // Clear search when closed
+    if (!isControlledOpen) setSearch('');
+  }, [isControlledOpen, isMobile]);
 
-  // Prevent scroll when opened on mobile for better UX (optional)
-  const filteredOptions = options.filter(o => 
+  const selectedOption = options.find(o => o.value === value);
+  const filteredOptions = options.filter(o =>
     o.label.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleTrigger = () => {
+    if (isControlledOpen) { onClose?.(); } else { onOpen?.(); }
+  };
+
+  const handleSelect = (val) => {
+    onChange(val);
+    onClose?.();
+  };
+
   return (
-    <div className="relative flex-1 min-w-0" ref={containerRef}>
+    <div className="relative flex-1 min-w-0">
+      {/* Trigger button */}
       <button
         type="button"
-        onClick={() => {
-          setIsOpen(!isOpen);
-          setSearch('');
-        }}
-        className="w-full flex items-center justify-between py-2.5 px-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/50 min-w-0 transition-all shadow-sm"
+        onClick={handleTrigger}
+        className="w-full flex items-center justify-between py-2.5 px-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none min-w-0 transition-all shadow-sm"
       >
         <span className="truncate text-slate-800 dark:text-slate-100 font-medium">
-          {selectedOption ? selectedOption.label : <span className="text-slate-400 font-normal">{placeholder}</span>}
+          {selectedOption
+            ? selectedOption.label
+            : <span className="text-slate-400 font-normal">{placeholder}</span>
+          }
         </span>
-        <FiChevronDown className={`flex-shrink-0 text-slate-400 ml-2 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <FiChevronDown className={`flex-shrink-0 text-slate-400 ml-2 transition-transform duration-200 ${isControlledOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
-        {isOpen && (
+        {isControlledOpen && (
           isMobile ? (
-            // ── MOBILE: Full-screen modal to prevent keyboard layout shifts ──
+            /* ── MOBILE: Full-height bottom sheet ── */
             <div className="fixed inset-0 z-[99999] flex flex-col pointer-events-auto">
+              {/* Backdrop — clicking it closes */}
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-                onClick={() => setIsOpen(false)}
+                transition={{ duration: 0.15 }}
+                className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+                onClick={() => onClose?.()}
               />
+              {/* Bottom sheet */}
               <motion.div
-                initial={{ opacity: 0, y: 60 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 40 }}
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 28, stiffness: 320, mass: 0.8 }}
                 className="relative mt-auto mx-3 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200/50 dark:border-slate-800/50"
-                style={{ maxHeight: '80vh', marginBottom: '80px' }}
+                style={{ maxHeight: '72vh', marginBottom: '72px' }}
               >
-                <div className="p-3 border-b border-slate-100 dark:border-slate-800/60 flex items-center gap-3">
-                  <div className="flex-1 relative flex items-center bg-slate-100 dark:bg-slate-800 rounded-2xl px-3 py-2.5">
-                    <FiSearch className="text-slate-400 mr-2 flex-shrink-0 text-lg" />
+                {/* Search row */}
+                <div className="p-3 border-b border-slate-100 dark:border-slate-800/60 flex items-center gap-2 flex-shrink-0">
+                  <div className="flex-1 flex items-center bg-slate-100 dark:bg-slate-800 rounded-2xl px-3 py-2.5 gap-2">
+                    <FiSearch className="text-slate-400 flex-shrink-0" />
                     <input
                       ref={inputRef}
                       type="text"
                       placeholder="Type to search..."
                       value={search}
                       onChange={e => setSearch(e.target.value)}
-                      className="w-full bg-transparent text-[16px] leading-normal text-slate-800 dark:text-slate-100 outline-none placeholder:text-slate-400"
-                      style={{ fontSize: '16px' }} // Force 16px to guarantee no iOS zoom
+                      style={{ fontSize: '16px' }}
+                      className="w-full bg-transparent text-slate-800 dark:text-slate-100 outline-none placeholder:text-slate-400"
                     />
                     {search && (
-                      <button onClick={() => setSearch('')} className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                        <FiX className="text-lg" />
+                      <button onClick={() => setSearch('')} className="p-1 text-slate-400">
+                        <FiX className="w-4 h-4" />
                       </button>
                     )}
                   </div>
-                  <button onClick={() => setIsOpen(false)} className="p-2 text-slate-500 font-bold text-sm">Cancel</button>
+                  <button
+                    onClick={() => onClose?.()}
+                    className="px-3 py-2 text-sky-500 font-bold text-sm flex-shrink-0"
+                  >Cancel</button>
                 </div>
-                <div className="overflow-y-auto flex-1 overscroll-contain custom-scrollbar p-2">
-                  {filteredOptions.length === 0 ? (
-                    <div className="p-8 text-center text-sm text-slate-500">No matching locations</div>
-                  ) : (
-                    <div className="flex flex-col gap-1">
-                      {filteredOptions.map(opt => (
+                {/* List */}
+                <div className="overflow-y-auto flex-1 overscroll-contain p-2">
+                  {filteredOptions.length === 0
+                    ? <div className="p-8 text-center text-sm text-slate-500">No results</div>
+                    : filteredOptions.map(opt => (
                         <button
                           key={opt.value}
                           type="button"
-                          onClick={() => { onChange(opt.value); setIsOpen(false); setSearch(''); }}
-                          className={`w-full text-left px-4 py-3.5 rounded-xl text-[15px] transition-colors flex items-center ${value === opt.value ? 'bg-sky-50 dark:bg-slate-800/80 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40'}`}
+                          onClick={() => handleSelect(opt.value)}
+                          className={`w-full text-left px-4 py-3 rounded-xl text-[14px] flex items-center gap-2 transition-colors mb-0.5 ${
+                            value === opt.value
+                              ? 'bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 font-bold'
+                              : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                          }`}
                         >
+                          {value === opt.value && <span className="text-sky-500 text-xs font-black">✓</span>}
                           <span className="truncate">{opt.label}</span>
                         </button>
-                      ))}
-                    </div>
-                  )}
+                      ))
+                  }
                 </div>
               </motion.div>
             </div>
           ) : (
-            // ── DESKTOP: Absolute dropdown ──
+            /* ── DESKTOP: Dropdown ── */
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              initial={{ opacity: 0, y: -8, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
+              exit={{ opacity: 0, y: -8, scale: 0.97 }}
+              transition={{ duration: 0.14 }}
               className="absolute z-[100] top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden flex flex-col origin-top"
-              style={{ maxHeight: '280px' }}
+              style={{ maxHeight: '260px' }}
             >
               <div className="p-2 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80">
                 <FiSearch className="text-slate-400 ml-1 flex-shrink-0" />
@@ -138,29 +151,27 @@ export default function SearchableSelect({ options, value, onChange, placeholder
                   onChange={e => setSearch(e.target.value)}
                   className="w-full bg-transparent text-sm text-slate-800 dark:text-slate-100 outline-none placeholder:text-slate-400"
                 />
-                {search && (
-                  <button onClick={() => setSearch('')} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <FiX />
-                  </button>
-                )}
+                {search && <button onClick={() => setSearch('')} className="p-1 text-slate-400 hover:text-slate-600"><FiX /></button>}
               </div>
-              <div className="overflow-y-auto flex-1 overscroll-contain custom-scrollbar">
-                {filteredOptions.length === 0 ? (
-                  <div className="p-4 text-center text-sm text-slate-500">No matching locations</div>
-                ) : (
-                  <div className="py-1">
-                    {filteredOptions.map(opt => (
+              <div className="overflow-y-auto flex-1 overscroll-contain">
+                {filteredOptions.length === 0
+                  ? <div className="p-4 text-center text-sm text-slate-500">No results</div>
+                  : filteredOptions.map(opt => (
                       <button
                         key={opt.value}
                         type="button"
-                        onClick={() => { onChange(opt.value); setIsOpen(false); setSearch(''); }}
-                        className={`w-full text-left px-3 py-2 text-sm hover:bg-sky-50 dark:hover:bg-slate-700/50 transition-colors flex items-center ${value === opt.value ? 'bg-sky-50 dark:bg-slate-700/50 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-700 dark:text-slate-300'}`}
+                        onClick={() => handleSelect(opt.value)}
+                        className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${
+                          value === opt.value
+                            ? 'bg-sky-50 dark:bg-slate-700/50 text-sky-600 dark:text-sky-400 font-bold'
+                            : 'text-slate-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-slate-700/50'
+                        }`}
                       >
+                        {value === opt.value && <span className="text-sky-500 text-xs font-black">✓</span>}
                         <span className="truncate">{opt.label}</span>
                       </button>
-                    ))}
-                  </div>
-                )}
+                    ))
+                }
               </div>
             </motion.div>
           )

@@ -187,6 +187,14 @@ export default function MapHeader() {
           </div>
         </div>
       )}
+      {/* ── Mobile Floating Search (below header, above map) ── */}
+      {!isFullScreen && dataLoaded && (
+        <div className="md:hidden fixed left-3 z-30 pointer-events-auto" style={{ top: '60px', right: '56px' }}>
+          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-lg shadow-black/8 border border-slate-200/60 dark:border-slate-700/40 px-3 py-1.5">
+            <Search />
+          </div>
+        </div>
+      )}
     </>
   );
 }

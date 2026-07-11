@@ -61,14 +61,52 @@ export default function Popup() {
 
   return (
     <AnimatePresence>
+      {/* ── MOBILE: Compact pill at bottom ── */}
       <motion.div
-        key={selectedPoi.id}
+        key={`m-${selectedPoi.id}`}
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 24 }}
+        transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+        className="md:hidden fixed z-50 left-3 right-3"
+        style={{ bottom: '72px' }}
+      >
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-black/15 border border-slate-200/60 dark:border-slate-700/40 px-3 py-2.5 flex items-center gap-2.5">
+          {/* Icon */}
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-base flex-shrink-0 shadow-md">
+            {{ gate:'✈️', restaurant:'🍽️', food:'🍽️', shopping:'🛍️', lounge:'🍷', washroom:'🚻', security:'🛡️', checkin:'🧳', baggage:'🛄' }[selectedPoi.category.toLowerCase()] || '📍'}
+          </div>
+          {/* Info */}
+          <div className="min-w-0 flex-1">
+            <p className="font-bold text-[13px] text-slate-800 dark:text-slate-100 truncate leading-tight">{selectedPoi.name}</p>
+            <p className="text-[10px] text-slate-400 capitalize">{selectedPoi.category}</p>
+          </div>
+          {/* Action buttons */}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button
+              onClick={handleFrom}
+              className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all active:scale-90 ${isFrom ? 'bg-emerald-500 text-white' : 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 border border-emerald-200/60 dark:border-emerald-800/40'}`}
+            >From</button>
+            <button
+              onClick={handleTo}
+              className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all active:scale-90 ${isTo ? 'bg-sky-500 text-white' : 'bg-sky-50 dark:bg-sky-950/30 text-sky-600 border border-sky-200/60 dark:border-sky-800/40'}`}
+            >Go</button>
+            <button
+              onClick={() => selectPoi(null)}
+              className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 active:scale-90 transition-all ml-0.5"
+            ><FiX className="w-3.5 h-3.5" /></button>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ── DESKTOP: Full card ── */}
+      <motion.div
+        key={`d-${selectedPoi.id}`}
         initial={{ opacity: 0, y: 32 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{    opacity: 0, y: 32 }}
+        exit={{ opacity: 0, y: 32 }}
         transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-        className="fixed bottom-6 left-[1rem] w-[calc(100vw-2rem)] md:absolute md:left-auto md:right-6 md:w-[380px]
-                   z-50 rounded-3xl overflow-hidden
+        className="hidden md:block absolute right-6 bottom-6 w-[380px] z-50 rounded-3xl overflow-hidden
                    bg-white dark:bg-[#0d1526]
                    border border-slate-200/60 dark:border-slate-800/60
                    shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
