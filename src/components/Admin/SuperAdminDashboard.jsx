@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useMapStore } from '../../store/useMapStore';
-import { FiPlus, FiLogOut, FiUsers, FiBox, FiActivity, FiMap, FiMapPin, FiTrash2, FiPower, FiX } from 'react-icons/fi';
+import { FiPlus, FiLogOut, FiUsers, FiBox, FiActivity, FiMap, FiMapPin, FiTrash2, FiPower, FiX, FiAlertTriangle } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 export default function SuperAdminDashboard() {
+  const navigate = useNavigate();
   const { token, logout } = useMapStore();
   const [clients, setClients] = useState([]);
   const [stats, setStats] = useState({ total_clients: 0, total_projects: 0, total_floors: 0, total_pois: 0 });
@@ -38,8 +40,17 @@ export default function SuperAdminDashboard() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (!token) {
+      navigate('/login');
+    } else {
+      fetchData();
+    }
+  }, [token, navigate]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
@@ -122,7 +133,7 @@ export default function SuperAdminDashboard() {
             <button onClick={() => setShowCreateModal(true)} className="flex-1 md:flex-none px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-white rounded-xl font-bold flex justify-center items-center gap-2 transition shadow-lg shadow-sky-500/20">
               <FiPlus /> New Client
             </button>
-            <button onClick={logout} className="px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-bold flex justify-center items-center gap-2 transition">
+            <button onClick={handleLogout} className="px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-bold flex justify-center items-center gap-2 transition">
               <FiLogOut /> Sign Out
             </button>
           </div>

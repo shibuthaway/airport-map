@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useMapStore } from '../../store/useMapStore';
 import Search from '../Search/Search';
 import SearchableSelect from './SearchableSelect';
@@ -21,6 +22,7 @@ export default function Sidebar() {
   const [activeTab, setActiveTab] = useState('explore');
   const [activeCategory, setActiveCategory] = useState('gate');
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const navigate = useNavigate();
   // Controls which SearchableSelect is open — prevents From/To overlap
   const [activeSelect, setActiveSelect] = useState(null); // 'from' | 'to' | null
 

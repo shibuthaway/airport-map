@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useMapStore } from '../../store/useMapStore';
 import { FiSave, FiUpload, FiImage, FiSettings } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 export default function SettingsManager() {
+  const navigate = useNavigate();
   const { appSettings, token, logout, user } = useMapStore();
   const [name, setName] = useState(appSettings?.name || '');
   const [logoUrl, setLogoUrl] = useState(appSettings?.logo_url || '');
@@ -64,6 +66,11 @@ export default function SettingsManager() {
     const url = `${window.location.origin}/map/${slugToUse}`;
     navigator.clipboard.writeText(url);
     alert('Public Map Link copied to clipboard!');
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -141,7 +148,7 @@ export default function SettingsManager() {
       </div>
 
       <button
-        onClick={logout}
+        onClick={handleLogout}
         className="w-full bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 font-bold py-3 rounded-2xl border border-red-200 dark:border-red-500/20 text-sm transition"
       >
         Sign Out

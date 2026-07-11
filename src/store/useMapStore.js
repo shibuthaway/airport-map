@@ -42,9 +42,6 @@ export const useMapStore = create((set, get) => ({
   logout: () => {
     localStorage.removeItem('ap_token');
     set({ user: null, token: null, isAdminMode: false });
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login';
-    }
   },
 
   // App Settings (Branding)
