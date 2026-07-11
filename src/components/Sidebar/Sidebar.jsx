@@ -420,12 +420,20 @@ export default function Sidebar() {
   // ── MOBILE: Bottom Sheet + Bottom Nav ─────────────────────────────────────
   if (isMobile) {
     const navItems = [
-      { id: 'explore',  label: 'Explore',   emoji: '🔍', action: () => { setActiveTab('explore');  setIsOpen(prev => activeTab === 'explore'  ? !prev : true); } },
-      { id: 'navigate', label: 'Navigate',  emoji: '🧭', action: () => { setActiveTab('navigate'); setIsOpen(prev => activeTab === 'navigate' ? !prev : true); setNavigationMode(true); } },
-      { id: 'map',      label: 'Map',       emoji: '🗺️', action: () => setIsOpen(false) },
-      ...(isAdminMode ? [{ id: 'floors', label: 'Floors', emoji: '🏢', action: () => { setActiveTab('floors'); setIsOpen(prev => activeTab === 'floors' ? !prev : true); } }] : []),
-      ...(isAdminMode ? [{ id: 'tagging', label: 'Admin', emoji: '⚙️', action: () => { setActiveTab('tagging'); setIsOpen(prev => activeTab === 'tagging' ? !prev : true); } }] : []),
+      { id: 'explore',  label: 'Explore',   emoji: '🔍', color: 'sky',    action: () => { setActiveTab('explore');  setIsOpen(prev => activeTab === 'explore'  ? !prev : true); } },
+      { id: 'navigate', label: 'Navigate',  emoji: '🧭', color: 'indigo', action: () => { setActiveTab('navigate'); setIsOpen(prev => activeTab === 'navigate' ? !prev : true); setNavigationMode(true); } },
+      { id: 'map',      label: 'Map',       emoji: '🗺️', color: 'emerald',action: () => setIsOpen(false) },
+      ...(isAdminMode ? [{ id: 'floors',  label: 'Floors', emoji: '🏢', color: 'violet', action: () => { setActiveTab('floors');  setIsOpen(prev => activeTab === 'floors'  ? !prev : true); } }] : []),
+      ...(isAdminMode ? [{ id: 'tagging', label: 'Admin',  emoji: '⚙️', color: 'rose',   action: () => { setActiveTab('tagging'); setIsOpen(prev => activeTab === 'tagging' ? !prev : true); } }] : []),
     ];
+
+    const colorMap = {
+      sky:    { active: 'text-sky-500',    bg: 'bg-sky-500/12' },
+      indigo: { active: 'text-indigo-500', bg: 'bg-indigo-500/12' },
+      emerald:{ active: 'text-emerald-500',bg: 'bg-emerald-500/12' },
+      violet: { active: 'text-violet-500', bg: 'bg-violet-500/12' },
+      rose:   { active: 'text-rose-500',   bg: 'bg-rose-500/12' },
+    };
 
     return (
       <>
@@ -434,7 +442,8 @@ export default function Sidebar() {
           {isOpen && (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[3px]"
+              transition={{ duration: 0.18 }}
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]"
               onClick={() => setIsOpen(false)}
             />
           )}
@@ -444,17 +453,17 @@ export default function Sidebar() {
         <motion.div
           initial={false}
           animate={{ y: isOpen ? 0 : '100%' }}
-          transition={{ type: 'spring', damping: 32, stiffness: 300 }}
+          transition={{ type: 'spring', damping: 28, stiffness: 320, mass: 0.8 }}
           drag="y"
           dragConstraints={{ top: 0 }}
-          dragElastic={0.1}
-          onDragEnd={(e, info) => { if (info.offset.y > 80) setIsOpen(false); }}
+          dragElastic={0.08}
+          onDragEnd={(_, info) => { if (info.offset.y > 60 || info.velocity.y > 400) setIsOpen(false); }}
           className="fixed left-0 right-0 z-50 pointer-events-auto"
-          style={{ bottom: '64px', maxHeight: '75vh' }}
+          style={{ bottom: '60px', maxHeight: '76vh' }}
         >
           <div
-            className="mx-2.5 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl shadow-black/20 border border-slate-200/60 dark:border-slate-700/30 overflow-hidden flex flex-col"
-            style={{ maxHeight: '75vh' }}
+            className="mx-3 bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl shadow-black/25 border border-slate-200/50 dark:border-slate-700/30 overflow-hidden flex flex-col"
+            style={{ maxHeight: '76vh' }}
           >
             {/* Drag Handle */}
             <div className="flex justify-center pt-3 pb-2 flex-shrink-0 cursor-grab active:cursor-grabbing" onPointerDown={e => e.stopPropagation()}>
@@ -507,29 +516,32 @@ export default function Sidebar() {
           </div>
         </motion.div>
 
-        {/* ── Bottom Navigation Bar ─────────────────────────────── */}
+        {/* ── Bottom Navigation Bar ─────────────────────────── */}
         <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-auto">
-          <div className="bg-white/98 dark:bg-slate-950/98 backdrop-blur-2xl border-t border-slate-200/70 dark:border-slate-800/70 px-1 pt-1 pb-1" style={{ paddingBottom: 'max(4px, env(safe-area-inset-bottom))' }}>
-            <div className="flex items-center justify-around">
+          <div
+            className="bg-white dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800/80 px-2"
+            style={{ paddingBottom: 'max(6px, env(safe-area-inset-bottom))' }}
+          >
+            <div className="flex items-center justify-around pt-1 pb-0.5">
               {navItems.map(item => {
                 const isActive = item.id !== 'map' && activeTab === item.id && isOpen;
+                const c = colorMap[item.color];
                 return (
                   <button
                     key={item.id}
                     onClick={item.action}
-                    className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90 relative min-w-[56px]"
+                    className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90 relative min-w-[52px]"
                   >
-                    {/* Active pill indicator */}
                     {isActive && (
                       <motion.div
-                        layoutId="nav-active"
-                        className="absolute inset-0 rounded-2xl bg-sky-500/10 dark:bg-sky-500/15"
-                        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                        layoutId="nav-pill"
+                        className={`absolute inset-0 rounded-2xl ${c.bg}`}
+                        transition={{ type: 'spring', damping: 30, stiffness: 350 }}
                       />
                     )}
-                    <span className={`text-[22px] transition-all ${isActive ? 'scale-110' : 'grayscale-[20%]'}`}>{item.emoji}</span>
-                    <span className={`text-[10px] font-bold transition-colors ${
-                      isActive ? 'text-sky-500' : 'text-slate-400 dark:text-slate-500'
+                    <span className={`text-[20px] leading-none transition-all ${isActive ? 'scale-115' : ''}`}>{item.emoji}</span>
+                    <span className={`text-[10px] font-bold transition-colors relative ${
+                      isActive ? c.active : 'text-slate-400 dark:text-slate-500'
                     }`}>{item.label}</span>
                   </button>
                 );
