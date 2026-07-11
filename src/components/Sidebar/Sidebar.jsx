@@ -419,13 +419,24 @@ export default function Sidebar() {
 
   // ── MOBILE: Bottom Sheet + Bottom Nav ─────────────────────────────────────
   if (isMobile) {
+    const navItems = [
+      { id: 'explore',  label: 'Explore',   emoji: '🔍', action: () => { setActiveTab('explore');  setIsOpen(prev => activeTab === 'explore'  ? !prev : true); } },
+      { id: 'navigate', label: 'Navigate',  emoji: '🧭', action: () => { setActiveTab('navigate'); setIsOpen(prev => activeTab === 'navigate' ? !prev : true); setNavigationMode(true); } },
+      { id: 'map',      label: 'Map',       emoji: '🗺️', action: () => setIsOpen(false) },
+      ...(isAdminMode ? [{ id: 'floors', label: 'Floors', emoji: '🏢', action: () => { setActiveTab('floors'); setIsOpen(prev => activeTab === 'floors' ? !prev : true); } }] : []),
+      ...(isAdminMode ? [{ id: 'tagging', label: 'Admin', emoji: '⚙️', action: () => { setActiveTab('tagging'); setIsOpen(prev => activeTab === 'tagging' ? !prev : true); } }] : []),
+    ];
+
     return (
       <>
-        {/* Bottom Sheet Overlay */}
+        {/* Overlay */}
         <AnimatePresence>
           {isOpen && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px]" onClick={() => setIsOpen(false)} />
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[3px]"
+              onClick={() => setIsOpen(false)}
+            />
           )}
         </AnimatePresence>
 
@@ -433,76 +444,96 @@ export default function Sidebar() {
         <motion.div
           initial={false}
           animate={{ y: isOpen ? 0 : '100%' }}
-          transition={{ type: 'spring', damping: 30, stiffness: 250 }}
-          className="fixed bottom-16 left-0 right-0 z-50 pointer-events-auto"
-          style={{ maxHeight: '72vh' }}
+          transition={{ type: 'spring', damping: 32, stiffness: 300 }}
+          drag="y"
+          dragConstraints={{ top: 0 }}
+          dragElastic={0.1}
+          onDragEnd={(e, info) => { if (info.offset.y > 80) setIsOpen(false); }}
+          className="fixed left-0 right-0 z-50 pointer-events-auto"
+          style={{ bottom: '64px', maxHeight: '75vh' }}
         >
-          <div className="mx-2 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/50 dark:border-slate-700/30 overflow-hidden flex flex-col" style={{ maxHeight: '72vh' }}>
-            {/* Handle */}
-            <div className="flex justify-center pt-3 pb-1 flex-shrink-0 cursor-pointer" onClick={() => setIsOpen(false)}>
-              <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+          <div
+            className="mx-2.5 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl shadow-black/20 border border-slate-200/60 dark:border-slate-700/30 overflow-hidden flex flex-col"
+            style={{ maxHeight: '75vh' }}
+          >
+            {/* Drag Handle */}
+            <div className="flex justify-center pt-3 pb-2 flex-shrink-0 cursor-grab active:cursor-grabbing" onPointerDown={e => e.stopPropagation()}>
+              <div className="w-9 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
             </div>
-            {/* Header */}
-            <div className="px-5 pt-2 pb-3 flex flex-col gap-3 flex-shrink-0 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-sm shadow-md overflow-hidden p-1 bg-white flex-shrink-0">
-                    {useMapStore.getState().appSettings?.logo_url ? (
-                      <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-full h-full object-contain" />
-                    ) : (
-                      '✈️'
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-wide truncate">{useMapStore.getState().appSettings?.name || 'Admin Navigation'}</p>
-                    <p className="text-[10px] font-bold text-sky-500 uppercase tracking-widest">Indoor Map</p>
-                  </div>
-                </div>
+
+            {/* Sheet Header */}
+            <div className="px-4 pb-3 flex items-center gap-3 flex-shrink-0 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
+                {useMapStore.getState().appSettings?.logo_url ? (
+                  <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-full h-full object-contain" />
+                ) : (
+                  <span className="text-lg">✈️</span>
+                )}
               </div>
-              
-              {/* Mini tab pills (Moved to own row to prevent squishing) */}
-              <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar snap-x">
-                {tabs.map(t => (
-                  <button key={t.id} onClick={() => setActiveTab(t.id)}
-                    className={`snap-center whitespace-nowrap px-4 py-2 rounded-xl text-[11px] font-bold transition-all ${activeTab === t.id ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-                    {t.label}
-                  </button>
-                ))}
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-black text-slate-800 dark:text-slate-100 truncate">{useMapStore.getState().appSettings?.name || 'Airport Navigation'}</p>
+                <p className="text-[10px] font-bold text-sky-500 uppercase tracking-widest">Indoor Map</p>
               </div>
+              {/* Close button */}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 active:scale-90 transition-all flex-shrink-0"
+              >
+                ✕
+              </button>
             </div>
-            {/* Scrollable content */}
-            <div className="overflow-y-auto flex-1 p-4 custom-scrollbar overscroll-contain">
+
+            {/* Tab Pills */}
+            <div className="px-4 pt-3 pb-2 flex gap-2 overflow-x-auto custom-scrollbar flex-shrink-0">
+              {tabs.map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => setActiveTab(t.id)}
+                  className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-bold transition-all active:scale-95 flex-shrink-0 ${
+                    activeTab === t.id
+                      ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-md shadow-sky-500/30'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="overflow-y-auto flex-1 px-4 pb-4 custom-scrollbar overscroll-contain">
               {renderTabContent()}
             </div>
           </div>
         </motion.div>
 
-        {/* Bottom Navigation Bar */}
+        {/* ── Bottom Navigation Bar ─────────────────────────────── */}
         <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-auto">
-          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-t border-slate-200/60 dark:border-slate-800/60 px-2 pb-safe">
-            <div className="flex items-center justify-around py-1">
-              <button onClick={() => { setActiveTab('explore'); setIsOpen(true); }}
-                className={`flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl transition-all active:scale-90 ${activeTab === 'explore' && isOpen ? 'text-sky-500' : 'text-slate-400 dark:text-slate-500'}`}>
-                <span className={`text-xl transition-transform ${activeTab === 'explore' && isOpen ? 'scale-110' : ''}`}>🔍</span>
-                <span className="text-[10px] font-bold">Explore</span>
-              </button>
-              <button onClick={() => { setActiveTab('navigate'); setIsOpen(true); setNavigationMode(true); }}
-                className={`flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl transition-all active:scale-90 ${activeTab === 'navigate' && isOpen ? 'text-sky-500' : 'text-slate-400 dark:text-slate-500'}`}>
-                <span className={`text-xl transition-transform ${activeTab === 'navigate' && isOpen ? 'scale-110' : ''}`}>🧭</span>
-                <span className="text-[10px] font-bold">Navigate</span>
-              </button>
-              <button onClick={() => setIsOpen(false)}
-                className="flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl text-slate-400 dark:text-slate-500 active:scale-90 transition-all">
-                <span className="text-xl">🗺️</span>
-                <span className="text-[10px] font-bold">Map</span>
-              </button>
-              {isAdminMode && (
-                <button onClick={() => { setActiveTab('tagging'); setIsOpen(true); }}
-                  className={`flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl transition-all active:scale-90 ${activeTab === 'tagging' && isOpen ? 'text-sky-500' : 'text-slate-400 dark:text-slate-500'}`}>
-                  <span className="text-xl">⚙️</span>
-                  <span className="text-[10px] font-bold">Admin</span>
-                </button>
-              )}
+          <div className="bg-white/98 dark:bg-slate-950/98 backdrop-blur-2xl border-t border-slate-200/70 dark:border-slate-800/70 px-1 pt-1 pb-1" style={{ paddingBottom: 'max(4px, env(safe-area-inset-bottom))' }}>
+            <div className="flex items-center justify-around">
+              {navItems.map(item => {
+                const isActive = item.id !== 'map' && activeTab === item.id && isOpen;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={item.action}
+                    className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90 relative min-w-[56px]"
+                  >
+                    {/* Active pill indicator */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="nav-active"
+                        className="absolute inset-0 rounded-2xl bg-sky-500/10 dark:bg-sky-500/15"
+                        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                      />
+                    )}
+                    <span className={`text-[22px] transition-all ${isActive ? 'scale-110' : 'grayscale-[20%]'}`}>{item.emoji}</span>
+                    <span className={`text-[10px] font-bold transition-colors ${
+                      isActive ? 'text-sky-500' : 'text-slate-400 dark:text-slate-500'
+                    }`}>{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

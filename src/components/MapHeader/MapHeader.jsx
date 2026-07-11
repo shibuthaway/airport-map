@@ -1,158 +1,169 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMapStore } from '../../store/useMapStore';
-import { FiSun, FiMoon, FiPlus, FiMinus, FiMaximize2, FiShare2, FiMaximize, FiMinimize } from 'react-icons/fi';
+import { FiSun, FiMoon, FiPlus, FiMinus, FiMaximize2, FiShare2, FiMaximize, FiMinimize, FiChevronDown } from 'react-icons/fi';
 import Search from '../Search/Search';
 
 export default function MapHeader() {
-  const { buildings, currentBuilding, setBuilding, theme, toggleTheme, zoomActions, isAdminMode, mapRotation, setMapRotation, isFullScreen, toggleFullScreen } = useMapStore();
+  const {
+    buildings, currentBuilding, setBuilding,
+    theme, toggleTheme,
+    zoomActions,
+    isAdminMode,
+    mapRotation, setMapRotation,
+    isFullScreen, toggleFullScreen
+  } = useMapStore();
 
-  const defaultTheme = {
-    gradient: 'from-blue-500 to-cyan-600 shadow-blue-500/25',
-    badgeActive: 'bg-white/20 text-white',
-    badgeInactive: 'bg-blue-500/10 text-blue-500 dark:text-blue-450'
-  };
+  const [terminalOpen, setTerminalOpen] = useState(false);
+  const currentBuildingName = buildings?.find(b => b.id === currentBuilding)?.name || 'Select Terminal';
 
   return (
     <>
-      {/* Immersive Exit Full Screen Button */}
+      {/* ── Full Screen Exit FAB ─────────────────────────────────── */}
       <AnimatePresence>
         {isFullScreen && (
           <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
             className="absolute top-4 right-4 z-[70] pointer-events-auto"
           >
             <button
               onClick={toggleFullScreen}
-              className="w-12 h-12 rounded-2xl flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 shadow-2xl shadow-indigo-500/30 text-white hover:scale-105 active:scale-95 transition-all cursor-pointer border border-indigo-400/50"
-              title="Exit Full Screen"
+              className="w-11 h-11 rounded-2xl flex items-center justify-center bg-indigo-500 shadow-2xl shadow-indigo-500/40 text-white active:scale-90 transition-all"
             >
-              <FiMinimize className="w-6 h-6" />
+              <FiMinimize className="w-5 h-5" />
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Normal Header */}
+      {/* ── Main Header ─────────────────────────────────────────── */}
       {!isFullScreen && (
-        <div className="h-14 md:h-16 border-b border-slate-200/50 dark:border-slate-800/40 bg-white/80 dark:bg-slate-950/60 backdrop-blur-xl flex items-center justify-between px-2 sm:px-4 md:px-6 z-20 select-none">
-          
-          {/* Terminal / Building Selector */}
-          <div className="flex items-center">
-            {buildings && buildings.length > 0 && (
-              <select
-                value={currentBuilding || ''}
-                onChange={(e) => setBuilding(e.target.value)}
-                className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-bold text-[16px] px-3 py-1.5 md:py-2 rounded-xl outline-none focus:border-sky-500 cursor-pointer shadow-sm transition-all"
-              >
-                {buildings.map(b => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
-                ))}
-              </select>
-            )}
+        <div className="h-14 border-b border-slate-200/50 dark:border-slate-800/40 bg-white/90 dark:bg-slate-950/80 backdrop-blur-xl flex items-center justify-between px-3 md:px-6 z-20 select-none flex-shrink-0">
+
+          {/* LEFT: Terminal Selector */}
+          <div className="flex items-center min-w-0">
+            {buildings && buildings.length > 1 ? (
+              /* Custom styled dropdown for multi-terminal */
+              <div className="relative">
+                <button
+                  onClick={() => setTerminalOpen(!terminalOpen)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-sky-500/10 to-indigo-500/10 border border-sky-400/30 dark:border-sky-600/30 text-sky-700 dark:text-sky-300 font-bold text-sm active:scale-95 transition-all"
+                >
+                  <span className="text-base">🏢</span>
+                  <span className="max-w-[120px] truncate text-[13px]">{currentBuildingName}</span>
+                  <FiChevronDown className={`w-3.5 h-3.5 transition-transform ${terminalOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {terminalOpen && (
+                    <>
+                      <div className="fixed inset-0 z-[55]" onClick={() => setTerminalOpen(false)} />
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                        className="absolute top-full left-0 mt-2 z-[60] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/60 dark:border-slate-700/40 overflow-hidden min-w-[180px]"
+                      >
+                        {buildings.map(b => (
+                          <button
+                            key={b.id}
+                            onClick={() => { setBuilding(b.id); setTerminalOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold transition-all active:scale-95 ${
+                              currentBuilding === b.id
+                                ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400'
+                                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                            }`}
+                          >
+                            <span className="text-base">🏢</span>
+                            <span className="truncate">{b.name}</span>
+                            {currentBuilding === b.id && <span className="ml-auto text-sky-500">✓</span>}
+                          </button>
+                        ))}
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : buildings && buildings.length === 1 ? (
+              /* Single terminal — just show name badge */
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/80 dark:bg-slate-900/60">
+                <span className="text-base">🏢</span>
+                <span className="font-bold text-[13px] text-slate-700 dark:text-slate-200 max-w-[130px] truncate">{currentBuildingName}</span>
+              </div>
+            ) : null}
           </div>
 
-      {/* 3. Utility options & Theme Switcher (Right) */}
-      <div className="flex items-center gap-1.5 md:gap-3 flex-shrink-0">
-        {/* Zoom Control Deck - Scaled down for mobile */}
-        <div className="flex items-center p-0.5 md:p-1 bg-slate-100/80 dark:bg-slate-900/50 border border-slate-200/30 dark:border-slate-850/40 rounded-xl md:rounded-2xl gap-0.5 md:gap-1">
-          <button
-            onClick={() => zoomActions?.zoomIn()}
-            className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl flex items-center justify-center text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-all duration-300 active:scale-90 outline-none cursor-pointer"
-            title="Zoom In"
-          >
-            <FiPlus className="w-4 h-4 md:w-4.5 md:h-4.5" />
-          </button>
-          <button
-            onClick={() => zoomActions?.zoomOut()}
-            className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl flex items-center justify-center text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-all duration-300 active:scale-90 outline-none cursor-pointer"
-            title="Zoom Out"
-          >
-            <FiMinus className="w-4 h-4 md:w-4.5 md:h-4.5" />
-          </button>
-          <button
-            onClick={() => zoomActions?.resetTransform()}
-            className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl flex items-center justify-center text-slate-500 hover:text-sky-600 dark:hover:text-sky-450 hover:bg-sky-500/10 dark:hover:bg-sky-500/20 transition-all duration-300 active:scale-90 outline-none cursor-pointer"
-            title="Reset Map View"
-          >
-            <FiMaximize2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
-          </button>
-        </div>
+          {/* RIGHT: Action Buttons */}
+          <div className="flex items-center gap-1.5">
 
-        {/* Rotation Controls */}
-        <div className="flex items-center p-0.5 md:p-1 bg-slate-100/80 dark:bg-slate-900/50 border border-slate-200/30 dark:border-slate-850/40 rounded-xl md:rounded-2xl gap-0.5 md:gap-1">
-          <button
-            onClick={() => setMapRotation(mapRotation - 45)}
-            className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl flex items-center justify-center text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-500/10 transition-all duration-200 active:scale-90 outline-none cursor-pointer text-base font-bold"
-            title="Rotate Map Left"
-          >↺</button>
-          <span className="text-[9px] md:text-[10px] font-bold text-slate-400 dark:text-slate-500 select-none px-0.5 min-w-[28px] md:min-w-[32px] text-center tabular-nums">
-            {Math.round(mapRotation)}°
-          </span>
-          <button
-            onClick={() => setMapRotation(mapRotation + 45)}
-            className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl flex items-center justify-center text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-500/10 transition-all duration-200 active:scale-90 outline-none cursor-pointer text-base font-bold"
-            title="Rotate Map Right"
-          >↻</button>
-          {mapRotation !== 0 && (
+            {/* Zoom Controls */}
+            <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/60 rounded-xl border border-slate-200/40 dark:border-slate-700/40 p-0.5 gap-0.5">
+              <button
+                onClick={() => zoomActions?.zoomIn()}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-emerald-600 hover:bg-emerald-500/10 active:scale-90 transition-all"
+              >
+                <FiPlus className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => zoomActions?.resetTransform()}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-sky-600 hover:bg-sky-500/10 active:scale-90 transition-all"
+              >
+                <FiMaximize2 className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => zoomActions?.zoomOut()}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 active:scale-90 transition-all"
+              >
+                <FiMinus className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Full Screen Toggle */}
             <button
-              onClick={() => setMapRotation(0)}
-              className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl flex items-center justify-center text-[8px] md:text-[9px] font-extrabold text-sky-500 hover:text-sky-600 hover:bg-sky-500/10 transition-all active:scale-90 cursor-pointer outline-none uppercase tracking-wider"
-              title="Reset Rotation"
-            >N</button>
-          )}
-        </div>
+              onClick={toggleFullScreen}
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/50 dark:border-indigo-800/40 text-indigo-600 dark:text-indigo-400 active:scale-90 transition-all"
+              title={isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
+            >
+              {isFullScreen
+                ? <FiMinimize className="w-4 h-4" />
+                : <FiMaximize className="w-4 h-4" />
+              }
+            </button>
 
-        {/* Share Public Mode (Admin Only) */}
-        {isAdminMode && (
-          <button
-            onClick={() => window.open(window.location.origin + window.location.pathname + '?mode=public', '_blank')}
-            className="flex items-center gap-1.5 px-2 md:px-3 h-8 md:h-10 rounded-lg md:rounded-xl border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 font-semibold text-xs transition-all active:scale-95 cursor-pointer outline-none"
-            title="Open Public Viewer Mode"
-          >
-            <FiShare2 className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
-            <span>Public</span>
-          </button>
-        )}
+            {/* Dark/Light Mode Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/40 dark:border-slate-700/40 active:scale-90 transition-all"
+              title="Toggle Theme"
+            >
+              {theme === 'dark'
+                ? <FiSun className="w-4 h-4 text-amber-400" />
+                : <FiMoon className="w-4 h-4 text-slate-600" />
+              }
+            </button>
 
-        {/* Full Screen Toggle (Mobile Only) */}
-        <div className="md:hidden">
-          <button
-            onClick={toggleFullScreen}
-            className="w-10 h-10 rounded-xl flex items-center justify-center border border-indigo-200/50 dark:border-indigo-800/40 bg-indigo-50/50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-all active:scale-95 cursor-pointer outline-none"
-            title={isFullScreen ? 'Exit Full Screen' : 'Enter Full Screen'}
-          >
-            {isFullScreen ? (
-              <FiMinimize className="w-4.5 h-4.5 text-indigo-600 dark:text-indigo-400" />
-            ) : (
-              <FiMaximize className="w-4.5 h-4.5 text-indigo-600 dark:text-indigo-400" />
+            {/* Admin: Share/Public Link */}
+            {isAdminMode && (
+              <button
+                onClick={() => window.open(window.location.origin + window.location.pathname + '?mode=public', '_blank')}
+                className="hidden md:flex items-center gap-1.5 px-3 h-9 rounded-xl bg-sky-500/10 border border-sky-400/30 text-sky-600 dark:text-sky-400 font-semibold text-xs active:scale-95 transition-all"
+              >
+                <FiShare2 className="w-3.5 h-3.5" />
+                <span>Public</span>
+              </button>
             )}
-          </button>
+          </div>
         </div>
+      )}
 
-        {/* Theme Toggler */}
-        <button
-          onClick={toggleTheme}
-          className="w-10 h-10 rounded-xl flex items-center justify-center border border-slate-200/50 dark:border-slate-800/40 bg-white/50 dark:bg-slate-950/30 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all active:scale-95 cursor-pointer outline-none"
-          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-        >
-          {theme === 'dark' ? (
-            <FiSun className="w-4.5 h-4.5 text-amber-400" />
-          ) : (
-            <FiMoon className="w-4.5 h-4.5 text-slate-650" />
-          )}
-        </button>
-      </div>
-
-        {/* Mobile Floating Search Bar */}
-        <div className="md:hidden fixed top-[60px] left-3 right-3 z-[60] pointer-events-auto">
-          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-slate-200/60 dark:border-slate-700/40 px-3 py-1.5">
+      {/* ── Mobile Floating Search (below header) ───────────────── */}
+      {!isFullScreen && (
+        <div className="md:hidden fixed top-[56px] left-3 right-3 z-[60] pointer-events-auto">
+          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-xl shadow-black/8 border border-slate-200/60 dark:border-slate-700/40 px-3 py-1.5">
             <Search />
           </div>
-        </div>
-
         </div>
       )}
     </>
