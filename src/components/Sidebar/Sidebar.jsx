@@ -17,8 +17,6 @@ export default function Sidebar() {
   const [activeTab, setActiveTab] = useState('explore');
   const [activeCategory, setActiveCategory] = useState('gate');
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-  // Only one SearchableSelect open at a time — prevents overlap
-  const [activeSelect, setActiveSelect] = useState(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -311,31 +309,25 @@ export default function Sidebar() {
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {/* Start/End selects — only one open at a time to prevent overlap */}
+              {/* Start/End selects */}
               <div className="flex flex-col gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/30">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 relative z-[60]">
                   <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0"><span className="text-white text-xs font-black">A</span></div>
                   <SearchableSelect
                     placeholder="Starting point..."
                     options={allNavigableNodes.map(p => ({ value: p.id, label: `${p.name} · ${capitalize(p.floor)}` }))}
                     value={navigationStart?.id || ''}
                     onChange={val => setNavigationStart(nodes.find(p => p.id === val))}
-                    isControlledOpen={activeSelect === 'from'}
-                    onOpen={() => setActiveSelect('from')}
-                    onClose={() => setActiveSelect(null)}
                   />
                 </div>
                 <div className="ml-4 w-0.5 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 relative z-[50]">
                   <div className="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center flex-shrink-0"><span className="text-white text-xs font-black">B</span></div>
                   <SearchableSelect
                     placeholder="Destination..."
                     options={allNavigableNodes.map(p => ({ value: p.id, label: `${p.name} · ${capitalize(p.floor)}` }))}
                     value={navigationEnd?.id || ''}
                     onChange={val => setNavigationEnd(nodes.find(p => p.id === val))}
-                    isControlledOpen={activeSelect === 'to'}
-                    onOpen={() => setActiveSelect('to')}
-                    onClose={() => setActiveSelect(null)}
                   />
                 </div>
               </div>
