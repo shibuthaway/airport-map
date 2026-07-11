@@ -14,26 +14,26 @@ import ToastContainer from './components/Toast/ToastContainer';
 const MapLayout = () => {
   const { isFullScreen } = useMapStore();
   return (
-    <div className="w-screen h-[100dvh] flex overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-500 relative">
+    <div className="w-screen h-[100dvh] flex md:p-4 md:gap-4 overflow-hidden bg-slate-50 dark:bg-[#0f212e] font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-500 relative">
       {/* Offline indicator */}
       <OfflineBanner />
       {/* 1. Preloader */}
       <LoadingScreen />
 
       {/* 2. Sidebar/Bottom-Sheet Navigation */}
-      <div className={`absolute md:relative z-40 h-full pointer-events-none md:pointer-events-auto ${isFullScreen ? 'hidden' : ''}`}>
+      <div className={`absolute md:relative z-40 h-full pointer-events-none md:pointer-events-auto ${isFullScreen ? 'hidden' : ''} md:h-[calc(100dvh-2rem)] md:shrink-0`}>
         <div className="h-full pointer-events-auto">
           <Sidebar />
         </div>
       </div>
 
       {/* 3. Map + Header */}
-      <div className="flex-1 h-full w-full relative flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 h-full w-full relative flex flex-col min-w-0 overflow-hidden md:rounded-3xl md:shadow-2xl md:border md:border-slate-800/50 bg-[#1a2c38]">
         {/* Top Header */}
         <MapHeader />
 
         {/* Map Canvas */}
-        <div className="flex-1 w-full relative z-10 min-h-0">
+        <div className="flex-1 w-full relative z-10 min-h-0 md:rounded-b-3xl overflow-hidden">
           <AirportMap />
         </div>
 

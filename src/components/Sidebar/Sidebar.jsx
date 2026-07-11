@@ -684,42 +684,57 @@ export default function Sidebar() {
 
   // ── DESKTOP: Sidebar ───────────────────────────────────────────────────────
   return (
-    <div className="relative h-full flex z-40">
-      <motion.div
-        animate={{ width: isOpen ? '380px' : '0px' }}
-        transition={{ type: 'spring', damping: 25, stiffness: 150 }}
-        className="h-full overflow-hidden bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 shadow-2xl flex flex-col"
-      >
-        {/* Branding */}
-        <div className="p-5 pb-4 flex items-center gap-3 border-b border-slate-200/20 dark:border-slate-800/30 flex-shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden p-1.5">
-            {useMapStore.getState().appSettings?.logo_url ? (
-              <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-full h-full object-contain" />
-            ) : (
-              '✈️'
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-wide truncate">{useMapStore.getState().appSettings?.name || 'Admin Navigation'}</h1>
-            <p className="text-[10px] text-sky-500 font-bold tracking-widest uppercase">Interactive Map</p>
-          </div>
+    <div className="relative h-full flex z-40 gap-4">
+      {/* Side Rail */}
+      <div className="w-[76px] rounded-3xl bg-[#1a2c38] shadow-2xl border border-slate-800/50 flex flex-col items-center py-6 gap-6 z-50 flex-shrink-0">
+        <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.1)] border border-slate-700 overflow-hidden p-1.5 flex-shrink-0">
+          {useMapStore.getState().appSettings?.logo_url ? (
+            <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-full h-full object-contain" />
+          ) : (
+            '✈️'
+          )}
         </div>
-        <div className="flex border-b border-slate-200/20 dark:border-slate-800/30 px-4 flex-shrink-0">
-          {tabs.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 pb-3 pt-1 text-xs font-bold border-b-2 transition flex-1 justify-center ${activeTab === tab.id ? 'border-sky-500 text-sky-500' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
-              {tab.icon}{tab.label}
-            </button>
-          ))}
+        <div className="flex flex-col gap-2 w-full px-2">
+          {tabs.map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => { setActiveTab(tab.id); setIsOpen(true); }}
+                className={`w-full aspect-square rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all group relative ${
+                  isActive 
+                    ? 'bg-sky-500/10 text-sky-400 shadow-[inset_0_0_0_1px_rgba(56,189,248,0.2)]' 
+                    : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
+                }`}
+                title={tab.label}
+              >
+                {isActive && (
+                  <motion.div layoutId="desktop-active-rail" className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-sky-400 rounded-r-full shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+                )}
+                {React.cloneElement(tab.icon, { className: 'w-5 h-5 transition-transform group-hover:scale-110' })}
+                <span className="text-[9px] font-bold uppercase tracking-widest">{tab.label}</span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Content Panel */}
+      <motion.div
+        animate={{ width: isOpen ? '360px' : '0px', opacity: isOpen ? 1 : 0 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 150 }}
+        className="h-full overflow-hidden bg-[#1a2c38] rounded-3xl border border-slate-800/50 shadow-2xl flex flex-col flex-shrink-0"
+      >
+        <div className="p-6 pb-4 flex items-center justify-between border-b border-slate-800/50 flex-shrink-0">
+          <h2 className="text-xl font-black text-white tracking-wide">
+            {tabs.find(t => t.id === activeTab)?.label || 'Menu'}
+          </h2>
+          <button onClick={() => setIsOpen(false)} className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition">
+            <FiChevronsLeft className="w-4 h-4" />
+          </button>
         </div>
         <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">{renderTabContent()}</div>
       </motion.div>
-      <div className="h-full flex items-center p-2 pointer-events-none">
-        <button onClick={() => setIsOpen(!isOpen)}
-          className="w-8 h-10 flex items-center justify-center rounded-r-xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-md border-y border-r border-slate-200/50 dark:border-slate-800/50 text-slate-500 shadow-xl pointer-events-auto hover:bg-white dark:hover:bg-slate-800 transition active:scale-95">
-          {isOpen ? <FiChevronsLeft className="w-5 h-5" /> : <FiChevronsRight className="w-5 h-5" />}
-        </button>
-      </div>
     </div>
   );
 }
