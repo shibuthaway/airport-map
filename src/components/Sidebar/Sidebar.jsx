@@ -451,8 +451,9 @@ export default function Sidebar() {
                         <button
                           onClick={() => {
                             toggleVoice();
+                            // If we just turned it on, announce the route synchronously
                             if (!voiceEnabled && navigationStart && navigationEnd) {
-                              setTimeout(() => announceRoute(navigationStart, navigationEnd, navigationDistance, []), 300);
+                              announceRoute(navigationStart, navigationEnd, navigationDistance, []);
                             }
                           }}
                           title={voiceEnabled ? 'Voice ON — tap to mute' : 'Enable voice guidance'}

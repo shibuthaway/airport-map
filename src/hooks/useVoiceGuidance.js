@@ -8,11 +8,12 @@ const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
 
 export function useVoiceGuidance() {
   const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const voiceEnabledRef = useRef(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const lastSpokenRef = useRef('');
 
-  const speak = useCallback((text, { priority = false, lang = 'en-IN' } = {}) => {
-    if (!isSupported || !voiceEnabled) return;
+  const speak = useCallback((text, { priority = false, lang = 'en-IN', force = false } = {}) => {
+    if (!isSupported || (!voiceEnabledRef.current && !force)) return;
     // Avoid repeating the exact same phrase
     if (!priority && lastSpokenRef.current === text) return;
 
@@ -37,7 +38,7 @@ export function useVoiceGuidance() {
     utt.onerror = () => setIsSpeaking(false);
 
     window.speechSynthesis.speak(utt);
-  }, [voiceEnabled]);
+  }, []);
 
   const stopSpeaking = useCallback(() => {
     if (!isSupported) return;
@@ -48,11 +49,18 @@ export function useVoiceGuidance() {
 
   const toggleVoice = useCallback(() => {
     setVoiceEnabled(prev => {
-      if (prev) {
+      const nextState = !prev;
+      voiceEnabledRef.current = nextState;
+      if (nextState) {
+        // Unlock speech synthesis immediately on user interaction
+        const dummy = new SpeechSynthesisUtterance('');
+        dummy.volume = 0;
+        window.speechSynthesis.speak(dummy);
+      } else {
         window.speechSynthesis?.cancel();
         setIsSpeaking(false);
       }
-      return !prev;
+      return nextState;
     });
   }, []);
 
