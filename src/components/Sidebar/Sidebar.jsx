@@ -6,10 +6,12 @@ import SearchableSelect from './SearchableSelect';
 import TaggingPanel from './TaggingPanel';
 import FloorManager from './FloorManager';
 import SettingsManager from './SettingsManager';
+import { useVoiceGuidance } from '../../hooks/useVoiceGuidance';
 import {
   FiCompass, FiNavigation, FiChevronsLeft, FiChevronsRight,
   FiClock, FiTag, FiSearch, FiEdit3, FiGitCommit, FiLoader, FiLayers,
-  FiArrowUp, FiCornerUpRight, FiCornerUpLeft, FiMapPin, FiTrendingUp, FiCheck, FiSettings
+  FiArrowUp, FiCornerUpRight, FiCornerUpLeft, FiMapPin, FiTrendingUp, FiCheck, FiSettings,
+  FiVolume2, FiVolumeX
 } from 'react-icons/fi';
 
 export default function Sidebar() {
@@ -19,6 +21,12 @@ export default function Sidebar() {
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   // Controls which SearchableSelect is open — prevents From/To overlap
   const [activeSelect, setActiveSelect] = useState(null); // 'from' | 'to' | null
+
+  // Voice guidance (FREE — Web Speech API)
+  const {
+    voiceEnabled, isSpeaking, isSupported,
+    toggleVoice, announceRoute, announceStep
+  } = useVoiceGuidance();
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -82,6 +90,14 @@ export default function Sidebar() {
       if (!isOpen) setIsOpen(true);
     }
   }, [taggingMode, navigationMode, activeTab, isOpen]);
+
+  // Auto-announce route summary when route is first calculated
+  useEffect(() => {
+    if (navigationPath && navigationStart && navigationEnd && voiceEnabled) {
+      announceRoute(navigationStart, navigationEnd, navigationDistance, []);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigationPath]);
 
   const categories = [
     { key: 'gate',      label: 'Gates',     icon: '✈️',
@@ -425,10 +441,34 @@ export default function Sidebar() {
                   )}
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Directions</span>
-                    <span className="text-[10px] font-bold text-sky-500 flex items-center gap-1">
-                      <FiClock className="w-3 h-3"/>
-                      {navigationDistance > 0 ? `${navigationDistance}m · ~${Math.max(1, Math.round(navigationDistance/80))} min` : '~3 min'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-sky-500 flex items-center gap-1">
+                        <FiClock className="w-3 h-3"/>
+                        {navigationDistance > 0 ? `${navigationDistance}m · ~${Math.max(1, Math.round(navigationDistance/80))} min` : '~3 min'}
+                      </span>
+                      {/* Voice toggle — only on mobile & if browser supports it */}
+                      {isSupported && (
+                        <button
+                          onClick={() => {
+                            toggleVoice();
+                            if (!voiceEnabled && navigationStart && navigationEnd) {
+                              setTimeout(() => announceRoute(navigationStart, navigationEnd, navigationDistance, []), 300);
+                            }
+                          }}
+                          title={voiceEnabled ? 'Voice ON — tap to mute' : 'Enable voice guidance'}
+                          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-all active:scale-90 ${
+                            voiceEnabled
+                              ? 'bg-sky-500 text-white shadow-md shadow-sky-500/30'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-sky-50 dark:hover:bg-sky-950/30'
+                          }`}
+                        >
+                          {voiceEnabled
+                            ? <><FiVolume2 className="w-3 h-3" />{isSpeaking ? '…' : 'ON'}</>
+                            : <><FiVolumeX className="w-3 h-3" />OFF</>
+                          }
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="relative pl-6">
                     <div className="absolute left-[11px] top-4 bottom-6 w-0.5 bg-slate-200 dark:bg-slate-700 rounded" />
@@ -441,15 +481,25 @@ export default function Sidebar() {
                         if (isElevator) iconCls = "bg-violet-500 text-white shadow-md shadow-violet-500/30";
                         if (isTurn) iconCls = "bg-slate-700 dark:bg-slate-300 text-white dark:text-slate-900";
                         return (
-                          <div key={i} className="relative flex items-start gap-3 text-xs">
+                          <div key={i}
+                            className="relative flex items-start gap-3 text-xs cursor-pointer group"
+                            onClick={() => voiceEnabled && announceStep(step)}
+                            title={voiceEnabled ? 'Tap to hear this step' : ''}
+                          >
                             <div className={`absolute -left-[27px] z-10 w-7 h-7 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-950 ${iconCls}`}>
                               {step.icon ? React.cloneElement(step.icon, { className: "w-3.5 h-3.5" }) : <FiArrowUp className="w-3.5 h-3.5" />}
                             </div>
                             <div className="flex flex-col gap-1 pt-1 w-full">
-                              <span className={`font-semibold leading-snug ${isStart || isEnd ? 'text-slate-800 dark:text-slate-100' : 'text-slate-600 dark:text-slate-300'}`}>{step.text}</span>
+                              <div className="flex items-start justify-between gap-1">
+                                <span className={`font-semibold leading-snug ${isStart || isEnd ? 'text-slate-800 dark:text-slate-100' : 'text-slate-600 dark:text-slate-300'}`}>{step.text}</span>
+                                {voiceEnabled && (
+                                  <FiVolume2 className="w-3 h-3 text-sky-400 flex-shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                )}
+                              </div>
                               {step.desc && <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{step.desc}</span>}
                               {step.action?.type === 'switch_floor' && step.action.floor !== currentFloor && (
-                                <button onClick={() => {
+                                <button onClick={(e) => {
+                                  e.stopPropagation();
                                   const { setFloor: sf, navigationPath: np, zoomMapTo: zmt } = useMapStore.getState();
                                   window.__mapSkipNextReset = true; sf(step.action.floor);
                                   const entry = np?.find(pt => pt.floor === step.action.floor);
