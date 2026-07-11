@@ -6,6 +6,7 @@ import {
   FiShare2, FiMaximize, FiMinimize, FiChevronDown,
   FiRotateCcw, FiRotateCw
 } from 'react-icons/fi';
+import Search from '../Search/Search';
 
 export default function MapHeader() {
   const {

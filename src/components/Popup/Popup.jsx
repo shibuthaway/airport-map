@@ -74,7 +74,7 @@ export default function Popup() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-black/15 border border-slate-200/60 dark:border-slate-700/40 px-3 py-2.5 flex items-center gap-2.5">
           {/* Icon */}
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-base flex-shrink-0 shadow-md">
-            {{ gate:'✈️', restaurant:'🍽️', food:'🍽️', shopping:'🛍️', lounge:'🍷', washroom:'🚻', security:'🛡️', checkin:'🧳', baggage:'🛄' }[selectedPoi.category.toLowerCase()] || '📍'}
+            {{ gate:'✈️', restaurant:'🍽️', food:'🍽️', shopping:'🛍️', lounge:'🍷', washroom:'🚻', security:'🛡️', checkin:'🧳', baggage:'🛄' }[selectedPoi.category?.toLowerCase()] || '📍'}
           </div>
           {/* Info */}
           <div className="min-w-0 flex-1">
