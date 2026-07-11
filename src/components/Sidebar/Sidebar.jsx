@@ -454,15 +454,11 @@ export default function Sidebar() {
           )}
         </AnimatePresence>
 
-        {/* Bottom Sheet Panel */}
+        {/* Bottom Sheet Panel - NO drag on whole sheet to avoid map touch conflicts */}
         <motion.div
           initial={false}
           animate={{ y: isOpen ? 0 : '100%' }}
           transition={{ type: 'spring', damping: 28, stiffness: 320, mass: 0.8 }}
-          drag="y"
-          dragConstraints={{ top: 0 }}
-          dragElastic={0.08}
-          onDragEnd={(_, info) => { if (info.offset.y > 60 || info.velocity.y > 400) setIsOpen(false); }}
           className="fixed left-0 right-0 z-50 pointer-events-auto"
           style={{ bottom: '60px', maxHeight: '76vh' }}
         >
@@ -470,8 +466,27 @@ export default function Sidebar() {
             className="mx-3 bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl shadow-black/25 border border-slate-200/50 dark:border-slate-700/30 overflow-hidden flex flex-col"
             style={{ maxHeight: '76vh' }}
           >
-            {/* Drag Handle */}
-            <div className="flex justify-center pt-3 pb-2 flex-shrink-0 cursor-grab active:cursor-grabbing" onPointerDown={e => e.stopPropagation()}>
+            {/* Handle Bar — ONLY this area triggers swipe-to-close */}
+            <div
+              className="flex justify-center pt-3 pb-2 flex-shrink-0 cursor-grab active:cursor-grabbing touch-none"
+              onPointerDown={(e) => {
+                // Swipe tracking only on the handle
+                const startY = e.clientY;
+                const onMove = (ev) => {
+                  if (ev.clientY - startY > 60) {
+                    setIsOpen(false);
+                    document.removeEventListener('pointermove', onMove);
+                    document.removeEventListener('pointerup', onUp);
+                  }
+                };
+                const onUp = () => {
+                  document.removeEventListener('pointermove', onMove);
+                  document.removeEventListener('pointerup', onUp);
+                };
+                document.addEventListener('pointermove', onMove);
+                document.addEventListener('pointerup', onUp);
+              }}
+            >
               <div className="w-9 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
             </div>
 

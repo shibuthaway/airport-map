@@ -19,15 +19,18 @@ export default function SearchableSelect({ options, value, onChange, placeholder
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      // Don't close if clicking inside a portal/modal on mobile
-      if (isMobile && isOpen) return;
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setIsOpen(false);
+        setSearch('');
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isMobile, isOpen]);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, []);
 
   // Focus input automatically only on desktop to avoid aggressive keyboard popping on mobile
   useEffect(() => {
