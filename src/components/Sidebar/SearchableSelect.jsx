@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FiChevronDown, FiSearch, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 
 /**
  * isControlledOpen: parent controls open state so only one is open at a time
@@ -65,7 +66,7 @@ export default function SearchableSelect({
 
       <AnimatePresence>
         {isControlledOpen && (
-          isMobile ? (
+          isMobile ? createPortal(
             /* ── MOBILE: Full-height bottom sheet ── */
             <div className="fixed inset-0 z-[99999] flex flex-col pointer-events-auto">
               {/* Backdrop — clicking it closes */}
@@ -130,7 +131,8 @@ export default function SearchableSelect({
                   }
                 </div>
               </motion.div>
-            </div>
+            </div>,
+            document.body
           ) : (
             /* ── DESKTOP: Dropdown ── */
             <motion.div
