@@ -102,14 +102,8 @@ export default function Sidebar() {
   
   const tabs = isAdminMode 
     ? allTabs 
-    : allTabs.filter(t => t.id === 'explore' || (t.id === 'navigate' && isMobile));
+    : allTabs.filter(t => t.id === 'explore' || t.id === 'navigate');
 
-  // If active tab was navigate and it's now hidden on desktop, switch to explore
-  React.useEffect(() => {
-    if (activeTab === 'navigate' && !isMobile && !isAdminMode) {
-      setActiveTab('explore');
-    }
-  }, [isMobile, isAdminMode, activeTab]);
   const compileDirections = () => {
     if (!navigationPath?.length || !navigationStart || !navigationEnd) return [];
     const { nodes } = useMapStore.getState();
@@ -311,7 +305,7 @@ export default function Sidebar() {
       {/* Navigate */}
       {activeTab === 'navigate' && (
         <motion.div key="navigate" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col gap-4">
-          {!navigationMode ? (
+          {(!navigationMode && isMobile) ? (
             <div className="flex flex-col items-center py-8 gap-4">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-3xl shadow-lg shadow-sky-500/30">🧭</div>
               <div className="text-center"><h3 className="font-bold text-slate-800 dark:text-slate-100 mb-1">Indoor Navigation</h3><p className="text-xs text-slate-400 max-w-[220px]">Find the fastest path between any two points in the airport.</p></div>
@@ -611,7 +605,6 @@ export default function Sidebar() {
             <p className="text-[10px] text-sky-500 font-bold tracking-widest uppercase">Interactive Map</p>
           </div>
         </div>
-        <div className="px-5 py-4 flex-shrink-0"><Search /></div>
         <div className="flex border-b border-slate-200/20 dark:border-slate-800/30 px-4 flex-shrink-0">
           {tabs.map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
