@@ -100,8 +100,16 @@ export default function Sidebar() {
     { id: 'settings',   label: 'Settings',   icon: <FiSettings className="w-3.5 h-3.5" /> },
   ];
   
-  const tabs = isAdminMode ? allTabs : allTabs.filter(t => t.id === 'explore' || t.id === 'navigate');
+  const tabs = isAdminMode 
+    ? allTabs 
+    : allTabs.filter(t => t.id === 'explore' || (t.id === 'navigate' && isMobile));
 
+  // If active tab was navigate and it's now hidden on desktop, switch to explore
+  React.useEffect(() => {
+    if (activeTab === 'navigate' && !isMobile && !isAdminMode) {
+      setActiveTab('explore');
+    }
+  }, [isMobile, isAdminMode, activeTab]);
   const compileDirections = () => {
     if (!navigationPath?.length || !navigationStart || !navigationEnd) return [];
     const { nodes } = useMapStore.getState();

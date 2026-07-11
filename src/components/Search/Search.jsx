@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useMapStore } from '../../store/useMapStore';
 import { FiSearch, FiX, FiMapPin } from 'react-icons/fi';
 
-export default function Search() {
+export default function Search({ compact = false }) {
   const { searchQuery, setSearchQuery, selectPoi, pois, currentFloor, setFloor, zoomMapTo } = useMapStore();
   const [suggestions, setSuggestions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -96,14 +96,14 @@ export default function Search() {
     <div ref={searchRef} className="relative w-full">
       {/* Search Input Container */}
       <div className="relative flex items-center w-full">
-        <FiSearch className="absolute left-4 text-slate-400 dark:text-slate-500 w-5 h-5" />
+        <FiSearch className={`absolute left-3 text-slate-400 dark:text-slate-500 ${compact ? 'w-4 h-4' : 'w-5 h-5'}`} />
         <input
           type="text"
           value={searchQuery}
           onChange={handleInputChange}
           onFocus={() => searchQuery.trim().length > 0 && setIsOpen(true)}
-          placeholder="Search on this floor..."
-          className="w-full pl-12 pr-10 py-3.5 rounded-2xl bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-slate-800 text-[16px] text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition duration-300 shadow-sm"
+          placeholder="Search..."
+          className={`w-full ${compact ? 'pl-9 pr-8 py-2 rounded-xl text-sm' : 'pl-12 pr-10 py-3.5 rounded-2xl text-[16px]'} bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition duration-300 shadow-inner`}
         />
         {searchQuery.length > 0 && (
           <button

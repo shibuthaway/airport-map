@@ -97,6 +97,11 @@ export default function MapHeader() {
             )}
           </div>
 
+          {/* MIDDLE: Mobile Compact Search */}
+          <div className="md:hidden flex-1 min-w-0 px-2 flex justify-center">
+            <Search compact />
+          </div>
+
           {/* RIGHT: Mobile — only essential 3 buttons */}
           <div className="flex items-center gap-1.5 flex-shrink-0 md:hidden">
             {/* Full Screen */}
@@ -185,14 +190,6 @@ export default function MapHeader() {
             <button onClick={() => setMapRotation(mapRotation + 45)} className="w-9 h-9 flex items-center justify-center text-violet-500 active:bg-violet-50 dark:active:bg-violet-950/30 transition-all active:scale-90">
               <FiRotateCw className="w-3.5 h-3.5" />
             </button>
-          </div>
-        </div>
-      )}
-      {/* ── Mobile Floating Search (below header, above map) ── */}
-      {!isFullScreen && dataLoaded && (
-        <div className="md:hidden fixed left-3 z-30 pointer-events-auto" style={{ top: '60px', right: '56px' }}>
-          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-lg shadow-black/8 border border-slate-200/60 dark:border-slate-700/40 px-3 py-1.5">
-            <Search />
           </div>
         </div>
       )}
