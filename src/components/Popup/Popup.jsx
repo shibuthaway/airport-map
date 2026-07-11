@@ -168,40 +168,7 @@ export default function Popup() {
             </p>
           )}
 
-          {/* Route status strip */}
-          {bothSet && (
-            <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl
-                            bg-slate-50 dark:bg-slate-900/60
-                            border border-slate-200/50 dark:border-slate-800/40">
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
-                  <FiMapPin className="w-2.5 h-2.5 text-white" />
-                </span>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">
-                  {navigationStart.name}
-                </span>
-              </div>
 
-              <div className="flex flex-col items-center flex-shrink-0">
-                <FiArrowRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600" />
-                {navigationDistance > 0 && (
-                  <span className="text-[9px] font-bold text-sky-500 flex items-center gap-0.5">
-                    <FiClock className="w-2.5 h-2.5" />
-                    ~{Math.max(1, Math.round(navigationDistance / 80))}min
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate text-right">
-                  {navigationEnd.name}
-                </span>
-                <span className="w-5 h-5 rounded-full bg-sky-500 flex items-center justify-center flex-shrink-0">
-                  <FiNavigation className="w-2.5 h-2.5 text-white" />
-                </span>
-              </div>
-            </div>
-          )}
 
           {/* ── Navigation buttons — pure CSS, no nested animation ── */}
           <div className="grid grid-cols-2 gap-2">

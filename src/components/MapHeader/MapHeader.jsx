@@ -17,6 +17,7 @@ export default function MapHeader() {
     mapRotation, setMapRotation,
     isFullScreen, toggleFullScreen,
     dataLoaded,
+    navigationPath, clearNavigation,
   } = useMapStore();
 
   const [terminalOpen, setTerminalOpen] = useState(false);
@@ -158,6 +159,27 @@ export default function MapHeader() {
           </div>
         </div>
       )}
+
+      {/* ── Active Navigation Overlay ─────────── */}
+      <AnimatePresence>
+        {navigationPath && !isFullScreen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            className="fixed top-16 left-1/2 -translate-x-1/2 z-[60] pointer-events-auto"
+          >
+            <button
+              onClick={() => clearNavigation()}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-lg shadow-rose-500/30 transition-all active:scale-95 border border-rose-400/50"
+            >
+              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              Stop Navigation
+              <FiX className="w-3.5 h-3.5 ml-1" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Mobile Floating Map Controls (zoom + rotation) ──── */}
       {!isFullScreen && dataLoaded && (
