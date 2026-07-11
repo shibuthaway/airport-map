@@ -159,7 +159,7 @@ export default function Popup() {
         </div>
 
         {/* ── Body ── */}
-        <div className="px-4 pt-3 pb-4 flex flex-col gap-3">
+        <div className="px-4 pt-3 pb-4 flex flex-col gap-3 overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(100vh - 240px)' }}>
 
           {/* Description */}
           {selectedPoi.description && (
