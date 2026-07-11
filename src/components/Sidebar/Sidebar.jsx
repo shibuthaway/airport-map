@@ -84,12 +84,36 @@ export default function Sidebar() {
   }, [taggingMode, navigationMode, activeTab, isOpen]);
 
   const categories = [
-    { key: 'gate',      label: 'Gates',      icon: '✈️' },
-    { key: 'checkin',   label: 'Check-in',   icon: '🧳' },
-    { key: 'baggage',   label: 'Baggage',    icon: '🛄' },
-    { key: 'security',  label: 'Security',   icon: '🛡️' },
-    { key: 'lounge',    label: 'Lounges',    icon: '🍷' },
-    { key: 'washroom',  label: 'Restrooms',  icon: '🚻' },
+    { key: 'gate',      label: 'Gates',     icon: '✈️',
+      gradLight: 'linear-gradient(135deg,#38bdf8,#3b82f6)',
+      gradDark:  'linear-gradient(135deg,#0369a1,#1d4ed8)',
+      glow: '0 6px 20px rgba(56,189,248,0.45)',
+      badgeLight: '#e0f2fe', badgeDark: '#0c4a6e', badgeTextLight: '#0369a1', badgeTextDark: '#7dd3fc' },
+    { key: 'checkin',   label: 'Check-in',  icon: '🧳',
+      gradLight: 'linear-gradient(135deg,#a78bfa,#8b5cf6)',
+      gradDark:  'linear-gradient(135deg,#6d28d9,#4c1d95)',
+      glow: '0 6px 20px rgba(167,139,250,0.45)',
+      badgeLight: '#ede9fe', badgeDark: '#2e1065', badgeTextLight: '#6d28d9', badgeTextDark: '#c4b5fd' },
+    { key: 'baggage',   label: 'Baggage',   icon: '🛄',
+      gradLight: 'linear-gradient(135deg,#fbbf24,#f97316)',
+      gradDark:  'linear-gradient(135deg,#b45309,#c2410c)',
+      glow: '0 6px 20px rgba(251,191,36,0.45)',
+      badgeLight: '#fef3c7', badgeDark: '#451a03', badgeTextLight: '#b45309', badgeTextDark: '#fcd34d' },
+    { key: 'security',  label: 'Security',  icon: '🛡️',
+      gradLight: 'linear-gradient(135deg,#f87171,#ef4444)',
+      gradDark:  'linear-gradient(135deg,#b91c1c,#7f1d1d)',
+      glow: '0 6px 20px rgba(248,113,113,0.45)',
+      badgeLight: '#fee2e2', badgeDark: '#450a0a', badgeTextLight: '#b91c1c', badgeTextDark: '#fca5a5' },
+    { key: 'lounge',    label: 'Lounges',   icon: '🍷',
+      gradLight: 'linear-gradient(135deg,#e879f9,#ec4899)',
+      gradDark:  'linear-gradient(135deg,#a21caf,#9d174d)',
+      glow: '0 6px 20px rgba(232,121,249,0.45)',
+      badgeLight: '#fdf4ff', badgeDark: '#3b0764', badgeTextLight: '#a21caf', badgeTextDark: '#f0abfc' },
+    { key: 'washroom',  label: 'Restrooms', icon: '🚻',
+      gradLight: 'linear-gradient(135deg,#2dd4bf,#10b981)',
+      gradDark:  'linear-gradient(135deg,#0f766e,#065f46)',
+      glow: '0 6px 20px rgba(45,212,191,0.45)',
+      badgeLight: '#ccfbf1', badgeDark: '#022c22', badgeTextLight: '#0f766e', badgeTextDark: '#5eead4' },
   ];
 
   const allTabs = [
@@ -239,12 +263,42 @@ export default function Sidebar() {
               {categories.map(cat => {
                 const count = pois[currentFloor]?.filter(p => p.category === cat.key).length || 0;
                 const isActive = activeCategory === cat.key;
+                const isDark = document.documentElement.classList.contains('dark');
+                const grad = isDark ? cat.gradDark : cat.gradLight;
+                const bdgBg = isActive ? 'rgba(255,255,255,0.22)' : (isDark ? cat.badgeDark : cat.badgeLight);
+                const bdgTxt = isActive ? '#fff' : (isDark ? cat.badgeTextDark : cat.badgeTextLight);
                 return (
                   <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
-                    className={`flex flex-col items-center p-3 rounded-2xl transition-all active:scale-95 gap-1.5 border ${isActive ? 'bg-sky-50 dark:bg-slate-800/80 border-sky-400/50 shadow-sm shadow-sky-500/20' : 'bg-slate-50 hover:bg-sky-50 dark:bg-slate-900/60 dark:hover:bg-sky-950/40 border-slate-200/50 dark:border-slate-800/30'}`}>
-                    <span className="text-2xl">{cat.icon}</span>
-                    <span className={`text-[10px] font-bold leading-tight text-center ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-600 dark:text-slate-300'}`}>{cat.label}</span>
-                    <span className="text-[9px] text-slate-400 font-medium">{count}</span>
+                    style={isActive ? {
+                      backgroundImage: grad,
+                      boxShadow: cat.glow,
+                      transform: 'scale(1.04)',
+                      border: 'none',
+                    } : {
+                      backgroundImage: 'none',
+                      border: '1px solid',
+                    }}
+                    className={`relative flex flex-col items-center p-3 rounded-2xl transition-all duration-200 active:scale-95 gap-1.5 overflow-hidden
+                      ${ isActive
+                        ? 'border-0'
+                        : 'bg-white dark:bg-slate-800/80 border-slate-200/60 dark:border-slate-700/40 hover:scale-[1.02] hover:shadow-md'
+                      }`}
+                  >
+                    {/* Hover shimmer layer on inactive */}
+                    {!isActive && (
+                      <div
+                        className="absolute inset-0 opacity-0 hover:opacity-10 transition-opacity duration-200 rounded-2xl"
+                        style={{ backgroundImage: isDark ? cat.gradDark : cat.gradLight }}
+                      />
+                    )}
+                    <span className={`text-2xl drop-shadow-sm transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>{cat.icon}</span>
+                    <span className={`text-[10px] font-extrabold leading-tight text-center ${
+                      isActive ? 'text-white drop-shadow-sm' : 'text-slate-700 dark:text-slate-200'
+                    }`}>{cat.label}</span>
+                    <span
+                      className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                      style={{ backgroundColor: bdgBg, color: bdgTxt }}
+                    >{count}</span>
                   </button>
                 );
               })}
