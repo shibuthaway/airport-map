@@ -628,7 +628,8 @@ app.post('/api/superadmin/create-client', verifyToken, async (req, res) => {
     if (err.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ error: 'Username or Project ID already exists' });
     }
-    res.status(500).json({ error: err.message });
+    // Return 400 instead of 500 to prevent shared hosting from replacing the JSON with an HTML error page
+    res.status(400).json({ error: `Server Error: ${err.message}` });
   } finally {
     conn.release();
   }
