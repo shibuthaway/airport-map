@@ -4,7 +4,7 @@ import { useMapStore } from '../../store/useMapStore';
 import {
   FiSun, FiMoon, FiPlus, FiMinus, FiMaximize2,
   FiShare2, FiMaximize, FiMinimize, FiChevronDown,
-  FiRotateCcw, FiRotateCw
+  FiRotateCcw, FiRotateCw, FiX
 } from 'react-icons/fi';
 import Search from '../Search/Search';
 
