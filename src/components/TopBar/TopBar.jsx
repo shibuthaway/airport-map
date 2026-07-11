@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMapStore } from '../../store/useMapStore';
 import {
-  FiSearch, FiNavigation, FiTag, FiLayers, FiSun, FiMoon,
-  FiPlus, FiMinus, FiMaximize2, FiX, FiClock, FiChevronLeft, FiChevronRight
+  FiSearch, FiTag, FiLayers, FiSun, FiMoon,
+  FiPlus, FiMinus, FiMaximize2, FiX, FiChevronLeft, FiChevronRight
 } from 'react-icons/fi';
 import TaggingPanel from '../Sidebar/TaggingPanel';
 import FloorManager from '../Sidebar/FloorManager';
@@ -47,107 +47,6 @@ function FloorTabs() {
         );
       })}
     </div>
-  );
-}
-
-// ─── Navigate Panel ───────────────────────────────────────────────────────────
-function NavigatePanel({ onClose }) {
-  const {
-    nodes, currentFloor,
-    navigationMode, setNavigationMode,
-    navigationStart, setNavigationStart,
-    navigationEnd, setNavigationEnd,
-    navigationPath, navigationDistance,
-    navigationOptions, setNavigationOptions,
-  } = useMapStore();
-
-  const floorNodes = nodes.filter(n => n.floor === currentFloor && n.category !== 'waypoint');
-
-  const directions = () => {
-    if (!navigationPath?.length || !navigationStart || !navigationEnd) return [];
-    const { nodes: allNodes } = useMapStore.getState();
-    const steps = [`Start at ${navigationStart.name}`];
-    const pathNodes = navigationPath.map(pt => allNodes.find(n => n.x===pt.x && n.y===pt.y && n.floor===pt.floor)).filter(Boolean);
-    for (let i=1; i<pathNodes.length-1; i++) {
-      const c = pathNodes[i];
-      if (c.category==='lift'||c.category==='escalator') steps.push(`Take ${c.name} to next floor`);
-      else if (c.category==='security'||c.category==='immigration') steps.push(`Pass through ${c.name}`);
-      else if (c.category!=='waypoint') steps.push(`Walk past ${c.name}`);
-    }
-    steps.push(`Arrive at ${navigationEnd.name}`);
-    return steps;
-  };
-
-  return (
-    <motion.div initial={{opacity:0,y:-12}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-12}}
-      className="w-80 rounded-2xl shadow-2xl overflow-hidden" style={glass}>
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
-        <span className="text-xs font-bold text-white uppercase tracking-widest">🧭 Navigate</span>
-        <button onClick={onClose} className="text-slate-500 hover:text-white transition"><FiX className="w-4 h-4"/></button>
-      </div>
-      <div className="p-4 flex flex-col gap-3">
-        {!navigationMode ? (
-          <button onClick={() => setNavigationMode(true)}
-            className="w-full py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm transition">
-            Start Route Finder
-          </button>
-        ) : (
-          <>
-            <select value={navigationStart?.id||''} onChange={e => setNavigationStart(nodes.find(n=>n.id===e.target.value))}
-              className="w-full p-2.5 rounded-xl text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:ring-1 focus:ring-sky-500">
-              <option value="">📍 From...</option>
-              {floorNodes.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-            <select value={navigationEnd?.id||''} onChange={e => setNavigationEnd(nodes.find(n=>n.id===e.target.value))}
-              className="w-full p-2.5 rounded-xl text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:ring-1 focus:ring-sky-500">
-              <option value="">🏁 To...</option>
-              {floorNodes.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-
-            <div className="flex gap-3 text-xs text-slate-400">
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input type="checkbox" checked={navigationOptions?.wheelchairOnly||false}
-                  onChange={e=>setNavigationOptions({wheelchairOnly:e.target.checked})}
-                  className="accent-sky-500"/>
-                ♿ Wheelchair
-              </label>
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input type="checkbox" checked={navigationOptions?.avoidClosed!==false}
-                  onChange={e=>setNavigationOptions({avoidClosed:e.target.checked})}
-                  className="accent-sky-500"/>
-                🚧 Avoid Blocked
-              </label>
-            </div>
-
-            {navigationPath ? (
-              <div className="border-t border-white/5 pt-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <FiClock className="w-3.5 h-3.5 text-sky-400"/>
-                  <span className="text-xs font-bold text-sky-400">
-                    {navigationDistance}m · ~{Math.max(1,Math.round(navigationDistance/80))} min
-                  </span>
-                </div>
-                <ul className="flex flex-col gap-2 max-h-40 overflow-y-auto">
-                  {directions().map((s,i)=>(
-                    <li key={i} className="flex gap-2 text-xs text-slate-300">
-                      <span className="w-4 h-4 rounded-full bg-white/10 text-white font-bold flex items-center justify-center flex-shrink-0 text-[9px]">{i+1}</span>
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (navigationStart && navigationEnd && (
-              <p className="text-xs text-red-400 text-center py-1">No route found. Check connections.</p>
-            ))}
-
-            <button onClick={()=>setNavigationMode(false)}
-              className="text-xs text-slate-500 hover:text-slate-300 transition text-center">
-              Clear
-            </button>
-          </>
-        )}
-      </div>
-    </motion.div>
   );
 }
 
@@ -268,7 +167,6 @@ export default function TopBar() {
         {/* Action buttons */}
         <div className="flex items-center gap-1.5">
           {iconBtn('search', <FiSearch className="w-3.5 h-3.5"/>, 'Search', activePanel==='search')}
-          {iconBtn('navigate', <FiNavigation className="w-3.5 h-3.5"/>, 'Navigate', activePanel==='navigate')}
           {iconBtn('tag', <FiTag className="w-3.5 h-3.5"/>, 'Tag', activePanel==='tag')}
           {iconBtn('floors', <FiLayers className="w-3.5 h-3.5"/>, 'Floors', activePanel==='floors')}
 
@@ -306,7 +204,6 @@ export default function TopBar() {
           <div className="absolute top-[56px] left-0 right-0 flex justify-center pt-3 px-4 pointer-events-none">
             <div className="pointer-events-auto">
               {activePanel==='search'   && <SearchPanel   onClose={()=>setActivePanel(null)}/>}
-              {activePanel==='navigate' && <NavigatePanel onClose={()=>setActivePanel(null)}/>}
               {activePanel==='tag'      && <TagPanel      onClose={()=>setActivePanel(null)}/>}
               {activePanel==='floors'   && <FloorsPanel   onClose={()=>setActivePanel(null)}/>}
             </div>
