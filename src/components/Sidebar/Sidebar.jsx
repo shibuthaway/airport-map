@@ -259,51 +259,48 @@ export default function Sidebar() {
 
           <div>
             <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Categories</h3>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2.5">
               {categories.map(cat => {
                 const count = pois[currentFloor]?.filter(p => p.category === cat.key).length || 0;
                 const isActive = activeCategory === cat.key;
                 const isDark = document.documentElement.classList.contains('dark');
                 const grad = isDark ? cat.gradDark : cat.gradLight;
-                const bdgBg = isActive ? 'rgba(255,255,255,0.22)' : (isDark ? cat.badgeDark : cat.badgeLight);
-                const bdgTxt = isActive ? '#fff' : (isDark ? cat.badgeTextDark : cat.badgeTextLight);
                 return (
                   <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
-                    style={isActive ? {
+                    style={{
                       backgroundImage: grad,
-                      boxShadow: cat.glow,
-                      transform: 'scale(1.04)',
-                      border: 'none',
-                    } : {
-                      backgroundImage: 'none',
-                      border: '1px solid',
+                      boxShadow: isActive
+                        ? `0 0 0 3px rgba(255,255,255,0.85), ${cat.glow}`
+                        : 'none',
+                      transform: isActive ? 'scale(1.06)' : 'scale(1)',
+                      opacity: isActive ? 1 : isDark ? 0.65 : 0.75,
+                      transition: 'all 0.2s cubic-bezier(.34,1.56,.64,1)',
                     }}
-                    className={`relative flex flex-col items-center p-3 rounded-2xl transition-all duration-200 active:scale-95 gap-1.5 overflow-hidden
-                      ${ isActive
-                        ? 'border-0'
-                        : 'bg-white dark:bg-slate-800/80 border-slate-200/60 dark:border-slate-700/40 hover:scale-[1.02] hover:shadow-md'
-                      }`}
+                    className="relative flex flex-col items-center p-3 rounded-2xl active:scale-95 gap-1.5 overflow-hidden border-0"
                   >
-                    {/* Hover shimmer layer on inactive */}
+                    {/* Brightness overlay on hover for inactive */}
                     {!isActive && (
-                      <div
-                        className="absolute inset-0 opacity-0 hover:opacity-10 transition-opacity duration-200 rounded-2xl"
-                        style={{ backgroundImage: isDark ? cat.gradDark : cat.gradLight }}
-                      />
+                      <div className="absolute inset-0 bg-white opacity-0 hover:opacity-10 transition-opacity duration-150 rounded-2xl" />
                     )}
-                    <span className={`text-2xl drop-shadow-sm transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>{cat.icon}</span>
-                    <span className={`text-[10px] font-extrabold leading-tight text-center ${
-                      isActive ? 'text-white drop-shadow-sm' : 'text-slate-700 dark:text-slate-200'
-                    }`}>{cat.label}</span>
+                    {/* Active sparkle ring */}
+                    {isActive && (
+                      <div className="absolute inset-0 rounded-2xl" style={{ boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.5)' }} />
+                    )}
+                    <span className={`text-2xl drop-shadow transition-transform duration-200 ${isActive ? 'scale-115' : 'scale-100'}`} style={{ transform: isActive ? 'scale(1.18)' : 'scale(1)' }}>{cat.icon}</span>
+                    <span className="text-[10px] font-extrabold leading-tight text-center text-white drop-shadow-sm">{cat.label}</span>
                     <span
                       className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-                      style={{ backgroundColor: bdgBg, color: bdgTxt }}
+                      style={{
+                        backgroundColor: isActive ? 'rgba(255,255,255,0.30)' : 'rgba(0,0,0,0.20)',
+                        color: '#fff',
+                      }}
                     >{count}</span>
                   </button>
                 );
               })}
             </div>
           </div>
+
           
           {(() => {
             const categoryPlaces = pois[currentFloor]?.filter(p => p.category === activeCategory) || [];
