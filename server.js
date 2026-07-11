@@ -687,6 +687,8 @@ app.delete('/api/superadmin/client/:id', verifyToken, async (req, res) => {
       await conn.execute('DELETE FROM ap_nodes WHERE project_id = ?', [projectId]);
       await conn.execute('DELETE FROM ap_edges WHERE project_id = ?', [projectId]);
       await conn.execute('DELETE FROM ap_custom_routes WHERE project_id = ?', [projectId]);
+      await conn.execute('DELETE FROM ap_categories WHERE project_id = ?', [projectId]);
+      await conn.execute('DELETE FROM ap_buildings WHERE project_id = ?', [projectId]);
       await conn.execute('DELETE FROM ap_projects WHERE id = ?', [projectId]);
     }
     // 3. Delete the user
@@ -696,7 +698,7 @@ app.delete('/api/superadmin/client/:id', verifyToken, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     await conn.rollback();
-    res.status(500).json({ error: err.message });
+    res.status(400).json({ error: err.message });
   } finally {
     conn.release();
   }

@@ -9,6 +9,8 @@ export default function SuperAdminDashboard() {
   const [stats, setStats] = useState({ total_clients: 0, total_projects: 0, total_floors: 0, total_pois: 0 });
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState(null);
 
   // Form states
   const [username, setUsername] = useState('');
@@ -79,19 +81,25 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  const handleDeleteClient = async (client) => {
-    if (!window.confirm(`WARNING: This will PERMANENTLY delete ${client.username} and ALL their map data (Floors, Nodes, Edges). This cannot be undone!\n\nAre you sure?`)) return;
+  const confirmDeleteClient = (client) => {
+    setClientToDelete(client);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteClient = async () => {
+    if (!clientToDelete) return;
     try {
-      const res = await fetch(`/api/superadmin/client/${client.user_id}`, {
+      const res = await fetch(`/api/superadmin/client/${clientToDelete.user_id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
-        alert('Client and all their data deleted.');
+        setShowDeleteModal(false);
+        setClientToDelete(null);
         fetchData();
       } else {
         const data = await res.json();
-        alert(data.error);
+        alert(data.error || 'Failed to delete client');
       }
     } catch (err) {
       alert(err.message);
@@ -168,7 +176,7 @@ export default function SuperAdminDashboard() {
                         <button onClick={() => handleToggleStatus(c)} title={c.status === 'active' ? 'Disable Access' : 'Enable Access'} className={`p-2 rounded-lg border transition ${c.status === 'active' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-white' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white'}`}>
                           <FiPower />
                         </button>
-                        <button onClick={() => handleDeleteClient(c)} title="Delete Project & User" className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition">
+                        <button onClick={() => confirmDeleteClient(c)} title="Delete Project & User" className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition">
                           <FiTrash2 />
                         </button>
                       </div>
@@ -225,6 +233,31 @@ export default function SuperAdminDashboard() {
                   <FiPlus /> {creating ? 'Provisioning...' : 'Deploy Project & Account'}
                 </button>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && clientToDelete && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-slate-900 border border-red-500/30 rounded-3xl p-8 max-w-md w-full shadow-2xl relative text-center">
+              <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 mx-auto mb-4 text-3xl">
+                <FiAlertTriangle />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Delete Project & Client?</h2>
+              <p className="text-sm text-slate-400 mb-6">
+                You are about to permanently delete <strong className="text-white">{clientToDelete.project_name}</strong> (@{clientToDelete.username}). 
+                This will destroy all their map data, floors, POIs, and routes. <strong>This cannot be undone!</strong>
+              </p>
+              
+              <div className="flex gap-4">
+                <button onClick={() => setShowDeleteModal(false)} className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition">
+                  Cancel
+                </button>
+                <button onClick={handleDeleteClient} className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold transition flex justify-center items-center gap-2">
+                  <FiTrash2 /> Delete
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
