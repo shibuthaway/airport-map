@@ -537,7 +537,14 @@ const DEFAULT_CATEGORIES = {
     { id: 'c_checkin', name: 'Check-in', icon: 'Briefcase', color: '#8b5cf6' },
     { id: 'c_washroom', name: 'Washrooms', icon: 'Droplet', color: '#06b6d4' },
     { id: 'c_food', name: 'Food & Dining', icon: 'Coffee', color: '#f59e0b' },
-    { id: 'c_shopping', name: 'Shopping', icon: 'ShoppingBag', color: '#10b981' }
+    { id: 'c_shopping', name: 'Shopping', icon: 'ShoppingBag', color: '#10b981' },
+    { id: 'c_baggage', name: 'Baggage Claim', icon: 'Archive', color: '#f97316' },
+    { id: 'c_lounge', name: 'Lounges', icon: 'Wine', color: '#ec4899' },
+    { id: 'c_atm', name: 'ATM', icon: 'Banknote', color: '#14b8a6' },
+    { id: 'c_medical', name: 'Medical', icon: 'Stethoscope', color: '#dc2626' },
+    { id: 'c_lift', name: 'Lifts', icon: 'ChevronsUp', color: '#64748b' },
+    { id: 'c_escalator', name: 'Escalators', icon: 'TrendingUp', color: '#8b5cf6' },
+    { id: 'c_emergency', name: 'Emergency Exit', icon: 'AlertTriangle', color: '#ef4444' }
   ],
   'Hospital': [
     { id: 'c_emergency', name: 'Emergency', icon: 'AlertTriangle', color: '#ef4444' },

@@ -8,7 +8,8 @@ const AVAILABLE_ICONS = [
   'Plane', 'Briefcase', 'Shield', 'ShoppingBag', 'Coffee', 'Droplet', 'Stethoscope', 
   'AlertTriangle', 'Bed', 'Pill', 'Pizza', 'TrendingUp', 'Car', 'Train', 'Ticket', 
   'LogOut', 'Layout', 'Store', 'BookOpen', 'FlaskConical', 'Library', 'Building', 
-  'DoorOpen', 'Star', 'ChevronsUp', 'MapPin'
+  'DoorOpen', 'Star', 'ChevronsUp', 'MapPin', 'Wine', 'Banknote', 'Archive', 
+  'Navigation', 'ArrowUp', 'ArrowDown', 'Info', 'Users', 'Camera', 'Video', 'Utensils'
 ];
 
 export default function CategoryManager() {

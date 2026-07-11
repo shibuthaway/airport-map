@@ -79,8 +79,10 @@ export const useMapStore = create((set, get) => ({
       console.error('Failed to load buildings', e);
     }
     
-    // Fallback if API fails or returns empty so the UI doesn't disappear
-    const fallbackBuildings = [{ id: 'bldg_default', name: 'Chennai Terminal 1' }];
+    // Fallback only if project is 'default'
+    const fallbackBuildings = projectId === 'default' 
+      ? [{ id: 'bldg_default', name: 'Chennai Terminal 1' }] 
+      : [];
     set({ buildings: fallbackBuildings });
     return fallbackBuildings;
   },
@@ -517,8 +519,9 @@ export const useMapStore = create((set, get) => ({
         set({ currentBuilding: activeBuildingId });
       }
 
+      const buildingQuery = activeBuildingId ? `&building=${activeBuildingId}` : (projectId === 'default' ? '&building=bldg_default' : '');
       const [floorsRes, graphRes, settingsRes, catRes] = await Promise.all([
-        fetch(`/api/load-floors?project=${projectId}&building=${activeBuildingId || 'bldg_default'}`),
+        fetch(`/api/load-floors?project=${projectId}${buildingQuery}`),
         fetch(`/api/load-graph?project=${projectId}`),
         fetch(`/api/load-settings?project=${projectId}`),
         fetch(`/api/load-categories?project=${projectId}`)
@@ -596,7 +599,7 @@ export const useMapStore = create((set, get) => ({
           'Content-Type': 'application/json',
           ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
         },
-        body: JSON.stringify({ floors: updatedFloors, buildingId: currentBuilding || 'bldg_default' })
+        body: JSON.stringify({ floors: updatedFloors, buildingId: currentBuilding || (get().appSettings?.project_id === 'default' ? 'bldg_default' : 'bldg_new') })
       });
       set({ floors: updatedFloors });
       if (!get().currentFloor) set({ currentFloor: newFloor.id });
@@ -616,7 +619,7 @@ export const useMapStore = create((set, get) => ({
           'Content-Type': 'application/json',
           ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
         },
-        body: JSON.stringify({ floors: updatedFloors, buildingId: get().currentBuilding || 'bldg_default' })
+        body: JSON.stringify({ floors: updatedFloors, buildingId: get().currentBuilding || (get().appSettings?.project_id === 'default' ? 'bldg_default' : 'bldg_new') })
       });
       set({ floors: updatedFloors });
     } catch (e) {
