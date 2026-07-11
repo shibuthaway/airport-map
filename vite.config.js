@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    basicSsl()
+    basicSsl(),
   ],
   server: {
     proxy: {

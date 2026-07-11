@@ -1,0 +1,31 @@
+{
+  "name": "Airport Indoor Navigator",
+  "short_name": "AirportNav",
+  "description": "Navigate inside the airport without internet — find gates, check-in, lounges and more offline.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0ea5e9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["travel", "navigation", "utilities"],
+  "lang": "en",
+  "scope": "/"
+}

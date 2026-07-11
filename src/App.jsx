@@ -8,11 +8,14 @@ import MapHeader from './components/MapHeader/MapHeader';
 import Login from './components/Auth/Login';
 import SuperAdminDashboard from './components/Admin/SuperAdminDashboard';
 import { useMapStore } from './store/useMapStore';
+import OfflineBanner from './components/OfflineBanner/OfflineBanner';
 
 const MapLayout = () => {
   const { isFullScreen } = useMapStore();
   return (
     <div className="w-screen h-[100dvh] flex overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-500 relative">
+      {/* Offline indicator */}
+      <OfflineBanner />
       {/* 1. Preloader */}
       <LoadingScreen />
 
