@@ -540,6 +540,29 @@ export const useMapStore = create((set, get) => ({
         }
 
         set({ floors, nodes, edges, pois: computedPois, currentFloor: topFloorId, appSettings: settings, dataLoaded: true });
+
+        // ── Prefetch all floor map images for offline use ──────────────────
+        // This ensures Service Worker caches every floor image immediately,
+        // not just the currently active floor.
+        if ('serviceWorker' in navigator && floors?.length) {
+          const imageUrls = floors
+            .map(f => f.image)
+            .filter(Boolean);
+          // Use cache API directly to warm up the map cache
+          caches.open('airport-maps-v1').then(cache => {
+            imageUrls.forEach(url => {
+              // Only fetch if not already cached
+              cache.match(url).then(cached => {
+                if (!cached) {
+                  fetch(url, { cache: 'no-store' })
+                    .then(res => { if (res.ok) cache.put(url, res); })
+                    .catch(() => {}); // Silent fail — offline already
+                }
+              });
+            });
+            console.log(`[SW Cache] Prefetching ${imageUrls.length} floor map image(s) for offline use.`);
+          }).catch(() => {});
+        }
       } else {
         if (retries > 0) {
           console.warn(`API returned ${floorsRes.status}, retrying...`);
