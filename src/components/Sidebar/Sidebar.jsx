@@ -199,8 +199,13 @@ export default function Sidebar() {
     <AnimatePresence mode="wait">
       {/* Explore */}
       {activeTab === 'explore' && (
-        <motion.div key="explore" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col gap-5">
+        <motion.div key="explore" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col gap-4">
           
+          {/* Search box inside sheet */}
+          <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-1 border border-slate-200/50 dark:border-slate-800/30">
+            <Search />
+          </div>
+
           {/* Floor Selector */}
           <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-200/50 dark:border-slate-800/30 shadow-inner">
             <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex justify-between items-center">

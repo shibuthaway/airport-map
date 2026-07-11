@@ -68,12 +68,12 @@ export default function SearchableSelect({ options, value, onChange, placeholder
                 onClick={() => setIsOpen(false)}
               />
               <motion.div
-                initial={{ opacity: 0, y: 50, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                initial={{ opacity: 0, y: 60 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 40 }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="relative mt-auto mx-2 mb-safe-4 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200/50 dark:border-slate-800/50"
-                style={{ maxHeight: '85vh', height: '100%' }}
+                className="relative mt-auto mx-3 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200/50 dark:border-slate-800/50"
+                style={{ maxHeight: '80vh', marginBottom: '80px' }}
               >
                 <div className="p-3 border-b border-slate-100 dark:border-slate-800/60 flex items-center gap-3">
                   <div className="flex-1 relative flex items-center bg-slate-100 dark:bg-slate-800 rounded-2xl px-3 py-2.5">
