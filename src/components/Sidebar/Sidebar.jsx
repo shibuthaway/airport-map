@@ -534,11 +534,11 @@ export default function Sidebar() {
   // ── MOBILE: Bottom Sheet + Bottom Nav ─────────────────────────────────────
   if (isMobile) {
     const navItems = [
-      { id: 'explore',  label: 'Explore',   emoji: '🔍', color: 'sky',    action: () => { setActiveTab('explore');  setIsOpen(prev => activeTab === 'explore'  ? !prev : true); } },
+      { id: 'explore',  label: 'Explore',   emoji: '🔍', color: 'sky',    action: () => { setActiveTab('explore');  setIsOpen(prev => activeTab === 'explore'  ? !prev : true); setNavigationMode(false); } },
       { id: 'navigate', label: 'Navigate',  emoji: '🧭', color: 'indigo', action: () => { setActiveTab('navigate'); setIsOpen(prev => activeTab === 'navigate' ? !prev : true); setNavigationMode(true); } },
       { id: 'map',      label: 'Map',       emoji: '🗺️', color: 'emerald',action: () => setIsOpen(false) },
-      ...(isAdminMode ? [{ id: 'floors',  label: 'Floors', emoji: '🏢', color: 'violet', action: () => { setActiveTab('floors');  setIsOpen(prev => activeTab === 'floors'  ? !prev : true); } }] : []),
-      ...(isAdminMode ? [{ id: 'tagging', label: 'Admin',  emoji: '⚙️', color: 'rose',   action: () => { setActiveTab('tagging'); setIsOpen(prev => activeTab === 'tagging' ? !prev : true); } }] : []),
+      ...(isAdminMode ? [{ id: 'floors',  label: 'Floors', emoji: '🏢', color: 'violet', action: () => { setActiveTab('floors');  setIsOpen(prev => activeTab === 'floors'  ? !prev : true); setNavigationMode(false); } }] : []),
+      ...(isAdminMode ? [{ id: 'tagging', label: 'Admin',  emoji: '⚙️', color: 'rose',   action: () => { setActiveTab('tagging'); setIsOpen(prev => activeTab === 'tagging' ? !prev : true); setNavigationMode(false); } }] : []),
     ];
 
     const colorMap = {
@@ -700,7 +700,7 @@ export default function Sidebar() {
             return (
               <button
                 key={tab.id}
-                onClick={() => { setActiveTab(tab.id); setIsOpen(true); }}
+                onClick={() => { setActiveTab(tab.id); setIsOpen(true); setNavigationMode(tab.id === 'navigate'); }}
                 className={`w-full aspect-square rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all group relative ${
                   isActive 
                     ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-inner' 
