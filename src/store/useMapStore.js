@@ -4,7 +4,7 @@ import { calculateShortestPath } from '../utils/pathfinder';
 const saveGraph = async (nodes, edges) => {
   const state = useMapStore.getState();
   try {
-    await fetch('/api/save-graph', {
+    const response = await fetch('/api/save-graph', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -12,6 +12,9 @@ const saveGraph = async (nodes, edges) => {
       },
       body: JSON.stringify({ nodes, edges })
     });
+    if (!response.ok) {
+      console.error('Failed to save Graph via API:', await response.text());
+    }
   } catch (e) {
     console.error('Failed to save Graph via API', e);
   }

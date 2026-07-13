@@ -118,13 +118,19 @@ async function initDB() {
         type        VARCHAR(100),
         description TEXT,
         status      VARCHAR(100) DEFAULT 'Open',
-        image_url   VARCHAR(500),
+        image_url   LONGTEXT,
         is_custom   TINYINT(1)   DEFAULT 1,
         created_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
         INDEX idx_floor (floor),
         INDEX idx_project (project_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
+
+    try {
+      await conn.execute('ALTER TABLE ap_nodes MODIFY COLUMN image_url LONGTEXT');
+    } catch (e) {
+      // Ignored if column doesn't exist or already modified
+    }
 
     await conn.execute(`
       CREATE TABLE IF NOT EXISTS ap_edges (
