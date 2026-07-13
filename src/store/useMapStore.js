@@ -613,7 +613,7 @@ export const useMapStore = create((set, get) => ({
           'Content-Type': 'application/json',
           ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
         },
-        body: JSON.stringify({ floors: updatedFloors, buildingId: currentBuilding || (get().appSettings?.project_id === 'default' ? 'bldg_default' : 'bldg_new') })
+        body: JSON.stringify({ floors: updatedFloors, buildingId: currentBuilding || 'bldg_default' })
       });
       set({ floors: updatedFloors });
       if (!get().currentFloor) set({ currentFloor: newFloor.id });
@@ -633,7 +633,7 @@ export const useMapStore = create((set, get) => ({
           'Content-Type': 'application/json',
           ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
         },
-        body: JSON.stringify({ floors: updatedFloors, buildingId: get().currentBuilding || (get().appSettings?.project_id === 'default' ? 'bldg_default' : 'bldg_new') })
+        body: JSON.stringify({ floors: updatedFloors, buildingId: get().currentBuilding || 'bldg_default' })
       });
       set({ floors: updatedFloors });
     } catch (e) {
