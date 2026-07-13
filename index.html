@@ -4,7 +4,17 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
-    <title>airport-indoor-map</title>
+    <title>Indoor Map</title>
+    <style>
+      /* Prevent white flash before React mounts */
+      html, body, #root {
+        background: #0a0f1e;
+        margin: 0;
+        padding: 0;
+        min-height: 100dvh;
+        width: 100%;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 import Sidebar from './components/Sidebar/Sidebar';
 import AirportMap from './components/AirportMap/AirportMap';
@@ -11,6 +11,69 @@ import { useMapStore } from './store/useMapStore';
 import OfflineBanner from './components/OfflineBanner/OfflineBanner';
 import ToastContainer from './components/Toast/ToastContainer';
 
+// ── Error Boundary ─────────────────────────────────────────────────────────────
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, info) {
+    console.error('[ErrorBoundary]', error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div
+          style={{
+            minHeight: '100dvh',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'linear-gradient(135deg, #0a0f1e 0%, #0c1a35 100%)',
+            color: '#f1f5f9',
+            fontFamily: 'system-ui, sans-serif',
+            padding: '2rem',
+            textAlign: 'center',
+            gap: '1rem',
+          }}
+        >
+          <span style={{ fontSize: '3rem' }}>⚠️</span>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 900, margin: 0 }}>Something went wrong</h1>
+          <p style={{ color: '#94a3b8', fontSize: '0.875rem', maxWidth: 320, margin: 0 }}>
+            An unexpected error occurred. Please refresh the page to continue.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              marginTop: '1rem',
+              padding: '0.75rem 2rem',
+              background: 'linear-gradient(90deg, #0ea5e9, #6366f1)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '0.75rem',
+              fontSize: '0.875rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            Reload App
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ── Map Layout ─────────────────────────────────────────────────────────────────
 const MapLayout = () => {
   const { isFullScreen, dataLoaded, loadMapData } = useMapStore();
 
@@ -53,6 +116,64 @@ const MapLayout = () => {
   );
 };
 
+// ── Auth-aware redirect handler (shown during logout/token checks) ──────────────
+const AuthRedirectScreen = () => (
+  <div
+    style={{
+      minHeight: '100dvh',
+      width: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #0a0f1e 0%, #0c1a35 100%)',
+    }}
+  >
+    <div style={{ textAlign: 'center' }}>
+      <div
+        style={{
+          width: 48,
+          height: 48,
+          border: '3px solid rgba(14,165,233,0.3)',
+          borderTop: '3px solid #0ea5e9',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite',
+          margin: '0 auto 16px',
+        }}
+      />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <p style={{ color: '#94a3b8', fontFamily: 'system-ui', fontSize: '0.875rem', margin: 0 }}>
+        Please wait...
+      </p>
+    </div>
+  </div>
+);
+
+// ── Protected Route: only accessible when NOT logged in ───────────────────────
+const GuestOnly = ({ children }) => {
+  const [checking, setChecking] = useState(true);
+  const [redirect, setRedirect] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('ap_token');
+    const user = useMapStore.getState().user;
+    if (token) {
+      if (user?.role === 'superadmin') {
+        setRedirect('/superadmin');
+      } else if (user?.project_id) {
+        setRedirect(`/?project=${user.project_id}&mode=admin`);
+      } else {
+        setRedirect('/');
+      }
+    }
+    setChecking(false);
+  }, []);
+
+  if (checking) return <AuthRedirectScreen />;
+  if (redirect) return <Navigate to={redirect} replace />;
+  return children;
+};
+
+// ── App ───────────────────────────────────────────────────────────────────────
 export default function App() {
   useEffect(() => {
     const activeTheme = localStorage.getItem('theme') || 'dark';
@@ -66,15 +187,22 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <ErrorBoundary>
       <Routes>
         <Route path="/" element={<MapLayout />} />
         <Route path="/map/:slug" element={<MapLayout />} />
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={
+            <GuestOnly>
+              <Login />
+            </GuestOnly>
+          }
+        />
         <Route path="/superadmin" element={<SuperAdminDashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <ToastContainer />
-    </>
+    </ErrorBoundary>
   );
 }

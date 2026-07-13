@@ -41,7 +41,11 @@ export const useMapStore = create((set, get) => ({
   token: typeof window !== 'undefined' ? localStorage.getItem('ap_token') : null,
   logout: () => {
     localStorage.removeItem('ap_token');
-    set({ user: null, token: null, isAdminMode: false });
+    set({ user: null, token: null, isAdminMode: false, dataLoaded: false });
+    // Hard redirect to /login — avoids React Router white-screen flash
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
   },
 
   // App Settings (Branding)

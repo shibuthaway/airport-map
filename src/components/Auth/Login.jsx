@@ -12,22 +12,6 @@ export default function Login() {
   
   const navigate = useNavigate();
 
-  // Redirect if already logged in
-  React.useEffect(() => {
-    const token = localStorage.getItem('ap_token');
-    const user = useMapStore.getState().user;
-    if (token) {
-      if (user?.role === 'superadmin') {
-        navigate('/superadmin');
-      } else if (user?.project_id) {
-        navigate(`/?project=${user.project_id}&mode=admin`);
-      } else {
-        // Fallback to home
-        navigate('/');
-      }
-    }
-  }, [navigate]);
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -51,14 +35,12 @@ export default function Login() {
 
       // Redirect based on role
       if (data.user.role === 'superadmin') {
-        navigate('/superadmin');
+        navigate('/superadmin', { replace: true });
       } else {
-        // Automatically load their project without full reload
-        navigate(`/?project=${data.user.project_id}&mode=admin`);
+        navigate(`/?project=${data.user.project_id}&mode=admin`, { replace: true });
       }
     } catch (err) {
       setError(err.message);
-    } finally {
       setLoading(false);
     }
   };
@@ -67,10 +49,12 @@ export default function Login() {
     <div className="min-h-[100dvh] w-full flex items-center justify-center bg-slate-950 p-4 relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-sky-500/10 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/5 blur-[80px] rounded-full pointer-events-none" />
       
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
         className="w-full max-w-md bg-slate-900/60 backdrop-blur-xl border border-slate-800/60 p-8 rounded-3xl shadow-2xl relative z-10"
       >
         <div className="text-center mb-8">
@@ -92,6 +76,7 @@ export default function Login() {
               value={username}
               onChange={e => setUsername(e.target.value)}
               placeholder="Username"
+              autoComplete="username"
               className="w-full pl-11 pr-4 py-3 bg-slate-950/50 border border-slate-800 text-white rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 outline-none transition-all"
             />
           </div>
@@ -106,6 +91,7 @@ export default function Login() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Password"
+              autoComplete="current-password"
               className="w-full pl-11 pr-4 py-3 bg-slate-950/50 border border-slate-800 text-white rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 outline-none transition-all"
             />
           </div>
