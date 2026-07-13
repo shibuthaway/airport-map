@@ -117,9 +117,7 @@ export default function AirportMap() {
     }
   }, [setIsTouchRotating]);
 
-  useEffect(() => {
-    loadMapData();
-  }, [loadMapData]);
+  // Data loading is now handled in App.jsx (MapLayout)
 
   const transformRef = useRef(null);
   const svgOverlayRef = useRef(null);

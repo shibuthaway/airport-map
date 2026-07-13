@@ -12,7 +12,12 @@ import OfflineBanner from './components/OfflineBanner/OfflineBanner';
 import ToastContainer from './components/Toast/ToastContainer';
 
 const MapLayout = () => {
-  const { isFullScreen } = useMapStore();
+  const { isFullScreen, dataLoaded, loadMapData } = useMapStore();
+
+  useEffect(() => {
+    loadMapData();
+  }, [loadMapData]);
+
   return (
     <div className="w-screen h-[100dvh] flex md:p-4 md:gap-4 overflow-hidden bg-[#f5f5f7] dark:bg-[#000000] font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-500 relative">
       {/* Offline indicator */}
@@ -21,25 +26,29 @@ const MapLayout = () => {
       <LoadingScreen />
 
       {/* 2. Sidebar/Bottom-Sheet Navigation */}
-      <div className={`absolute md:relative z-40 h-full pointer-events-none md:pointer-events-auto ${isFullScreen ? 'hidden' : ''} md:h-[calc(100dvh-2rem)] md:shrink-0`}>
-        <div className="h-full pointer-events-auto">
-          <Sidebar />
+      {dataLoaded && (
+        <div className={`absolute md:relative z-40 h-full pointer-events-none md:pointer-events-auto ${isFullScreen ? 'hidden' : ''} md:h-[calc(100dvh-2rem)] md:shrink-0`}>
+          <div className="h-full pointer-events-auto">
+            <Sidebar />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 3. Map + Header */}
-      <div className="flex-1 h-full w-full relative flex flex-col min-w-0 overflow-hidden md:rounded-[2rem] md:shadow-2xl md:border border-black/5 dark:border-white/10 bg-white dark:bg-[#0a0a0a]">
-        {/* Top Header */}
-        <MapHeader />
+      {dataLoaded && (
+        <div className="flex-1 h-full w-full relative flex flex-col min-w-0 overflow-hidden md:rounded-[2rem] md:shadow-2xl md:border border-black/5 dark:border-white/10 bg-white dark:bg-[#0a0a0a]">
+          {/* Top Header */}
+          <MapHeader />
 
-        {/* Map Canvas */}
-        <div className="flex-1 w-full relative z-10 min-h-0 md:rounded-b-3xl overflow-hidden">
-          <AirportMap />
+          {/* Map Canvas */}
+          <div className="flex-1 w-full relative z-10 min-h-0 md:rounded-b-3xl overflow-hidden">
+            <AirportMap />
+          </div>
+
+          {/* POI Detail Popup */}
+          <Popup />
         </div>
-
-        {/* POI Detail Popup */}
-        <Popup />
-      </div>
+      )}
     </div>
   );
 };
