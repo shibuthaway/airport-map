@@ -8,6 +8,7 @@ import UserLocationMarker from './UserLocationMarker';
 import FloorSelector from '../FloorSelector/FloorSelector';
 
 const getLabelLines = (name) => {
+  if (!name) return [];
   const words = name.split(' ');
   const lines = [];
   let currentLine = '';
