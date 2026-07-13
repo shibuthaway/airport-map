@@ -252,7 +252,7 @@ export const useMapStore = create((set, get) => ({
       id: `edge_${fromId}_${toId}_${Date.now()}`,
       from: fromId,
       to: toId,
-      distance: Math.round(dist),
+      distance: options.distance !== undefined && options.distance !== null ? options.distance : Math.round(dist),
       bidirectional: options.bidirectional !== false,
       accessible: options.accessible !== false,
       blocked: options.blocked === true
@@ -321,7 +321,7 @@ export const useMapStore = create((set, get) => ({
     get().calculateRoute();
   },
 
-  toggleEdge: (fromId, toId) => {
+  toggleEdge: (fromId, toId, options = {}) => {
     const { edges } = get();
     const existingEdge = edges.find(e =>
       (e.from === fromId && e.to === toId) ||
@@ -330,7 +330,7 @@ export const useMapStore = create((set, get) => ({
     if (existingEdge) {
       get().deleteEdge(existingEdge.id);
     } else {
-      get().addEdge(fromId, toId);
+      get().addEdge(fromId, toId, options);
     }
   },
 

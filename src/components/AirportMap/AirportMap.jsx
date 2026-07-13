@@ -190,7 +190,25 @@ export default function AirportMap() {
       }
     } else {
       if (edgeStartNodeId !== nodeId) {
-        toggleEdge(edgeStartNodeId, nodeId);
+        // Check if edge already exists
+        const existingEdge = edges.find(e =>
+          (e.from === edgeStartNodeId && e.to === nodeId) ||
+          (e.from === nodeId && e.to === edgeStartNodeId)
+        );
+        
+        if (existingEdge) {
+          // If exists, toggleEdge will delete it
+          toggleEdge(edgeStartNodeId, nodeId);
+        } else {
+          // Prompt for distance when creating
+          const distInput = window.prompt("Enter distance in meters (optional):\nLeave blank for auto-calculated distance based on coordinates.");
+          let distance = null;
+          if (distInput !== null && distInput.trim() !== '') {
+            distance = parseFloat(distInput);
+            if (isNaN(distance)) distance = null;
+          }
+          toggleEdge(edgeStartNodeId, nodeId, { distance });
+        }
       }
       setEdgeStartNodeId(null);
     }
