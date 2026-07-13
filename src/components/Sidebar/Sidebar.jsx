@@ -686,12 +686,12 @@ export default function Sidebar() {
   return (
     <div className="relative h-full flex z-40 gap-4">
       {/* Side Rail */}
-      <div className="w-[76px] rounded-3xl bg-[#1a2c38] shadow-2xl border border-slate-800/50 flex flex-col items-center py-6 gap-6 z-50 flex-shrink-0">
-        <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.1)] border border-slate-700 overflow-hidden p-1.5 flex-shrink-0">
+      <div className="w-[76px] rounded-3xl bg-white dark:bg-slate-900 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-2xl border border-slate-200/80 dark:border-slate-800/80 flex flex-col items-center py-6 gap-6 z-50 flex-shrink-0 transition-colors duration-500">
+        <div className="w-11 h-11 rounded-2xl bg-slate-50 dark:bg-slate-950 flex items-center justify-center shadow-inner border border-slate-200 dark:border-slate-800 overflow-hidden p-1.5 flex-shrink-0">
           {useMapStore.getState().appSettings?.logo_url ? (
             <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-full h-full object-contain" />
           ) : (
-            '✈️'
+            <span className="text-xl">✈️</span>
           )}
         </div>
         <div className="flex flex-col gap-2 w-full px-2">
@@ -703,13 +703,13 @@ export default function Sidebar() {
                 onClick={() => { setActiveTab(tab.id); setIsOpen(true); }}
                 className={`w-full aspect-square rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all group relative ${
                   isActive 
-                    ? 'bg-sky-500/10 text-sky-400 shadow-[inset_0_0_0_1px_rgba(56,189,248,0.2)]' 
-                    : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
+                    ? 'bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 shadow-[inset_0_0_0_1px_rgba(56,189,248,0.2)]' 
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50'
                 }`}
                 title={tab.label}
               >
                 {isActive && (
-                  <motion.div layoutId="desktop-active-rail" className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-sky-400 rounded-r-full shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+                  <motion.div layoutId="desktop-active-rail" className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-sky-500 dark:bg-sky-400 rounded-r-full shadow-[0_0_8px_rgba(56,189,248,0.4)] dark:shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
                 )}
                 {React.cloneElement(tab.icon, { className: 'w-5 h-5 transition-transform group-hover:scale-110' })}
                 <span className="text-[9px] font-bold uppercase tracking-widest">{tab.label}</span>
@@ -723,13 +723,13 @@ export default function Sidebar() {
       <motion.div
         animate={{ width: isOpen ? '360px' : '0px', opacity: isOpen ? 1 : 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 150 }}
-        className="h-full overflow-hidden bg-[#1a2c38] rounded-3xl border border-slate-800/50 shadow-2xl flex flex-col flex-shrink-0"
+        className="h-full overflow-hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-2xl flex flex-col flex-shrink-0 transition-colors duration-500"
       >
-        <div className="p-6 pb-4 flex items-center justify-between border-b border-slate-800/50 flex-shrink-0">
-          <h2 className="text-xl font-black text-white tracking-wide">
+        <div className="p-6 pb-4 flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800/50 flex-shrink-0">
+          <h2 className="text-xl font-black text-slate-800 dark:text-white tracking-wide">
             {tabs.find(t => t.id === activeTab)?.label || 'Menu'}
           </h2>
-          <button onClick={() => setIsOpen(false)} className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition">
+          <button onClick={() => setIsOpen(false)} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition">
             <FiChevronsLeft className="w-4 h-4" />
           </button>
         </div>

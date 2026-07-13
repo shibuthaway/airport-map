@@ -14,7 +14,7 @@ import ToastContainer from './components/Toast/ToastContainer';
 const MapLayout = () => {
   const { isFullScreen } = useMapStore();
   return (
-    <div className="w-screen h-[100dvh] flex md:p-4 md:gap-4 overflow-hidden bg-slate-50 dark:bg-[#0f212e] font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-500 relative">
+    <div className="w-screen h-[100dvh] flex md:p-4 md:gap-4 overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-500 relative">
       {/* Offline indicator */}
       <OfflineBanner />
       {/* 1. Preloader */}
@@ -28,7 +28,7 @@ const MapLayout = () => {
       </div>
 
       {/* 3. Map + Header */}
-      <div className="flex-1 h-full w-full relative flex flex-col min-w-0 overflow-hidden md:rounded-3xl md:shadow-2xl md:border md:border-slate-800/50 bg-[#1a2c38]">
+      <div className="flex-1 h-full w-full relative flex flex-col min-w-0 overflow-hidden md:rounded-3xl md:shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:md:shadow-2xl md:border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900">
         {/* Top Header */}
         <MapHeader />
 
