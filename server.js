@@ -91,12 +91,20 @@ async function initDB() {
       CREATE TABLE IF NOT EXISTS ap_floors (
         id         VARCHAR(100) PRIMARY KEY,
         project_id VARCHAR(100) DEFAULT 'default',
+        building_id VARCHAR(100) DEFAULT 'bldg_default',
         level      VARCHAR(20)  NOT NULL,
         name       VARCHAR(100) NOT NULL,
         image      VARCHAR(255),
         sort_order INT DEFAULT 0
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
+
+    // Safely attempt to add 'building_id' for existing DBs
+    try {
+      await conn.execute("ALTER TABLE ap_floors ADD COLUMN building_id VARCHAR(100) DEFAULT 'bldg_default'");
+    } catch (e) {
+      // Ignored if column already exists
+    }
 
     await conn.execute(`
       CREATE TABLE IF NOT EXISTS ap_nodes (
