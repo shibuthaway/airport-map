@@ -4,8 +4,8 @@ import { useMapStore } from '../../store/useMapStore';
 
 const PHASES = [
   'Connecting to database...',
-  'Loading floor layouts...',
-  'Mapping Gates & Lounges...',
+  'Loading map layouts...',
+  'Mapping points of interest...',
   'Building navigation graph...',
   'Ready!',
 ];
@@ -16,6 +16,18 @@ export default function LoadingScreen() {
   const [phaseIdx, setPhaseIdx] = useState(0);
   const [visible, setVisible] = useState(true);
   const [apiDone, setApiDone] = useState(false);
+
+  // Extract short project name for watermark
+  const getProjectWatermark = () => {
+    if (typeof window === 'undefined') return 'MAP';
+    const pathMatch = window.location.pathname.match(/^\/map\/([^/]+)/);
+    if (pathMatch) return pathMatch[1].substring(0, 4).toUpperCase();
+    const params = new URLSearchParams(window.location.search);
+    const p = params.get('project');
+    if (p) return p.substring(0, 4).toUpperCase();
+    return 'MAP';
+  };
+  const [watermark] = useState(getProjectWatermark());
 
   // Simulate progress up to 85% while waiting for API
   useEffect(() => {
@@ -113,7 +125,7 @@ export default function LoadingScreen() {
               <div className="h-px w-10 bg-sky-500/40" />
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-wider text-white mb-2 leading-tight px-4 max-w-sm mx-auto">
-              {useMapStore.getState().appSettings?.name || 'Airport Authority of India Navigation'}
+              {useMapStore.getState().appSettings?.name || 'Smart Map Dashboard'}
             </h1>
             <p className="text-xs text-sky-500/70 font-medium tracking-widest uppercase">
               Interactive Floor Map
@@ -160,7 +172,7 @@ export default function LoadingScreen() {
             transition={{ delay: 0.5 }}
             className="flex gap-3 mt-8"
           >
-            {['L1 Arrival', 'L2 Departure', 'L3 Mezzanine', 'L4 Lounge'].map((label, i) => (
+            {['Initialization', 'Layouts', 'Points', 'Routing'].map((label, i) => (
               <motion.div
                 key={label}
                 animate={{ opacity: progress > (i + 1) * 22 ? 1 : 0.25 }}
@@ -173,14 +185,14 @@ export default function LoadingScreen() {
             ))}
           </motion.div>
 
-          {/* IATA decoration */}
+          {/* Watermark decoration */}
           <motion.p
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.25 }}
+            animate={{ opacity: 0.15 }}
             transition={{ delay: 0.8 }}
-            className="absolute bottom-8 text-[80px] font-black text-white/5 tracking-widest select-none pointer-events-none"
+            className="absolute bottom-8 text-[80px] md:text-[100px] font-black text-white/10 tracking-widest select-none pointer-events-none"
           >
-            MAA
+            {watermark}
           </motion.p>
         </motion.div>
       )}
