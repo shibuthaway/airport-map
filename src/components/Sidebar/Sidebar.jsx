@@ -521,38 +521,40 @@ export default function Sidebar() {
               )}
               <button onClick={() => setNavigationMode(false)} className="py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-900/30 transition">Clear</button>
             </div>
-          )}
-          {activeTab === 'profile' && isAdminMode && (
-            <div className="flex flex-col gap-4 animate-in fade-in zoom-in duration-300">
-              <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-sky-400 to-indigo-500 rounded-full flex items-center justify-center text-3xl text-white font-black mb-4 shadow-xl shadow-sky-500/20">
-                  {useMapStore.getState().user?.username?.charAt(0)?.toUpperCase() || 'U'}
-                </div>
-                <h3 className="text-xl font-black text-slate-800 dark:text-white">@{useMapStore.getState().user?.username || 'Guest'}</h3>
-                <span className="text-xs font-bold px-3 py-1 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-full mt-2 uppercase tracking-widest border border-sky-200 dark:border-sky-800">
-                  {useMapStore.getState().user?.role || 'Viewer'}
+        </motion.div>
+      )}
+
+      {activeTab === 'profile' && isAdminMode && (
+        <motion.div key="profile" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <div className="flex flex-col gap-4 animate-in fade-in zoom-in duration-300">
+            <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-sky-400 to-indigo-500 rounded-full flex items-center justify-center text-3xl text-white font-black mb-4 shadow-xl shadow-sky-500/20">
+                {useMapStore.getState().user?.username?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              <h3 className="text-xl font-black text-slate-800 dark:text-white">@{useMapStore.getState().user?.username || 'Guest'}</h3>
+              <span className="text-xs font-bold px-3 py-1 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-full mt-2 uppercase tracking-widest border border-sky-200 dark:border-sky-800">
+                {useMapStore.getState().user?.role || 'Viewer'}
+              </span>
+            </div>
+
+            <div className="p-5 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800">
+              <h4 className="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest">Account Details</h4>
+              <div className="flex justify-between items-center py-2.5 border-b border-slate-200 dark:border-slate-800">
+                <span className="text-sm text-slate-500 font-medium">Project ID</span>
+                <span className="text-sm font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-black/20 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700">{useMapStore.getState().user?.project_id || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between items-center py-2.5">
+                <span className="text-sm text-slate-500 font-medium">Status</span>
+                <span className="text-sm font-bold text-emerald-500 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Active
                 </span>
               </div>
-
-              <div className="p-5 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800">
-                <h4 className="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest">Account Details</h4>
-                <div className="flex justify-between items-center py-2.5 border-b border-slate-200 dark:border-slate-800">
-                  <span className="text-sm text-slate-500 font-medium">Project ID</span>
-                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-black/20 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700">{useMapStore.getState().user?.project_id || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between items-center py-2.5">
-                  <span className="text-sm text-slate-500 font-medium">Status</span>
-                  <span className="text-sm font-bold text-emerald-500 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Active
-                  </span>
-                </div>
-              </div>
-
-              <button onClick={() => { useMapStore.getState().logout(); window.location.reload(); }} className="mt-2 w-full py-3.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 border border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400 rounded-2xl font-bold flex items-center justify-center gap-2 transition active:scale-[0.98]">
-                <FiLogOut className="w-4 h-4" /> Sign Out
-              </button>
             </div>
-          )}
+
+            <button onClick={() => { useMapStore.getState().logout(); window.location.reload(); }} className="mt-2 w-full py-3.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 border border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400 rounded-2xl font-bold flex items-center justify-center gap-2 transition active:scale-[0.98]">
+              <FiLogOut className="w-4 h-4" /> Sign Out
+            </button>
+          </div>
         </motion.div>
       )}
 
