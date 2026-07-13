@@ -507,10 +507,13 @@ export default function AirportMap() {
 
     const midX = (fromNode.x + toNode.x) / 2;
     const midY = (fromNode.y + toNode.y) / 2;
+    const cx = selectedEdge.controlPoint ? selectedEdge.controlPoint.x : midX;
+    const cy = selectedEdge.controlPoint ? selectedEdge.controlPoint.y : midY;
 
+    // Offset delete button so it doesn't cover the curve handle
     return (
       <g
-        transform={`translate(${midX}, ${midY})`}
+        transform={`translate(${cx + 20}, ${cy - 20})`}
         className="cursor-pointer pointer-events-auto"
         onClick={(e) => {
           e.stopPropagation();
@@ -518,6 +521,7 @@ export default function AirportMap() {
           setSelectedEdge(null);
         }}
       >
+        <line x1="-12" y1="12" x2="0" y2="0" stroke="#ef4444" strokeWidth="2" strokeDasharray="2,2" opacity="0.5" />
         <circle r="10" fill="#ef4444" stroke="#ffffff" strokeWidth="1.5" className="shadow-lg hover:scale-110 transition-transform" />
         <path d="M-4.5,-4.5 L4.5,4.5 M4.5,-4.5 L-4.5,4.5" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
         <title>Delete Edge</title>
