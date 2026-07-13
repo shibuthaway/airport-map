@@ -226,6 +226,18 @@ export const useMapStore = create((set, get) => ({
     get().calculateRoute();
   },
 
+  dragEdgeCurve: (id, cx, cy) => {
+    const { nodes, edges } = get();
+    const updatedEdges = edges.map(e => e.id === id ? { ...e, controlPoint: { x: Math.round(cx), y: Math.round(cy) } } : e);
+    const sel = get().selectedEdge;
+    set({ 
+      edges: updatedEdges,
+      selectedEdge: sel?.id === id ? { ...sel, controlPoint: { x: Math.round(cx), y: Math.round(cy) } } : sel
+    });
+    saveGraph(nodes, updatedEdges);
+    get().calculateRoute();
+  },
+
   // Graph Edge Actions
   addEdge: (fromId, toId, options = {}) => {
     const { nodes, edges } = get();

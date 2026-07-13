@@ -57,6 +57,7 @@ const getCategoryIcon = (category) => {
 export default function AirportMap() {
   const [zoomScale, setZoomScale] = useState(1);
   const [draggedNodeId, setDraggedNodeId] = useState(null);
+  const [draggedEdgeHandleId, setDraggedEdgeHandleId] = useState(null);
   const [edgeStartNodeId, setEdgeStartNodeId] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [hoveredBlockedEdge, setHoveredBlockedEdge] = useState(null);
@@ -78,7 +79,7 @@ export default function AirportMap() {
     pendingZoom, clearPendingZoom,
     
     // Graph states & actions
-    nodes, edges, dragNode, toggleEdge, isDrawingEdges, setIsDrawingEdges,
+    nodes, edges, dragNode, dragEdgeCurve, toggleEdge, isDrawingEdges, setIsDrawingEdges,
     selectedEdge, setSelectedEdge, setZoomActions,
     userPosition, categories
   } = useMapStore();
@@ -170,6 +171,10 @@ export default function AirportMap() {
     if (draggedNodeId) {
       dragNode(draggedNodeId, clampedX, clampedY);
     }
+    
+    if (draggedEdgeHandleId) {
+      dragEdgeCurve(draggedEdgeHandleId, clampedX, clampedY);
+    }
 
     if (edgeStartNodeId) {
       setMousePos({ x: clampedX, y: clampedY });
@@ -179,6 +184,9 @@ export default function AirportMap() {
   const handleSvgMouseUp = () => {
     if (draggedNodeId) {
       setDraggedNodeId(null);
+    }
+    if (draggedEdgeHandleId) {
+      setDraggedEdgeHandleId(null);
     }
   };
 
@@ -342,16 +350,20 @@ export default function AirportMap() {
           const midX = (fromNode.x + toNode.x) / 2;
           const midY = (fromNode.y + toNode.y) / 2;
 
+          const cx = e.controlPoint ? e.controlPoint.x : midX;
+          const cy = e.controlPoint ? e.controlPoint.y : midY;
+          const pathD = `M ${fromNode.x} ${fromNode.y} Q ${cx} ${cy}, ${toNode.x} ${toNode.y}`;
+
           // Auto-edges: only in edit mode
           if (e.isAuto) {
             if (!inEditMode) return null;
             return (
-              <line
+              <path
                 key={e.id}
-                x1={fromNode.x} y1={fromNode.y}
-                x2={toNode.x}   y2={toNode.y}
+                d={pathD}
                 stroke="#818cf8" strokeWidth="1.5"
                 strokeOpacity="0.6" strokeDasharray="4,4"
+                fill="none"
                 className="pointer-events-none"
               />
             );
@@ -368,20 +380,20 @@ export default function AirportMap() {
             return (
               <g key={e.id}>
                 {/* Soft red glow halo */}
-                <line
-                  x1={fromNode.x} y1={fromNode.y}
-                  x2={toNode.x}   y2={toNode.y}
+                <path
+                  d={pathD}
                   stroke="#ef4444" strokeWidth="14" strokeOpacity="0.10"
+                  fill="none"
                   className="pointer-events-none"
                 />
                 {/* Dashed red line */}
-                <line
-                  x1={fromNode.x} y1={fromNode.y}
-                  x2={toNode.x}   y2={toNode.y}
+                <path
+                  d={pathD}
                   stroke={isSelected ? '#dc2626' : '#ef4444'}
                   strokeWidth={isSelected ? '5' : '3'}
                   strokeOpacity="0.9"
                   strokeDasharray="10,6"
+                  fill="none"
                   className={inEditMode ? "cursor-pointer pointer-events-auto" : "pointer-events-none"}
                   onClick={(evt) => {
                     evt.stopPropagation();
@@ -444,19 +456,42 @@ export default function AirportMap() {
           }
 
           // ── Normal (unblocked) edge — only in edit mode ───────────────
-          if (!inEditMode) return null;
+          let edgeVisual = null;
+          if (inEditMode) {
+            edgeVisual = (
+              <path
+                key={e.id}
+                d={pathD}
+                stroke={isSelected ? '#6366f1' : '#64748b'}
+                strokeWidth={isSelected ? '4' : '2'}
+                strokeOpacity={isSelected ? '0.9' : '0.4'}
+                fill="none"
+                className="cursor-pointer pointer-events-auto hover:stroke-indigo-400 hover:stroke-[3px] transition-all"
+                onClick={(evt) => { evt.stopPropagation(); setSelectedEdge(isSelected ? null : e); }}
+              />
+            );
+          }
+
+          // Draggable Control Point (Curve Handle)
+          const curveHandle = (isSelected && inEditMode) ? (
+            <g
+              transform={`translate(${cx}, ${cy})`}
+              className="cursor-move pointer-events-auto"
+              onMouseDown={(evt) => {
+                evt.stopPropagation();
+                setDraggedEdgeHandleId(e.id);
+              }}
+            >
+              <circle r="8" fill="#c7d2fe" className="opacity-50" />
+              <circle r="4" fill="#6366f1" stroke="#fff" strokeWidth="1.5" />
+            </g>
+          ) : null;
 
           return (
-            <line
-              key={e.id}
-              x1={fromNode.x} y1={fromNode.y}
-              x2={toNode.x}   y2={toNode.y}
-              stroke={isSelected ? '#6366f1' : '#64748b'}
-              strokeWidth={isSelected ? '4' : '2'}
-              strokeOpacity={isSelected ? '0.9' : '0.4'}
-              className="cursor-pointer pointer-events-auto hover:stroke-indigo-400 hover:stroke-[3px] transition-all"
-              onClick={(evt) => { evt.stopPropagation(); setSelectedEdge(isSelected ? null : e); }}
-            />
+            <g key={`group-${e.id}`}>
+              {edgeVisual}
+              {curveHandle}
+            </g>
           );
         })}
       </g>
@@ -566,36 +601,29 @@ export default function AirportMap() {
       <g className="navigation-overlay" pointerEvents="none">
         {segments.map((s, idx) => {
           if (s.length < 2) return null;
-          let renderSeg = s;
-          if (s.length === 2) {
-            const midX = (s[0].x + s[1].x) / 2;
-            const midY = (s[0].y + s[1].y) / 2;
-            renderSeg = [s[0], { x: midX, y: midY }, s[1]];
+          // Generate path taking into account manual control points
+          let d = '';
+          for (let i = 0; i < s.length; i++) {
+            if (i === 0) {
+              d += `M ${s[i].x} ${s[i].y}`;
+            } else {
+              const prev = s[i - 1];
+              const curr = s[i];
+              
+              // Find the edge connecting prev to curr to check for a custom control point
+              const edge = edges.find(e => 
+                (e.from === prev.id && e.to === curr.id) || 
+                (e.from === curr.id && e.to === prev.id)
+              );
+              
+              if (edge && edge.controlPoint) {
+                d += ` Q ${edge.controlPoint.x} ${edge.controlPoint.y}, ${curr.x} ${curr.y}`;
+              } else {
+                d += ` L ${curr.x} ${curr.y}`;
+              }
+            }
           }
 
-          // Catmull-Rom spline to smooth the path for a curvy, organic look
-          const getSmoothPath = (points) => {
-            if (points.length < 2) return '';
-            let path = `M ${points[0].x} ${points[0].y}`;
-            for (let i = 0; i < points.length - 1; i++) {
-              const p0 = points[i === 0 ? 0 : i - 1];
-              const p1 = points[i];
-              const p2 = points[i + 1];
-              const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
-              
-              // Tension = 0.15 for a gentle curve (higher = looser, lower = tighter)
-              const tension = 0.15;
-              const cp1x = p1.x + (p2.x - p0.x) * tension;
-              const cp1y = p1.y + (p2.y - p0.y) * tension;
-              const cp2x = p2.x - (p3.x - p1.x) * tension;
-              const cp2y = p2.y - (p3.y - p1.y) * tension;
-              
-              path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
-            }
-            return path;
-          };
-
-          const d = getSmoothPath(renderSeg);
           const pathId = `nav-path-${idx}`;
 
           return (
