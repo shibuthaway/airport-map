@@ -521,6 +521,7 @@ export default function Sidebar() {
               )}
               <button onClick={() => setNavigationMode(false)} className="py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-900/30 transition">Clear</button>
             </div>
+          )}
         </motion.div>
       )}
 
