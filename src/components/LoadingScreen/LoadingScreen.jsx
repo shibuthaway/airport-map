@@ -125,7 +125,7 @@ export default function LoadingScreen() {
               <div className="h-px w-10 bg-sky-500/40" />
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-wider text-white mb-2 leading-tight px-4 max-w-sm mx-auto">
-              {useMapStore.getState().appSettings?.name || 'Smart Map Dashboard'}
+              {(useMapStore.getState().appSettings?.name || 'Smart Indoor Map').replace(/airport\s*/gi, '').trim() || 'Smart Indoor Map'}
             </h1>
             <p className="text-xs text-sky-500/70 font-medium tracking-widest uppercase">
               Interactive Floor Map
