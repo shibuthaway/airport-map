@@ -242,11 +242,21 @@ export default function Login() {
         body: JSON.stringify({ username, password })
       });
 
-      const data = await res.json();
+      // Safe JSON parse — server might return HTML on crash
+      const contentType = res.headers.get('content-type') || '';
+      let data;
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        // Server returned HTML (Vercel error page, 500, etc.)
+        const text = await res.text();
+        console.error('[Login] Non-JSON server response:', text.substring(0, 200));
+        throw new Error('Server error. Please try again in a moment.');
+      }
+
       if (!res.ok) {
         const newAttempts = attempts + 1;
         setAttempts(newAttempts);
-        // Lock for 30s after 5 failed attempts
         if (newAttempts >= 5) {
           setLockedUntil(Date.now() + 30_000);
           setLockCountdown(30);

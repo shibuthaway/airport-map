@@ -26,6 +26,12 @@ const isVercelEnv = process.env.VERCEL || process.env.VERCEL_ENV;
 app.use('/poi-images', express.static(isVercelEnv ? '/tmp' : path.join(__dirname, 'public', 'poi-images')));
 app.use('/maps',       express.static(isVercelEnv ? '/tmp' : path.join(__dirname, 'public', 'maps')));
 
+// Ensure all /api responses always have JSON Content-Type
+app.use('/api', (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  next();
+});
+
 // ── MySQL Pool ─────────────────────────────────────────────────────────────────
 const pool = mysql.createPool({
   host:               process.env.DB_HOST     || 'localhost',
@@ -1032,6 +1038,12 @@ app.post('/api/upload-logo', verifyToken, uploadMiddleware.single('logo'), (req,
   res.json({ url: base64 });
 });
 
+// ── Global JSON Error Handler (must be LAST middleware, BEFORE catch-all) ──────
+app.use('/api', (err, req, res, next) => {
+  console.error('[API Error]', err.message);
+  res.status(err.status || 500).json({ error: err.message || 'An internal server error occurred.' });
+});
+
 // ── Serve React Build ──────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'dist')));
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
@@ -1045,8 +1057,12 @@ initDB().then(() => {
     });
   }
 }).catch(err => {
-  console.error('❌ DB failed:', err.message);
-  process.exit(1);
+  // On Vercel, DB init failure should not crash the whole process
+  // — individual routes will handle DB errors gracefully
+  console.error('⚠️ DB init warning (non-fatal on serverless):', err.message);
+  if (require.main === module) {
+    process.exit(1);
+  }
 });
 
 module.exports = app;
