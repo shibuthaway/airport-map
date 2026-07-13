@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { FiX, FiNavigation } from 'react-icons/fi';
+import * as LucideIcons from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { useMapStore } from '../../store/useMapStore';
 import { getEffectiveEdges } from '../../utils/pathfinder';
@@ -79,7 +80,7 @@ export default function AirportMap() {
     // Graph states & actions
     nodes, edges, dragNode, toggleEdge, isDrawingEdges, setIsDrawingEdges,
     selectedEdge, setSelectedEdge, setZoomActions,
-    userPosition
+    userPosition, categories
   } = useMapStore();
 
   const { isActive, error: ipsError, startTracking, stopTracking } = useIndoorPositioning();
@@ -1057,12 +1058,28 @@ export default function AirportMap() {
                               ))}
                             </text>
 
-                            {/* Foreground Content */}
-                            <text fontFamily="Outfit, sans-serif" textAnchor="middle">
-                              <tspan x="0" y={-boxHeight / 2 + 15} fontSize="13">
-                                {getCategoryIcon(poi.category)}
-                              </tspan>
-                              {nameLines.map((line, lineIdx) => (
+                        {/* Foreground Content */}
+                        {(() => {
+                          const cat = categories?.find(c => c.id === poi.category);
+                          const CustomIcon = cat?.icon && LucideIcons[cat.icon] ? LucideIcons[cat.icon] : null;
+                          const iconColor = isSelected ? '#0ea5e9' : (theme === 'dark' ? '#f8fafc' : '#0f172a');
+                          
+                          return (
+                            <>
+                              {CustomIcon ? (
+                                <g transform={`translate(-6, ${-boxHeight / 2 + 4})`}>
+                                  <CustomIcon size={12} color={iconColor} strokeWidth={2.5} />
+                                </g>
+                              ) : (
+                                <text fontFamily="Outfit, sans-serif" textAnchor="middle">
+                                  <tspan x="0" y={-boxHeight / 2 + 15} fontSize="13">
+                                    {getCategoryIcon(poi.category)}
+                                  </tspan>
+                                </text>
+                              )}
+                              
+                              <text fontFamily="Outfit, sans-serif" textAnchor="middle">
+                                {nameLines.map((line, lineIdx) => (
                                 <tspan
                                   key={`fg-${lineIdx}`}
                                   x="0"
@@ -1074,9 +1091,12 @@ export default function AirportMap() {
                                   {line}
                                 </tspan>
                               ))}
-                            </text>
-                          </g>
-                        )}
+                              </text>
+                            </>
+                          );
+                        })()}
+                      </g>
+                    )}
                         
                         {/* Red locator search query pin */}
                         {searchQuery.trim() !== '' && isActive && (

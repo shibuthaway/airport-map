@@ -613,7 +613,7 @@ export default function TaggingPanel() {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{poi.name}</p>
                   <p className="text-[10px] text-slate-400 dark:text-slate-500">
-                    {poi.category} · ({poi.x}, {poi.y})
+                    {categories?.find(c => c.id === poi.category)?.name || poi.category} · ({poi.x}, {poi.y})
                   </p>
                 </div>
                 <FiEdit2 className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 group-hover:text-amber-500 transition flex-shrink-0" />
