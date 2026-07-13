@@ -878,14 +878,34 @@ app.post('/api/save-floors', verifyToken, async (req, res) => {
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    await conn.execute('DELETE FROM ap_floors WHERE project_id = ? AND building_id = ?', [projectId, buildingId]);
+
+    // 1. Delete removed floors for this building
+    if (floors.length > 0) {
+      const ph = floors.map(() => '?').join(',');
+      const ids = floors.map(f => f.id);
+      await conn.execute(`DELETE FROM ap_floors WHERE project_id = ? AND building_id = ? AND id NOT IN (${ph})`, [projectId, buildingId, ...ids]);
+    } else {
+      await conn.execute('DELETE FROM ap_floors WHERE project_id = ? AND building_id = ?', [projectId, buildingId]);
+    }
+
+    // 2. Upsert floors
     for (let i = 0; i < floors.length; i++) {
       const f = floors[i];
-      await conn.execute(
-        'INSERT INTO ap_floors (id, project_id, building_id, level, name, image, sort_order) VALUES (?,?,?,?,?,?,?)',
-        [f.id, projectId, buildingId, f.level, f.name, f.image || null, i]
-      );
+      if (f.image === '__KEEP__') {
+        await conn.execute(
+          'UPDATE ap_floors SET level=?, name=?, sort_order=? WHERE id=? AND project_id=? AND building_id=?',
+          [f.level, f.name, i, f.id, projectId, buildingId]
+        );
+      } else {
+        await conn.execute(
+          `INSERT INTO ap_floors (id, project_id, building_id, level, name, image, sort_order) 
+           VALUES (?,?,?,?,?,?,?)
+           ON DUPLICATE KEY UPDATE level=VALUES(level), name=VALUES(name), image=VALUES(image), sort_order=VALUES(sort_order)`,
+          [f.id, projectId, buildingId, f.level, f.name, f.image || null, i]
+        );
+      }
     }
+    
     await conn.commit();
     res.json({ success: true });
   } catch (err) {

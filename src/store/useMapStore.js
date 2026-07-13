@@ -606,38 +606,78 @@ export const useMapStore = create((set, get) => ({
     const newFloor = { id: `flr_${Date.now()}`, level, name, image: imageUrl || null };
     const updatedFloors = [...floors, newFloor];
 
+    const payloadFloors = updatedFloors.map(f => ({
+      ...f,
+      image: f.id === newFloor.id ? f.image : '__KEEP__'
+    }));
+
     try {
-      await fetch('/api/save-floors', {
+      const res = await fetch('/api/save-floors', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
         },
-        body: JSON.stringify({ floors: updatedFloors, buildingId: currentBuilding || 'bldg_default' })
+        body: JSON.stringify({ floors: payloadFloors, buildingId: currentBuilding || 'bldg_default' })
       });
+      if (!res.ok) throw new Error('Failed to save floor to API');
       set({ floors: updatedFloors });
       if (!get().currentFloor) set({ currentFloor: newFloor.id });
     } catch (e) {
       console.error('Failed to add floor', e);
+      get().addToast('Failed to add floor. Please try again.', 'error');
     }
   },
 
   editFloor: async (id, level, name, imageUrl) => {
     const { floors } = get();
+    const oldFloor = floors.find(f => f.id === id);
+    const imageChanged = imageUrl && imageUrl !== oldFloor?.image;
+    
     const updatedFloors = floors.map(f => f.id === id ? { ...f, level, name, image: imageUrl } : f);
 
+    const payloadFloors = updatedFloors.map(f => ({
+      ...f,
+      image: f.id === id ? (imageChanged ? imageUrl : '__KEEP__') : '__KEEP__'
+    }));
+
     try {
-      await fetch('/api/save-floors', {
+      const res = await fetch('/api/save-floors', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
         },
-        body: JSON.stringify({ floors: updatedFloors, buildingId: get().currentBuilding || 'bldg_default' })
+        body: JSON.stringify({ floors: payloadFloors, buildingId: get().currentBuilding || 'bldg_default' })
       });
+      if (!res.ok) throw new Error('Failed to update floor on API');
       set({ floors: updatedFloors });
     } catch (e) {
       console.error('Failed to edit floor', e);
+      get().addToast('Failed to update floor. Please try again.', 'error');
+    }
+  },
+
+  updateFloorsOrder: async (orderedFloors) => {
+    const payloadFloors = orderedFloors.map(f => ({
+      ...f,
+      image: '__KEEP__'
+    }));
+
+    try {
+      const res = await fetch('/api/save-floors', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
+        },
+        body: JSON.stringify({ floors: payloadFloors, buildingId: get().currentBuilding || 'bldg_default' })
+      });
+      if (!res.ok) throw new Error('Failed to update floor order on API');
+      set({ floors: orderedFloors });
+    } catch (e) {
+      console.error('Failed to update floor order', e);
+      get().addToast('Failed to update floor order.', 'error');
     }
   },
 
@@ -656,19 +696,26 @@ export const useMapStore = create((set, get) => ({
       nextFloor = updatedFloors[0]?.id || '';
     }
 
+    const payloadFloors = updatedFloors.map(f => ({
+      ...f,
+      image: '__KEEP__'
+    }));
+
     try {
-      await fetch('/api/save-floors', {
+      const res = await fetch('/api/save-floors', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
         },
-        body: JSON.stringify({ floors: updatedFloors, buildingId: get().currentBuilding || 'bldg_default' })
+        body: JSON.stringify({ floors: payloadFloors, buildingId: get().currentBuilding || 'bldg_default' })
       });
+      if (!res.ok) throw new Error('Failed to delete floor from API');
       set({ floors: updatedFloors, nodes: updatedNodes, edges: updatedEdges, pois: computePoisFromNodes(updatedNodes), currentFloor: nextFloor });
       saveGraph(updatedNodes, updatedEdges);
     } catch (e) {
       console.error('Failed to delete floor', e);
+      get().addToast('Failed to delete floor. Please try again.', 'error');
     }
   },
 
