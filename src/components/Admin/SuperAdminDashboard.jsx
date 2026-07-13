@@ -150,11 +150,22 @@ export default function SuperAdminDashboard() {
             <h1 className="text-3xl font-black mb-1 bg-gradient-to-r from-sky-400 to-indigo-500 bg-clip-text text-transparent">SaaS Control Center</h1>
             <p className="text-slate-400 text-sm">Super Admin Dashboard</p>
           </div>
-          <div className="flex gap-4 w-full md:w-auto">
-            <button onClick={() => setShowCreateModal(true)} className="flex-1 md:flex-none px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-white rounded-xl font-bold flex justify-center items-center gap-2 transition shadow-lg shadow-sky-500/20">
+          <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto items-center">
+            {/* Profile Indicator */}
+            <div className="flex items-center gap-3 pr-4 md:border-r border-slate-800 hidden md:flex">
+              <div className="w-10 h-10 bg-sky-500/20 text-sky-400 rounded-xl flex items-center justify-center font-bold text-lg border border-sky-500/30">
+                {useMapStore.getState().user?.username?.charAt(0)?.toUpperCase() || 'A'}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-white">@{useMapStore.getState().user?.username || 'admin'}</span>
+                <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-black">SuperAdmin</span>
+              </div>
+            </div>
+
+            <button onClick={() => setShowCreateModal(true)} className="w-full md:w-auto px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-white rounded-xl font-bold flex justify-center items-center gap-2 transition shadow-lg shadow-sky-500/20">
               <FiPlus /> New Client
             </button>
-            <button onClick={handleLogout} className="px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-bold flex justify-center items-center gap-2 transition">
+            <button onClick={handleLogout} className="w-full md:w-auto px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-bold flex justify-center items-center gap-2 transition">
               <FiLogOut /> Sign Out
             </button>
           </div>
