@@ -31,6 +31,9 @@ export default function SuperAdminDashboard() {
       if (statsRes.ok && clientsRes.ok) {
         setStats(await statsRes.json());
         setClients(await clientsRes.json());
+      } else if (statsRes.status === 401 || clientsRes.status === 401 || statsRes.status === 403 || clientsRes.status === 403) {
+        logout();
+        navigate('/login');
       }
     } catch (err) {
       console.error('Failed to fetch admin data', err);

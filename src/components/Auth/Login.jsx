@@ -12,6 +12,22 @@ export default function Login() {
   
   const navigate = useNavigate();
 
+  // Redirect if already logged in
+  React.useEffect(() => {
+    const token = localStorage.getItem('ap_token');
+    const user = useMapStore.getState().user;
+    if (token) {
+      if (user?.role === 'superadmin') {
+        navigate('/superadmin');
+      } else if (user?.project_id) {
+        navigate(`/?project=${user.project_id}&mode=admin`);
+      } else {
+        // Fallback to home
+        navigate('/');
+      }
+    }
+  }, [navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
