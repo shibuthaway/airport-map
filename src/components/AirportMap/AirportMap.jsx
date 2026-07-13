@@ -771,7 +771,15 @@ export default function AirportMap() {
         const w = typeof window !== 'undefined' ? window.innerWidth : 1000;
         const h = typeof window !== 'undefined' ? window.innerHeight : 600;
         
-        const targetScale = isMobile ? 0.35 : 0.8;
+        // Dynamically calculate scale to fit screen, ensuring it looks good on very large displays
+        // We leave some padding (e.g. 100px) so it doesn't touch the edges completely.
+        const scaleX = (w - 100) / 1000;
+        const scaleY = (h - 100) / 600;
+        let targetScale = isMobile ? 0.35 : Math.min(scaleX, scaleY);
+        // Ensure it doesn't get too small on weird desktop window sizes, and cap it for extreme sizes
+        if (!isMobile) {
+          targetScale = Math.max(0.6, Math.min(targetScale, 2.5));
+        }
         
         // On mobile, the search bar is around 110px from the top.
         // The bottom sheet covers 72vh from the bottom.
