@@ -200,14 +200,8 @@ export default function AirportMap() {
           // If exists, toggleEdge will delete it
           toggleEdge(edgeStartNodeId, nodeId);
         } else {
-          // Prompt for distance when creating
-          const distInput = window.prompt("Enter distance in meters (optional):\nLeave blank for auto-calculated distance based on coordinates.");
-          let distance = null;
-          if (distInput !== null && distInput.trim() !== '') {
-            distance = parseFloat(distInput);
-            if (isNaN(distance)) distance = null;
-          }
-          toggleEdge(edgeStartNodeId, nodeId, { distance });
+          // Default to auto-calculated Euclidean distance
+          toggleEdge(edgeStartNodeId, nodeId);
         }
       }
       setEdgeStartNodeId(null);

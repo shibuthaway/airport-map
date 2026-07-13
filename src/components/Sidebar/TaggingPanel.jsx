@@ -405,8 +405,15 @@ export default function TaggingPanel() {
                 <span className="font-semibold truncate">{nodes.find(n => n.id === selectedEdge.to)?.name || 'Point B'}</span>
               </div>
               <div className="flex items-center gap-3 pt-1 mt-1 border-t border-slate-100 dark:border-slate-800/20">
-                <span className="text-[10px] text-slate-400">
-                  📏 {selectedEdge.distance} units
+                <span className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
+                  📏 Distance:
+                  <input
+                    type="number"
+                    value={selectedEdge.distance}
+                    onChange={(e) => updateEdge(selectedEdge.id, { distance: parseFloat(e.target.value) || 0 })}
+                    className="w-16 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                  />
+                  m
                 </span>
                 <span className="text-[10px] text-slate-400">
                   {selectedEdge.bidirectional !== false ? '↔ Two-way' : '→ One-way'}
