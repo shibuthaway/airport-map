@@ -285,6 +285,7 @@ export default function TaggingPanel() {
                 onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
                 className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/50"
               >
+                <option value="waypoint" className="font-bold text-sky-600 dark:text-sky-400">📍 Navigation Waypoint</option>
                 {categories && categories.length > 0 ? categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>) : <option value="default">Default</option>}
               </select>
             </div>
