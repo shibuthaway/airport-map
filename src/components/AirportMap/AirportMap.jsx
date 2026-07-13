@@ -930,7 +930,8 @@ export default function AirportMap() {
                     const isStart = navigationStart?.id === poi.id;
                     const isEnd = navigationEnd?.id === poi.id;
                     const isEdgeStart = edgeStartNodeId === poi.id;
-                    const color = getCategoryColor(poi.category);
+                    const cat = categories?.find(c => c.id === poi.category);
+                    const color = cat?.color || getCategoryColor(poi.category);
 
                     // Special Waypoint node representation
                     if (poi.category === 'waypoint') {
@@ -1062,7 +1063,7 @@ export default function AirportMap() {
                         {(() => {
                           const cat = categories?.find(c => c.id === poi.category);
                           const CustomIcon = cat?.icon && LucideIcons[cat.icon] ? LucideIcons[cat.icon] : null;
-                          const iconColor = isSelected ? '#0ea5e9' : (theme === 'dark' ? '#f8fafc' : '#0f172a');
+                          const iconColor = isSelected ? '#0ea5e9' : (cat?.color || (theme === 'dark' ? '#f8fafc' : '#0f172a'));
                           
                           return (
                             <>
