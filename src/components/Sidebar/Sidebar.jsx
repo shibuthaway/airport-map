@@ -25,6 +25,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   // Controls which SearchableSelect is open — prevents From/To overlap
   const [activeSelect, setActiveSelect] = useState(null); // 'from' | 'to' | null
+  const [expandedPoiId, setExpandedPoiId] = useState(null);
 
   // Voice guidance (FREE — Web Speech API)
   const {
@@ -372,11 +373,11 @@ export default function Sidebar() {
                     {categoryPlaces.map(poi => (
                       <div key={poi.id} className="flex flex-col">
                         <button onClick={() => {
-                          selectPoi(poi);
+                          setExpandedPoiId(expandedPoiId === poi.id ? null : poi.id);
                           useMapStore.getState().zoomMapTo(poi.x, poi.y, 3.5);
                           if (isMobile) setIsOpen(false);
                         }}
-                          className={`flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-98 text-left ${selectedPoi?.id === poi.id ? 'bg-sky-500/10 dark:bg-sky-500/10 ring-1 ring-sky-500/30' : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
+                          className={`flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-98 text-left ${expandedPoiId === poi.id ? 'bg-sky-500/10 dark:bg-sky-500/10 ring-1 ring-sky-500/30' : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
                           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-base flex-shrink-0 overflow-hidden text-slate-500">
                             {poi.imageUrl ? <img src={poi.imageUrl} alt="" className="w-full h-full object-cover" /> : (poi.isCustom ? <LucideIcons.MapPin className="w-4 h-4" /> : <DynamicIcon name={activeCatObj?.iconName} className="w-4 h-4" />)}
                           </div>
@@ -386,7 +387,7 @@ export default function Sidebar() {
                           </div>
                           <span className="text-[9px] font-bold px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex-shrink-0">{poi.category}</span>
                         </button>
-                        {selectedPoi?.id === poi.id && (
+                        {expandedPoiId === poi.id && (
                           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="pl-12 pr-3 pb-2 flex gap-2">
                             <button onClick={() => { setNavigationMode(true); if (navigationEnd?.id === poi.id) setNavigationEnd(null); setNavigationStart(poi); setActiveTab('navigate'); }}
                               className="flex-1 py-2 text-[11px] font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition active:scale-95">From Here</button>
