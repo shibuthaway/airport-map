@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMapStore } from '../../store/useMapStore';
 import {
@@ -22,7 +22,12 @@ export default function MapHeader() {
 
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [rotOpen, setRotOpen] = useState(false);
-  const currentBuildingName = buildings?.find(b => b.id === currentBuilding)?.name || 'Select Terminal';
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (!dataLoaded) return null;
 
@@ -47,55 +52,19 @@ export default function MapHeader() {
       {!isFullScreen && (
         <div className="h-14 border-b border-slate-200/50 dark:border-slate-800/40 bg-white/95 dark:bg-slate-950/90 backdrop-blur-xl flex items-center justify-between px-3 md:px-6 z-20 select-none flex-shrink-0 gap-2">
 
-          {/* LEFT: Terminal Selector */}
+          {/* LEFT: Live Status Indicator */}
           <div className="flex items-center min-w-0 flex-1">
-            {buildings && buildings.length > 0 && (
-              <div className="relative max-w-full">
-                <button
-                  onClick={() => setTerminalOpen(v => !v)}
-                  className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-gradient-to-r from-sky-500/15 to-indigo-500/15 border border-sky-400/30 dark:border-sky-600/30 text-sky-700 dark:text-sky-300 font-bold active:scale-95 transition-all max-w-[160px]"
-                >
-                  <span className="text-base flex-shrink-0">🏢</span>
-                  <span className="truncate text-[12px] font-bold">{currentBuildingName}</span>
-                  {buildings.length > 1 && (
-                    <FiChevronDown className={`w-3 h-3 flex-shrink-0 transition-transform duration-200 ${terminalOpen ? 'rotate-180' : ''}`} />
-                  )}
-                </button>
-
-                {buildings.length > 1 && (
-                  <AnimatePresence>
-                    {terminalOpen && (
-                      <>
-                        <div className="fixed inset-0 z-[55]" onClick={() => setTerminalOpen(false)} />
-                        <motion.div
-                          initial={{ opacity: 0, y: -6, scale: 0.97 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                          transition={{ duration: 0.15 }}
-                          className="absolute top-full left-0 mt-2 z-[60] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl shadow-black/15 border border-slate-200/60 dark:border-slate-700/40 overflow-hidden min-w-[180px]"
-                        >
-                          {buildings.map(b => (
-                            <button
-                              key={b.id}
-                              onClick={() => { setBuilding(b.id); setTerminalOpen(false); }}
-                              className={`w-full flex items-center gap-3 px-4 py-3 text-[13px] font-semibold transition-all active:scale-95 ${
-                                currentBuilding === b.id
-                                  ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400'
-                                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
-                              }`}
-                            >
-                              <span>🏢</span>
-                              <span className="truncate flex-1 text-left">{b.name}</span>
-                              {currentBuilding === b.id && <span className="text-sky-500 text-xs font-bold">✓</span>}
-                            </button>
-                          ))}
-                        </motion.div>
-                      </>
-                    )}
-                  </AnimatePresence>
-                )}
+            <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/50 backdrop-blur-md shadow-sm">
+              <div className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </div>
-            )}
+              <span className="text-[10px] font-black text-slate-600 dark:text-slate-300 tracking-wider uppercase">Live</span>
+              <div className="w-px h-3 bg-slate-300 dark:bg-slate-700 mx-0.5"></div>
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
           </div>
 
           {/* MIDDLE: Mobile Compact Search */}
