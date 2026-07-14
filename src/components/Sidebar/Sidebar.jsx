@@ -240,8 +240,8 @@ export default function Sidebar() {
       {activeTab === 'explore' && (
         <motion.div key="explore" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col gap-4">
           
-          {/* Search box inside sheet - hidden on mobile since we have a floating one */}
-          <div className="hidden md:block bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-1 border border-slate-200/50 dark:border-slate-800/30">
+          {/* Search box inside sheet */}
+          <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-1 border border-slate-200/50 dark:border-slate-800/30">
             <Search />
           </div>
 
@@ -568,8 +568,6 @@ export default function Sidebar() {
 
   // ── MOBILE: Bottom Sheet + Bottom Nav ─────────────────────────────────────
   if (isMobile) {
-    const isActivelyNavigating = navigationMode && navigationStart && navigationEnd && navigationPath;
-
     const navItems = [
       { id: 'explore',  label: 'Explore',   emoji: '🔍', color: 'sky',    action: () => { setActiveTab('explore');  setIsOpen(prev => activeTab === 'explore'  ? !prev : true); setNavigationMode(false); } },
       { id: 'navigate', label: 'Navigate',  emoji: '🧭', color: 'indigo', action: () => { setActiveTab('navigate'); setIsOpen(prev => activeTab === 'navigate' ? !prev : true); setNavigationMode(true); } },
@@ -587,86 +585,8 @@ export default function Sidebar() {
       rose:   { active: 'text-rose-500',   bg: 'bg-rose-500/12' },
     };
 
-    if (isActivelyNavigating) {
-      const steps = compileDirections();
-      const currentStep = steps[1] || steps[0]; // Next step is usually index 1, index 0 is start.
-      const timeMins = Math.max(1, Math.round(navigationDistance/80));
-
-      return (
-        <AnimatePresence>
-          {/* Top Floating Card */}
-          <motion.div 
-            initial={{ y: -100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -100, opacity: 0 }}
-            className="fixed top-4 left-4 right-4 z-[60] bg-teal-800 text-white rounded-[24px] p-5 shadow-2xl flex flex-col gap-2 pointer-events-auto"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 flex items-center justify-center bg-teal-700/50 rounded-full flex-shrink-0">
-                {currentStep?.icon ? React.cloneElement(currentStep.icon, { className: "w-6 h-6 text-white drop-shadow-md" }) : <FiArrowUp className="w-6 h-6" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-2xl font-black truncate">{currentStep?.text || 'Proceed on route'}</h2>
-                <p className="text-[13px] font-semibold text-teal-100 truncate">{currentStep?.desc || `Floor ${currentFloor}`}</p>
-              </div>
-            </div>
-            {steps.length > 2 && (
-              <div className="mt-2 pt-2 text-[13px] border-t border-white/20 flex items-center gap-2 font-semibold">
-                <span className="opacity-70">Then</span>
-                <span className="text-teal-200">↰</span>
-                <span className="truncate">{steps[2]?.text}</span>
-              </div>
-            )}
-          </motion.div>
-          
-          {/* Bottom Exit Pill */}
-          <motion.div 
-            initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-6 left-4 right-4 z-[60] bg-white dark:bg-slate-900 rounded-[32px] p-2 shadow-[0_10px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex items-center justify-between border border-slate-200/50 dark:border-slate-800 pointer-events-auto"
-          >
-            <div className="flex flex-col pl-4">
-              <div className="flex items-baseline gap-2">
-                <span className="text-xl font-black text-emerald-600 dark:text-emerald-500">{timeMins} min</span>
-                <span className="text-slate-500 font-bold text-sm">({navigationDistance}m)</span>
-              </div>
-              <span className="text-[11px] text-slate-400 font-bold tracking-wide uppercase">{navigationRoutes?.length > 1 ? `Via ${navigationRoutes[activeRouteIndex]?.type}` : 'Fastest route'}</span>
-            </div>
-            <button 
-              onClick={() => { useMapStore.getState().clearNavigation(); }} 
-              className="px-6 py-3.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 font-black rounded-full active:scale-95 transition-all text-sm"
-            >
-              Exit
-            </button>
-          </motion.div>
-
-          {/* Voice Toggle FAB */}
-          {isSupported && (
-            <motion.button 
-              initial={{ scale: 0 }} animate={{ scale: 1 }}
-              onClick={() => toggleVoice()} 
-              className={`fixed right-4 bottom-28 z-[60] w-12 h-12 rounded-full flex items-center justify-center shadow-xl border border-slate-200/50 dark:border-slate-700 pointer-events-auto active:scale-90 transition-all ${voiceEnabled ? 'bg-sky-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-500'}`}
-            >
-              {voiceEnabled ? <FiVolume2 className="w-5 h-5"/> : <FiVolumeX className="w-5 h-5"/>}
-            </motion.button>
-          )}
-        </AnimatePresence>
-      );
-    }
-
     return (
       <>
-        {/* Floating Search Bar (Top) */}
-        {!isOpen && (
-          <div className="fixed top-4 left-4 right-4 z-[45] pointer-events-auto">
-            <div className="bg-white dark:bg-slate-900 rounded-full shadow-lg border border-slate-200/50 dark:border-slate-700/50 pl-1 pr-3 py-1 flex items-center gap-2">
-              <div className="flex-1">
-                <Search compact />
-              </div>
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-md flex-shrink-0">
-                {useMapStore.getState().user?.username?.charAt(0)?.toUpperCase() || '👤'}
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Overlay */}
         <AnimatePresence>
           {isOpen && (
@@ -688,7 +608,7 @@ export default function Sidebar() {
           style={{ bottom: '60px', maxHeight: '76vh' }}
         >
           <div
-            className="mx-2 bg-white dark:bg-slate-900 rounded-t-[28px] rounded-b-[16px] shadow-2xl shadow-black/25 border border-slate-200/50 dark:border-slate-700/30 overflow-hidden flex flex-col"
+            className="mx-3 bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl shadow-black/25 border border-slate-200/50 dark:border-slate-700/30 overflow-hidden flex flex-col"
             style={{ maxHeight: '76vh' }}
           >
             {/* Handle Bar — ONLY this area triggers swipe-to-close */}
@@ -712,7 +632,7 @@ export default function Sidebar() {
                 document.addEventListener('pointerup', onUp);
               }}
             >
-              <div className="w-9 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
+              <div className="w-9 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
             </div>
 
             {/* Sheet Header */}
@@ -743,7 +663,7 @@ export default function Sidebar() {
                 <button
                   key={t.id}
                   onClick={() => setActiveTab(t.id)}
-                  className={`whitespace-nowrap px-4 py-2 rounded-[14px] text-[12px] font-bold transition-all active:scale-95 flex-shrink-0 ${
+                  className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-bold transition-all active:scale-95 flex-shrink-0 ${
                     activeTab === t.id
                       ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-md shadow-sky-500/30'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
@@ -784,7 +704,7 @@ export default function Sidebar() {
                         transition={{ type: 'spring', damping: 30, stiffness: 350 }}
                       />
                     )}
-                    <span className={`text-[22px] leading-none transition-all ${isActive ? 'scale-110 drop-shadow-md' : 'grayscale-[0.5] opacity-80'}`}>{item.emoji}</span>
+                    <span className={`text-[20px] leading-none transition-all ${isActive ? 'scale-115' : ''}`}>{item.emoji}</span>
                     <span className={`text-[10px] font-bold transition-colors relative ${
                       isActive ? c.active : 'text-slate-400 dark:text-slate-500'
                     }`}>{item.label}</span>
