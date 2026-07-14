@@ -152,33 +152,35 @@ export default function MapHeader() {
 
       {/* ── Floating Map Controls (zoom + rotation) ──── */}
       {dataLoaded && (
-        <div className={`fixed right-3 flex flex-col gap-2 pointer-events-auto transition-all ${isFullScreen ? 'z-[60] top-[80px] md:top-[80px]' : 'z-30 top-[72px] md:hidden'}`}>
+        <div className={`fixed flex flex-row gap-3 pointer-events-auto transition-all ${
+          isFullScreen ? 'z-[60] bottom-8 left-1/2 -translate-x-1/2' : 'z-30 bottom-[90px] left-1/2 -translate-x-1/2 md:hidden'
+        }`}>
           {/* Zoom group */}
-          <div className="flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-200/60 dark:border-slate-700/40 overflow-hidden">
-            <button onClick={() => zoomActions?.zoomIn()} className="w-9 h-9 flex items-center justify-center text-emerald-600 dark:text-emerald-400 active:bg-emerald-50 dark:active:bg-emerald-950/30 transition-all active:scale-90">
-              <FiPlus className="w-4 h-4" />
+          <div className="flex flex-row items-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-full shadow-xl border border-slate-200/60 dark:border-slate-700/40 px-1 overflow-hidden">
+            <button onClick={() => zoomActions?.zoomOut()} className="w-10 h-10 flex items-center justify-center text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-full transition-all active:scale-90">
+              <FiMinus className="w-4 h-4" />
             </button>
-            <div className="h-px bg-slate-200/60 dark:bg-slate-700/40 mx-1.5" />
-            <button onClick={() => zoomActions?.resetTransform()} className="w-9 h-9 flex items-center justify-center text-slate-500 dark:text-slate-400 active:bg-slate-50 dark:active:bg-slate-800 transition-all active:scale-90">
+            <div className="w-px h-5 bg-slate-200/60 dark:bg-slate-700/40 mx-0.5" />
+            <button onClick={() => zoomActions?.resetTransform()} className="w-10 h-10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-all active:scale-90">
               <FiMaximize2 className="w-3.5 h-3.5" />
             </button>
-            <div className="h-px bg-slate-200/60 dark:bg-slate-700/40 mx-1.5" />
-            <button onClick={() => zoomActions?.zoomOut()} className="w-9 h-9 flex items-center justify-center text-rose-500 dark:text-rose-400 active:bg-rose-50 dark:active:bg-rose-950/30 transition-all active:scale-90">
-              <FiMinus className="w-4 h-4" />
+            <div className="w-px h-5 bg-slate-200/60 dark:bg-slate-700/40 mx-0.5" />
+            <button onClick={() => zoomActions?.zoomIn()} className="w-10 h-10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-full transition-all active:scale-90">
+              <FiPlus className="w-4 h-4" />
             </button>
           </div>
 
           {/* Rotation group */}
-          <div className="flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-200/60 dark:border-slate-700/40 overflow-hidden">
-            <button onClick={() => setMapRotation(mapRotation - 45)} className="w-9 h-9 flex items-center justify-center text-violet-500 active:bg-violet-50 dark:active:bg-violet-950/30 transition-all active:scale-90">
+          <div className="flex flex-row items-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-full shadow-xl border border-slate-200/60 dark:border-slate-700/40 px-1 overflow-hidden">
+            <button onClick={() => setMapRotation(mapRotation - 45)} className="w-10 h-10 flex items-center justify-center text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/30 rounded-full transition-all active:scale-90">
               <FiRotateCcw className="w-3.5 h-3.5" />
             </button>
-            <div className="h-px bg-slate-200/60 dark:bg-slate-700/40 mx-1.5" />
-            <button onClick={() => setMapRotation(0)} className="w-9 h-9 flex items-center justify-center text-[9px] font-bold text-violet-600 dark:text-violet-300 active:bg-violet-50 transition-all">
+            <div className="w-px h-5 bg-slate-200/60 dark:bg-slate-700/40 mx-0.5" />
+            <button onClick={() => setMapRotation(0)} className="w-10 h-10 flex items-center justify-center text-[10px] font-bold text-violet-600 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded-full transition-all">
               {Math.round(mapRotation)}°
             </button>
-            <div className="h-px bg-slate-200/60 dark:bg-slate-700/40 mx-1.5" />
-            <button onClick={() => setMapRotation(mapRotation + 45)} className="w-9 h-9 flex items-center justify-center text-violet-500 active:bg-violet-50 dark:active:bg-violet-950/30 transition-all active:scale-90">
+            <div className="w-px h-5 bg-slate-200/60 dark:bg-slate-700/40 mx-0.5" />
+            <button onClick={() => setMapRotation(mapRotation + 45)} className="w-10 h-10 flex items-center justify-center text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/30 rounded-full transition-all active:scale-90">
               <FiRotateCw className="w-3.5 h-3.5" />
             </button>
           </div>
