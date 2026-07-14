@@ -45,7 +45,7 @@ export default function MapHeader() {
 
       {/* ── Main Header ─────────────────────── */}
       {!isFullScreen && (
-        <div className="h-14 border-b border-slate-200/50 dark:border-slate-800/40 bg-white/95 dark:bg-slate-950/90 backdrop-blur-xl flex items-center justify-between px-3 md:px-6 z-20 select-none flex-shrink-0 gap-2">
+        <div className="h-14 border-b border-slate-200/50 dark:border-slate-800/40 bg-white/95 dark:bg-slate-950/90 backdrop-blur-xl hidden md:flex items-center justify-between px-3 md:px-6 z-20 select-none flex-shrink-0 gap-2">
 
           {/* LEFT: Terminal Selector */}
           <div className="flex items-center min-w-0 flex-1">
@@ -98,32 +98,8 @@ export default function MapHeader() {
             )}
           </div>
 
-          {/* MIDDLE: Mobile Compact Search */}
-          <div className="md:hidden flex-1 min-w-0 px-2 flex justify-center">
-            <Search compact />
-          </div>
-
-          {/* RIGHT: Mobile — only essential 3 buttons */}
-          <div className="flex items-center gap-1.5 flex-shrink-0 md:hidden">
-            {/* Full Screen */}
-            <button
-              onClick={toggleFullScreen}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/50 dark:border-indigo-800/40 text-indigo-600 dark:text-indigo-400 active:scale-90 transition-all"
-            >
-              <FiMaximize className="w-4 h-4" />
-            </button>
-
-            {/* Theme */}
-            <button
-              onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-amber-50 dark:bg-slate-800/60 border border-amber-200/50 dark:border-slate-700/40 active:scale-90 transition-all"
-            >
-              {theme === 'dark' ? <FiSun className="w-4 h-4 text-amber-400" /> : <FiMoon className="w-4 h-4 text-slate-600" />}
-            </button>
-          </div>
-
           {/* RIGHT: Desktop — all controls */}
-          <div className="hidden md:flex items-center gap-1.5 flex-shrink-0">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             {/* Rotation */}
             <div className="flex items-center bg-violet-50 dark:bg-violet-950/30 border border-violet-200/50 dark:border-violet-800/40 rounded-xl p-0.5 gap-0.5">
               <button onClick={() => setMapRotation(mapRotation - 45)} className="w-8 h-8 rounded-lg flex items-center justify-center text-violet-500 hover:bg-violet-100 active:scale-90 transition-all">
@@ -160,30 +136,11 @@ export default function MapHeader() {
         </div>
       )}
 
-      {/* ── Active Navigation Overlay ─────────── */}
-      <AnimatePresence>
-        {navigationPath && !isFullScreen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.9 }}
-            className="fixed top-16 left-1/2 -translate-x-1/2 z-[60] pointer-events-auto"
-          >
-            <button
-              onClick={() => clearNavigation()}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-lg shadow-rose-500/30 transition-all active:scale-95 border border-rose-400/50"
-            >
-              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              Stop Navigation
-              <FiX className="w-3.5 h-3.5 ml-1" />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
 
       {/* ── Mobile Floating Map Controls (zoom + rotation) ──── */}
       {!isFullScreen && dataLoaded && (
-        <div className="md:hidden fixed right-3 z-30 flex flex-col gap-2 pointer-events-auto" style={{ top: '72px' }}>
+        <div className="md:hidden fixed right-3 z-30 flex flex-col gap-2 pointer-events-auto top-[60%] -translate-y-1/2">
           {/* Zoom group */}
           <div className="flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-200/60 dark:border-slate-700/40 overflow-hidden">
             <button onClick={() => zoomActions?.zoomIn()} className="w-9 h-9 flex items-center justify-center text-emerald-600 dark:text-emerald-400 active:bg-emerald-50 dark:active:bg-emerald-950/30 transition-all active:scale-90">
