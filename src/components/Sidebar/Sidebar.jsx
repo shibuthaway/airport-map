@@ -388,11 +388,17 @@ export default function Sidebar() {
                           <span className="text-[9px] font-bold px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex-shrink-0">{poi.category}</span>
                         </button>
                         {expandedPoiId === poi.id && (
-                          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="pl-12 pr-3 pb-2 flex gap-2">
-                            <button onClick={() => { setNavigationMode(true); if (navigationEnd?.id === poi.id) setNavigationEnd(null); setNavigationStart(poi); setActiveTab('navigate'); }}
-                              className="flex-1 py-2 text-[11px] font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition active:scale-95">From Here</button>
-                            <button onClick={() => { setNavigationMode(true); if (navigationStart?.id === poi.id) setNavigationStart(null); setNavigationEnd(poi); setActiveTab('navigate'); }}
-                              className="flex-1 py-2 text-[11px] font-bold bg-sky-500 hover:bg-sky-600 text-white rounded-xl transition active:scale-95">To Here</button>
+                          <motion.div initial={{ opacity: 0, height: 0, y: -5 }} animate={{ opacity: 1, height: 'auto', y: 0 }} className="px-3 pb-3 pt-1">
+                            <div className="flex gap-2 p-1.5 rounded-xl bg-slate-100/50 dark:bg-slate-800/30 border border-slate-200/50 dark:border-slate-700/50">
+                              <button onClick={() => { setNavigationMode(true); if (navigationEnd?.id === poi.id) setNavigationEnd(null); setNavigationStart(poi); setActiveTab('navigate'); }}
+                                className="flex-1 py-2 flex items-center justify-center gap-1.5 text-[11px] font-bold bg-white dark:bg-slate-800 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700 rounded-lg shadow-sm transition-all active:scale-95">
+                                <LucideIcons.MapPin className="w-3 h-3" /> From Here
+                              </button>
+                              <button onClick={() => { setNavigationMode(true); if (navigationStart?.id === poi.id) setNavigationStart(null); setNavigationEnd(poi); setActiveTab('navigate'); }}
+                                className="flex-1 py-2 flex items-center justify-center gap-1.5 text-[11px] font-bold bg-sky-500 hover:bg-sky-600 text-white border border-transparent rounded-lg shadow-sm shadow-sky-500/20 transition-all active:scale-95">
+                                <LucideIcons.Navigation className="w-3 h-3" /> To Here
+                              </button>
+                            </div>
                           </motion.div>
                         )}
                       </div>
