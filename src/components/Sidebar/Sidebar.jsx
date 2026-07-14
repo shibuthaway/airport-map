@@ -239,7 +239,7 @@ export default function Sidebar() {
     <AnimatePresence mode="wait">
       {/* Explore */}
       {activeTab === 'explore' && (
-        <motion.div key="explore" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col gap-4 relative h-full">
+        <motion.div key="explore" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col gap-4 relative">
           
           {activeCategory === null ? (
             // ── DASHBOARD VIEW ────────────────────────────────────────────────
@@ -351,7 +351,7 @@ export default function Sidebar() {
               </div>
 
               {/* Action Cards */}
-              <div className="grid grid-cols-2 gap-3 mt-auto pb-4">
+              <div className="grid grid-cols-2 gap-3 pt-2 pb-4">
                 <button onClick={() => setActiveCategory('search')} className="flex items-center gap-3 p-4 rounded-2xl bg-slate-100 dark:bg-gradient-to-br dark:from-[#0f172a] dark:to-[#0a0f1e] border border-slate-200 dark:border-sky-500/10 dark:shadow-[0_0_15px_rgba(14,165,233,0.05)] hover:border-sky-400/40 transition-all group active:scale-95 text-left">
                   <div className="w-10 h-10 rounded-full bg-sky-500/10 flex items-center justify-center flex-shrink-0 text-sky-500 group-hover:bg-sky-500/20 transition-all"><FiSearch className="w-4 h-4" /></div>
                   <div>
@@ -370,7 +370,7 @@ export default function Sidebar() {
             </>
           ) : (
             // ── LIST VIEW (Category / Search) ──────────────────────────────────
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-4 h-full">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-4">
               
               {/* Back Button & Title */}
               <div className="flex items-center gap-3 pb-3 border-b border-slate-200/50 dark:border-slate-800/50">
@@ -394,7 +394,7 @@ export default function Sidebar() {
               </div>
 
               {/* List of Places */}
-              <div className="flex-1 overflow-y-auto no-scrollbar -mx-2 px-2 pb-10">
+              <div className="-mx-2 px-2 pb-10">
                 {(() => {
                   const query = useMapStore.getState().searchQuery.toLowerCase();
                   let displayPlaces = flatPois;
