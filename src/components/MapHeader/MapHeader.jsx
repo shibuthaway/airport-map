@@ -150,9 +150,9 @@ export default function MapHeader() {
         )}
       </AnimatePresence>
 
-      {/* ── Mobile Floating Map Controls (zoom + rotation) ──── */}
-      {!isFullScreen && dataLoaded && (
-        <div className="md:hidden fixed right-3 z-30 flex flex-col gap-2 pointer-events-auto" style={{ top: '72px' }}>
+      {/* ── Floating Map Controls (zoom + rotation) ──── */}
+      {dataLoaded && (
+        <div className={`fixed right-3 flex flex-col gap-2 pointer-events-auto transition-all ${isFullScreen ? 'z-[60] top-[80px] md:top-[80px]' : 'z-30 top-[72px] md:hidden'}`}>
           {/* Zoom group */}
           <div className="flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-200/60 dark:border-slate-700/40 overflow-hidden">
             <button onClick={() => zoomActions?.zoomIn()} className="w-9 h-9 flex items-center justify-center text-emerald-600 dark:text-emerald-400 active:bg-emerald-50 dark:active:bg-emerald-950/30 transition-all active:scale-90">
