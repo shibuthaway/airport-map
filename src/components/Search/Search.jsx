@@ -59,13 +59,11 @@ export default function Search({ compact = false }) {
       setFloor(poi.floor);
       // Slight delay to allow floor transition before highlighting the POI
       setTimeout(() => {
-        selectPoi(poi);
         zoomMapTo(poi.x, poi.y, 3.5);
         // Dispatch custom event so Sidebar can close on mobile
         window.dispatchEvent(new CustomEvent('map:poi-selected'));
       }, 150);
     } else {
-      selectPoi(poi);
       zoomMapTo(poi.x, poi.y, 3.5);
       window.dispatchEvent(new CustomEvent('map:poi-selected'));
     }
