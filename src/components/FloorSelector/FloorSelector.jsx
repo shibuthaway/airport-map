@@ -1,10 +1,22 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMapStore } from '../../store/useMapStore';
 import { FiLayers } from 'react-icons/fi';
 
 export default function FloorSelector() {
-  const { floors, currentFloor, setFloor, theme } = useMapStore();
+  const { floors, currentFloor, setFloor, buildings, currentBuilding, setBuilding } = useMapStore();
+  const [showBuildings, setShowBuildings] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setShowBuildings(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
 
   const floorThemes = {
     arrival: {
@@ -33,10 +45,47 @@ export default function FloorSelector() {
   if (!floors || floors.length === 0) return null;
 
   return (
-    <div className="absolute right-3 top-1/2 -translate-y-1/2 z-[60] flex flex-col items-center gap-2 pointer-events-auto">
-      {/* Optional Top Icon to signify "Floors" */}
-      <div className="w-8 h-8 rounded-full bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/50 dark:border-slate-700/40 flex items-center justify-center text-slate-400 mb-1 shadow-lg">
-        <FiLayers className="w-4 h-4" />
+    <div ref={containerRef} className="absolute right-3 top-1/2 -translate-y-1/2 z-[60] flex flex-col items-center gap-2 pointer-events-auto">
+      {/* Top Icon to signify "Floors" and Switch Buildings */}
+      <div className="relative group">
+        <button 
+          onClick={() => setShowBuildings(!showBuildings)}
+          className={`w-8 h-8 rounded-full backdrop-blur-md border flex items-center justify-center mb-1 shadow-lg transition-all ${
+            showBuildings 
+              ? 'bg-sky-500 text-white border-sky-400' 
+              : 'bg-white/70 dark:bg-slate-900/60 border-slate-200/50 dark:border-slate-700/40 text-slate-400 hover:text-sky-500 hover:border-sky-300'
+          }`}
+          title="Switch Building"
+        >
+          <FiLayers className="w-4 h-4" />
+        </button>
+
+        {/* Building Dropdown Tooltip */}
+        <AnimatePresence>
+          {showBuildings && buildings?.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              className="absolute right-full mr-3 top-0 min-w-[140px] bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700/60 rounded-xl shadow-xl overflow-hidden pointer-events-auto"
+            >
+              <div className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Select Building</span>
+              </div>
+              <div className="flex flex-col py-1">
+                {buildings.map(b => (
+                  <button
+                    key={b.id}
+                    onClick={() => { setBuilding(b.id); setShowBuildings(false); }}
+                    className={`px-3 py-2 text-xs font-bold text-left transition-colors ${currentBuilding === b.id ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                  >
+                    {b.name}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/50 p-1.5 rounded-3xl shadow-2xl flex flex-col gap-1.5">
