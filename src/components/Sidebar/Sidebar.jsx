@@ -792,7 +792,7 @@ export default function Sidebar() {
           )}
         </div>
         
-        <div className="flex flex-col gap-2.5 w-full px-2.5">
+        <div className="flex flex-col gap-2 w-full px-2.5 overflow-y-auto no-scrollbar flex-1 pb-4">
           {tabs.map(tab => {
             const isActive = activeTab === tab.id;
             const grad = tabColors[tab.id] || tabColors.explore;
@@ -802,8 +802,8 @@ export default function Sidebar() {
               <button
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id); setIsOpen(true); setNavigationMode(tab.id === 'navigate'); }}
-                className={`w-full h-[66px] rounded-[20px] flex flex-col items-center justify-center gap-1.5 transition-all duration-300 group relative border border-transparent ${isActive
-                    ? `bg-gradient-to-br ${grad} text-white shadow-xl scale-[1.02]`
+                className={`w-full h-[60px] md:h-[64px] flex-shrink-0 rounded-[20px] flex flex-col items-center justify-center gap-1.5 transition-all duration-300 group relative border border-transparent ${isActive
+                    ? `bg-gradient-to-br ${grad} text-white shadow-xl`
                     : `text-slate-400 dark:text-slate-500 ${hover} bg-transparent`
                   }`}
                 title={tab.label}
@@ -811,7 +811,7 @@ export default function Sidebar() {
                 {isActive && (
                   <motion.div layoutId="desktop-active-rail" className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-1.5 h-6 bg-sky-500 dark:bg-sky-400 rounded-r-full shadow-[0_0_10px_rgba(14,165,233,0.5)]" />
                 )}
-                {React.cloneElement(tab.icon, { className: `w-5 h-5 transition-all duration-300 ${isActive ? 'scale-110 drop-shadow-md' : 'group-hover:scale-110 group-hover:-translate-y-0.5'}` })}
+                {React.cloneElement(tab.icon, { className: `w-5 h-5 transition-all duration-300 ${isActive ? 'scale-110 drop-shadow-md' : 'group-hover:scale-110'}` })}
                 <span className={`text-[8.5px] font-black uppercase tracking-widest transition-all ${isActive ? 'text-white/95' : 'opacity-70 group-hover:opacity-100'}`}>{tab.label}</span>
               </button>
             )
