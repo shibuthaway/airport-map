@@ -100,7 +100,7 @@ export default function Sidebar() {
     if (navigationPath && navigationStart && navigationEnd && voiceEnabled) {
       announceRoute(navigationStart, navigationEnd, navigationDistance, []);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigationPath]);
 
   const DynamicIcon = ({ name, className }) => {
@@ -109,55 +109,55 @@ export default function Sidebar() {
   };
 
   const storeCategories = useMapStore(state => state.categories);
-  const categories = storeCategories && storeCategories.length > 0 
+  const categories = storeCategories && storeCategories.length > 0
     ? storeCategories.map(c => ({
-        key: c.id,
-        label: c.name,
-        iconName: c.icon,
-        color: c.color || '#3b82f6'
-      }))
+      key: c.id,
+      label: c.name,
+      iconName: c.icon,
+      color: c.color || '#3b82f6'
+    }))
     : [{ key: 'default', label: 'Places', iconName: 'MapPin', color: '#3b82f6' }];
 
   const getGradient = (color, isDark) => {
     // Generate simple gradient based on hex color
-    return isDark 
-      ? `linear-gradient(135deg, ${color}99, ${color}44)` 
+    return isDark
+      ? `linear-gradient(135deg, ${color}99, ${color}44)`
       : `linear-gradient(135deg, ${color}ff, ${color}cc)`;
   };
 
   const allTabs = [
-    { id: 'explore',    label: 'Explore',    icon: <FiSearch className="w-3.5 h-3.5" /> },
-    { id: 'navigate',   label: 'Directions', icon: <FiCompass className="w-3.5 h-3.5" /> },
-    { id: 'tagging',    label: 'Tag',        icon: <FiEdit3 className="w-3.5 h-3.5" /> },
-    { id: 'floors',     label: 'Floors',     icon: <FiLayers className="w-3.5 h-3.5" /> },
-    { id: 'categories', label: 'Types',      icon: <FiTag className="w-3.5 h-3.5" /> },
-    { id: 'settings',   label: 'Settings',   icon: <FiSettings className="w-3.5 h-3.5" /> },
-    { id: 'profile',    label: 'Profile',    icon: <FiUser className="w-3.5 h-3.5" /> },
+    { id: 'explore', label: 'Explore', icon: <FiSearch className="w-3.5 h-3.5" /> },
+    { id: 'navigate', label: 'Directions', icon: <FiCompass className="w-3.5 h-3.5" /> },
+    { id: 'tagging', label: 'Tag', icon: <FiEdit3 className="w-3.5 h-3.5" /> },
+    { id: 'floors', label: 'Floors', icon: <FiLayers className="w-3.5 h-3.5" /> },
+    { id: 'categories', label: 'Types', icon: <FiTag className="w-3.5 h-3.5" /> },
+    { id: 'settings', label: 'Settings', icon: <FiSettings className="w-3.5 h-3.5" /> },
+    { id: 'profile', label: 'Profile', icon: <FiUser className="w-3.5 h-3.5" /> },
   ];
-  
-  const tabs = isAdminMode 
-    ? allTabs 
+
+  const tabs = isAdminMode
+    ? allTabs
     : allTabs.filter(t => t.id === 'explore' || t.id === 'navigate');
 
   const compileDirections = () => {
     if (!navigationPath?.length || !navigationStart || !navigationEnd) return [];
     const { nodes } = useMapStore.getState();
     const steps = [];
-    
+
     const pathNodes = [];
     navigationPath.forEach(pt => {
       const matched = nodes.find(n => n.x === pt.x && n.y === pt.y && n.floor === pt.floor);
       if (matched) pathNodes.push(matched);
     });
-    
+
     if (pathNodes.length < 2) {
       return [{ type: 'end', text: 'Walk directly to your destination.', icon: <FiCheck /> }];
     }
 
     steps.push({ type: 'start', text: `Start at ${navigationStart.name}`, desc: `${capitalize(navigationStart.floor)} Level`, icon: <FiMapPin /> });
-    
+
     let currentFloorName = navigationStart.floor;
-    
+
     for (let i = 1; i < pathNodes.length - 1; i++) {
       const prev = pathNodes[i - 1];
       const curr = pathNodes[i];
@@ -171,7 +171,7 @@ export default function Sidebar() {
 
       // Vertical Transit
       if (curr.category === 'lift' || curr.category === 'escalator' || curr.category === 'elevator') {
-        steps.push({ 
+        steps.push({
           type: 'elevator',
           text: `Take the ${curr.name || curr.category}`,
           desc: `To floor ${capitalize(next.floor)}`,
@@ -181,7 +181,7 @@ export default function Sidebar() {
         currentFloorName = next.floor;
         continue;
       }
-      
+
       // Security/Immigration
       if (curr.category === 'security' || curr.category === 'immigration') {
         steps.push({ type: 'security', text: `Pass through ${curr.name || curr.category}`, icon: <FiCheck /> });
@@ -195,18 +195,18 @@ export default function Sidebar() {
         const dy1 = curr.y - prev.y;
         const dx2 = next.x - curr.x;
         const dy2 = next.y - curr.y;
-        
+
         const angle1 = Math.atan2(dy1, dx1);
         const angle2 = Math.atan2(dy2, dx2);
-        
+
         let diff = (angle2 - angle1) * (180 / Math.PI);
         while (diff <= -180) diff += 360;
         while (diff > 180) diff -= 360;
-        
+
         let turnType = 'straight';
         let turnText = 'Continue straight past';
         let Icon = FiArrowUp;
-        
+
         if (diff > 30 && diff <= 150) {
           turnType = 'right';
           turnText = 'Turn Right at';
@@ -220,15 +220,15 @@ export default function Sidebar() {
           turnText = 'Turn Around at';
           Icon = FiArrowUp; // fallback
         }
-        
-        steps.push({ 
+
+        steps.push({
           type: turnType,
           text: `${turnText} ${curr.name}`,
           icon: <Icon />
         });
       }
     }
-    
+
     steps.push({ type: 'end', text: `Arrive at ${navigationEnd.name}`, icon: <FiCheck /> });
     return steps;
   };
@@ -239,7 +239,7 @@ export default function Sidebar() {
       {/* Explore */}
       {activeTab === 'explore' && (
         <motion.div key="explore" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col gap-4">
-          
+
           {/* Search box inside sheet */}
           <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-1 border border-slate-200/50 dark:border-slate-800/30">
             <Search />
@@ -256,11 +256,10 @@ export default function Sidebar() {
                 <button
                   key={f.id}
                   onClick={() => setFloor(f.id)}
-                  className={`snap-center flex-shrink-0 px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all active:scale-95 ${
-                    currentFloor === f.id 
-                      ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg shadow-sky-500/30 border border-transparent' 
+                  className={`snap-center flex-shrink-0 px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all active:scale-95 ${currentFloor === f.id
+                      ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg shadow-sky-500/30 border border-transparent'
                       : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-sky-300/50 dark:hover:border-sky-500/30'
-                  }`}
+                    }`}
                 >
                   {f.name}
                 </button>
@@ -270,55 +269,94 @@ export default function Sidebar() {
 
           <div>
             <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Categories</h3>
-            <div className="grid grid-cols-3 gap-2.5">
-              {categories.map(cat => {
-                const count = pois[currentFloor]?.filter(p => p.category === cat.key).length || 0;
-                const isActive = activeCategory === cat.key;
-                const isDark = document.documentElement.classList.contains('dark');
-                const grad = getGradient(cat.color, isDark);
+            
+            {(() => {
+              const activeCategoriesOnFloor = categories
+                .map(cat => ({
+                  ...cat,
+                  count: pois[currentFloor]?.filter(p => p.category === cat.key).length || 0
+                }))
+                .filter(cat => cat.count > 0);
+
+              if (activeCategoriesOnFloor.length === 0) {
                 return (
-                  <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
-                    style={{
-                      backgroundImage: grad,
-                      boxShadow: isActive
-                        ? `0 0 0 3px rgba(255,255,255,0.85), 0 6px 20px ${cat.color}66`
-                        : 'none',
-                      transform: isActive ? 'scale(1.06)' : 'scale(1)',
-                      opacity: isActive ? 1 : isDark ? 0.65 : 0.75,
-                      transition: 'all 0.2s cubic-bezier(.34,1.56,.64,1)',
-                    }}
-                    className="relative flex flex-col items-center p-3 rounded-2xl active:scale-95 gap-1.5 overflow-hidden border-0"
-                  >
+                  <div className="py-8 text-center bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200/50 dark:border-slate-800/30">
+                    <span className="text-3xl opacity-50 block mb-2">🏝️</span>
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">No places added on this floor yet.</p>
+                  </div>
+                );
+              }
+
+              // Auto-select the first available category if current activeCategory has 0 count
+              if (activeCategoriesOnFloor.length > 0 && !activeCategoriesOnFloor.find(c => c.key === activeCategory)) {
+                setTimeout(() => setActiveCategory(activeCategoriesOnFloor[0].key), 0);
+              }
+
+              return (
+                <div className="grid grid-cols-3 gap-2.5">
+                  {activeCategoriesOnFloor.map(cat => {
+                    const isActive = activeCategory === cat.key;
+                    const isDark = document.documentElement.classList.contains('dark');
+                    
+                    // Generate a unique modern gradient using the category ID to slightly shift the appearance
+                    let hash = 0;
+                    for (let i = 0; i < cat.key.length; i++) hash = cat.key.charCodeAt(i) + ((hash << 5) - hash);
+                    const hueShift = Math.abs(hash % 40) - 20; // -20 to +20 degree shift
+                    const grad = `linear-gradient(135deg, ${cat.color}, color-mix(in srgb, ${cat.color}, black 20%))`;
+
+                    return (
+                      <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
+                        style={{
+                          background: grad,
+                          boxShadow: isActive
+                            ? `0 0 0 3px rgba(255,255,255,0.85), 0 8px 25px ${cat.color}66`
+                            : `0 4px 15px ${cat.color}22`,
+                          transform: isActive ? 'scale(1.04) translateY(-2px)' : 'scale(1)',
+                          opacity: isActive ? 1 : isDark ? 0.8 : 0.9,
+                          filter: isActive ? 'saturate(1.2)' : `hue-rotate(${hueShift}deg)`,
+                          transition: 'all 0.3s cubic-bezier(.34,1.56,.64,1)',
+                        }}
+                        className="relative flex flex-col items-center p-3 rounded-2xl active:scale-95 gap-1.5 overflow-hidden border-0"
+                      >
                     {/* Brightness overlay on hover for inactive */}
                     {!isActive && (
                       <div className="absolute inset-0 bg-white opacity-0 hover:opacity-10 transition-opacity duration-150 rounded-2xl" />
                     )}
-                    {/* Active sparkle ring */}
-                    {isActive && (
-                      <div className="absolute inset-0 rounded-2xl" style={{ boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.5)' }} />
-                    )}
-                    <span className={`text-2xl drop-shadow text-white transition-transform duration-200 ${isActive ? 'scale-115' : 'scale-100'}`} style={{ transform: isActive ? 'scale(1.18)' : 'scale(1)' }}>
-                      <DynamicIcon name={cat.iconName} className="w-6 h-6" />
-                    </span>
-                    <span className="text-[10px] font-extrabold leading-tight text-center text-white drop-shadow-sm">{cat.label}</span>
-                    <span
-                      className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor: isActive ? 'rgba(255,255,255,0.30)' : 'rgba(0,0,0,0.20)',
-                        color: '#fff',
-                      }}
-                    >{count}</span>
-                  </button>
-                );
-              })}
-            </div>
+                        {/* Active sparkle ring */}
+                        {isActive && (
+                          <div className="absolute inset-0 rounded-2xl" style={{ boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.4)' }} />
+                        )}
+                        
+                        <span className={`text-2xl drop-shadow-md text-white transition-transform duration-300 ${isActive ? 'scale-110' : 'scale-100'}`}>
+                          <DynamicIcon name={cat.iconName} className="w-6 h-6" />
+                        </span>
+                        
+                        <span className="text-[10px] font-extrabold leading-tight text-center text-white drop-shadow-sm line-clamp-2">
+                          {cat.label}
+                        </span>
+                        
+                        <span
+                          className="text-[9px] font-bold px-1.5 py-0.5 rounded-full mt-auto"
+                          style={{
+                            backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.15)',
+                            color: '#fff',
+                          }}
+                        >
+                          {cat.count} {cat.count === 1 ? 'place' : 'places'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
 
-          
+
           {(() => {
             const categoryPlaces = pois[currentFloor]?.filter(p => p.category === activeCategory) || [];
             const activeCatObj = categories.find(c => c.key === activeCategory);
-            
+
             return (
               <div>
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">
@@ -333,14 +371,14 @@ export default function Sidebar() {
                   <div className="flex flex-col gap-1.5">
                     {categoryPlaces.map(poi => (
                       <div key={poi.id} className="flex flex-col">
-                        <button onClick={() => { 
-                          selectPoi(poi); 
+                        <button onClick={() => {
+                          selectPoi(poi);
                           useMapStore.getState().zoomMapTo(poi.x, poi.y, 3.5);
-                          if (isMobile) setIsOpen(false); 
+                          if (isMobile) setIsOpen(false);
                         }}
                           className={`flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-98 text-left ${selectedPoi?.id === poi.id ? 'bg-sky-500/10 dark:bg-sky-500/10 ring-1 ring-sky-500/30' : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
                           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-base flex-shrink-0 overflow-hidden text-slate-500">
-                            {poi.imageUrl ? <img src={poi.imageUrl} alt="" className="w-full h-full object-cover" /> : (poi.isCustom ? <LucideIcons.MapPin className="w-4 h-4"/> : <DynamicIcon name={activeCatObj?.iconName} className="w-4 h-4"/>)}
+                            {poi.imageUrl ? <img src={poi.imageUrl} alt="" className="w-full h-full object-cover" /> : (poi.isCustom ? <LucideIcons.MapPin className="w-4 h-4" /> : <DynamicIcon name={activeCatObj?.iconName} className="w-4 h-4" />)}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{poi.name}</p>
@@ -440,8 +478,8 @@ export default function Sidebar() {
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Directions</span>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold text-sky-500 flex items-center gap-1">
-                        <FiClock className="w-3 h-3"/>
-                        {navigationDistance > 0 ? `${navigationDistance}m · ~${Math.max(1, Math.round(navigationDistance/80))} min` : '~3 min'}
+                        <FiClock className="w-3 h-3" />
+                        {navigationDistance > 0 ? `${navigationDistance}m · ~${Math.max(1, Math.round(navigationDistance / 80))} min` : '~3 min'}
                       </span>
                       {/* Voice toggle — only on mobile & if browser supports it */}
                       {isSupported && (
@@ -454,11 +492,10 @@ export default function Sidebar() {
                             }
                           }}
                           title={voiceEnabled ? 'Voice ON — tap to mute' : 'Enable voice guidance'}
-                          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-all active:scale-90 ${
-                            voiceEnabled
+                          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-all active:scale-90 ${voiceEnabled
                               ? 'bg-sky-500 text-white shadow-md shadow-sky-500/30'
                               : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-sky-50 dark:hover:bg-sky-950/30'
-                          }`}
+                            }`}
                         >
                           {voiceEnabled
                             ? <><FiVolume2 className="w-3 h-3" />{isSpeaking ? '…' : 'ON'}</>
@@ -472,7 +509,7 @@ export default function Sidebar() {
                     <div className="absolute left-[11px] top-4 bottom-6 w-0.5 bg-slate-200 dark:bg-slate-700 rounded" />
                     <div className="flex flex-col gap-5">
                       {compileDirections().map((step, i) => {
-                        const isStart = step.type === 'start', isEnd = step.type === 'end', isElevator = step.type === 'elevator', isTurn = ['left','right','uturn'].includes(step.type);
+                        const isStart = step.type === 'start', isEnd = step.type === 'end', isElevator = step.type === 'elevator', isTurn = ['left', 'right', 'uturn'].includes(step.type);
                         let iconCls = "bg-slate-100 dark:bg-slate-800 text-slate-500";
                         if (isStart) iconCls = "bg-emerald-500 text-white shadow-md shadow-emerald-500/30";
                         if (isEnd) iconCls = "bg-sky-500 text-white shadow-md shadow-sky-500/30";
@@ -569,20 +606,20 @@ export default function Sidebar() {
   // ── MOBILE: Bottom Sheet + Bottom Nav ─────────────────────────────────────
   if (isMobile) {
     const navItems = [
-      { id: 'explore',  label: 'Explore',   emoji: '🔍', color: 'sky',    action: () => { setActiveTab('explore');  setIsOpen(prev => activeTab === 'explore'  ? !prev : true); setNavigationMode(false); } },
-      { id: 'navigate', label: 'Navigate',  emoji: '🧭', color: 'indigo', action: () => { setActiveTab('navigate'); setIsOpen(prev => activeTab === 'navigate' ? !prev : true); setNavigationMode(true); } },
-      { id: 'map',      label: 'Map',       emoji: '🗺️', color: 'emerald',action: () => setIsOpen(false) },
-      ...(isAdminMode ? [{ id: 'floors',  label: 'Floors', emoji: '🏢', color: 'violet', action: () => { setActiveTab('floors');  setIsOpen(prev => activeTab === 'floors'  ? !prev : true); setNavigationMode(false); } }] : []),
-      ...(isAdminMode ? [{ id: 'tagging', label: 'Admin',  emoji: '⚙️', color: 'rose',   action: () => { setActiveTab('tagging'); setIsOpen(prev => activeTab === 'tagging' ? !prev : true); setNavigationMode(false); } }] : []),
+      { id: 'explore', label: 'Explore', emoji: '🔍', color: 'sky', action: () => { setActiveTab('explore'); setIsOpen(prev => activeTab === 'explore' ? !prev : true); setNavigationMode(false); } },
+      { id: 'navigate', label: 'Navigate', emoji: '🧭', color: 'indigo', action: () => { setActiveTab('navigate'); setIsOpen(prev => activeTab === 'navigate' ? !prev : true); setNavigationMode(true); } },
+      { id: 'map', label: 'Map', emoji: '🗺️', color: 'emerald', action: () => setIsOpen(false) },
+      ...(isAdminMode ? [{ id: 'floors', label: 'Floors', emoji: '🏢', color: 'violet', action: () => { setActiveTab('floors'); setIsOpen(prev => activeTab === 'floors' ? !prev : true); setNavigationMode(false); } }] : []),
+      ...(isAdminMode ? [{ id: 'tagging', label: 'Admin', emoji: '⚙️', color: 'rose', action: () => { setActiveTab('tagging'); setIsOpen(prev => activeTab === 'tagging' ? !prev : true); setNavigationMode(false); } }] : []),
       ...(isAdminMode ? [{ id: 'profile', label: 'Profile', emoji: '👤', color: 'slate', action: () => { setActiveTab('profile'); setIsOpen(prev => activeTab === 'profile' ? !prev : true); setNavigationMode(false); } }] : []),
     ];
 
     const colorMap = {
-      sky:    { active: 'text-sky-500',    bg: 'bg-sky-500/12' },
+      sky: { active: 'text-sky-500', bg: 'bg-sky-500/12' },
       indigo: { active: 'text-indigo-500', bg: 'bg-indigo-500/12' },
-      emerald:{ active: 'text-emerald-500',bg: 'bg-emerald-500/12' },
+      emerald: { active: 'text-emerald-500', bg: 'bg-emerald-500/12' },
       violet: { active: 'text-violet-500', bg: 'bg-violet-500/12' },
-      rose:   { active: 'text-rose-500',   bg: 'bg-rose-500/12' },
+      rose: { active: 'text-rose-500', bg: 'bg-rose-500/12' },
     };
 
     return (
@@ -663,11 +700,10 @@ export default function Sidebar() {
                 <button
                   key={t.id}
                   onClick={() => setActiveTab(t.id)}
-                  className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-bold transition-all active:scale-95 flex-shrink-0 ${
-                    activeTab === t.id
+                  className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-bold transition-all active:scale-95 flex-shrink-0 ${activeTab === t.id
                       ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-md shadow-sky-500/30'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-                  }`}
+                    }`}
                 >
                   {t.label}
                 </button>
@@ -705,9 +741,8 @@ export default function Sidebar() {
                       />
                     )}
                     <span className={`text-[20px] leading-none transition-all ${isActive ? 'scale-115' : ''}`}>{item.emoji}</span>
-                    <span className={`text-[10px] font-bold transition-colors relative ${
-                      isActive ? c.active : 'text-slate-400 dark:text-slate-500'
-                    }`}>{item.label}</span>
+                    <span className={`text-[10px] font-bold transition-colors relative ${isActive ? c.active : 'text-slate-400 dark:text-slate-500'
+                      }`}>{item.label}</span>
                   </button>
                 );
               })}
@@ -737,11 +772,10 @@ export default function Sidebar() {
               <button
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id); setIsOpen(true); setNavigationMode(tab.id === 'navigate'); }}
-                className={`w-full aspect-square rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all group relative ${
-                  isActive 
-                    ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-inner' 
+                className={`w-full aspect-square rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all group relative ${isActive
+                    ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-inner'
                     : 'text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
-                }`}
+                  }`}
                 title={tab.label}
               >
                 {isActive && (
