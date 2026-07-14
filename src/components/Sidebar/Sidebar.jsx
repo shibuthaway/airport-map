@@ -919,10 +919,15 @@ export default function Sidebar() {
         className="h-full overflow-hidden bg-white/80 dark:bg-[#111111]/80 backdrop-blur-3xl rounded-[2rem] border border-black/5 dark:border-white/10 shadow-xl dark:shadow-2xl flex flex-col flex-shrink-0 transition-colors duration-500"
       >
         <div className="p-6 pb-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 flex-shrink-0">
-          <h2 className="text-xl font-black text-slate-800 dark:text-white tracking-wide">
-            {tabs.find(t => t.id === activeTab)?.label || 'Menu'}
-          </h2>
-          <button onClick={() => setIsOpen(false)} className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white transition">
+          <div className="flex flex-col min-w-0 flex-1 pr-4">
+            <h2 className="text-[18px] font-black text-slate-800 dark:text-white tracking-tight truncate leading-tight">
+              {useMapStore.getState().appSettings?.name || 'Global Navigation'}
+            </h2>
+            <p className="text-[10px] font-bold text-sky-500 uppercase tracking-widest mt-0.5">
+              Indoor Map - {tabs.find(t => t.id === activeTab)?.label || 'Menu'}
+            </p>
+          </div>
+          <button onClick={() => setIsOpen(false)} className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 flex flex-shrink-0 items-center justify-center text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white transition">
             <FiChevronsLeft className="w-4 h-4" />
           </button>
         </div>
