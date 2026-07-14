@@ -20,7 +20,7 @@ import {
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('explore');
-  const [activeCategory, setActiveCategory] = useState('gate');
+  const [activeCategory, setActiveCategory] = useState(null);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const navigate = useNavigate();
   // Controls which SearchableSelect is open — prevents From/To overlap
@@ -239,175 +239,248 @@ export default function Sidebar() {
     <AnimatePresence mode="wait">
       {/* Explore */}
       {activeTab === 'explore' && (
-        <motion.div key="explore" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col gap-4">
-
-          {/* Search box inside sheet */}
-          <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-1 border border-slate-200/50 dark:border-slate-800/30">
-            <Search />
-          </div>
-
-          {/* Floor Selector */}
-          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-200/50 dark:border-slate-800/30 shadow-inner">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex justify-between items-center">
-              <span>Current Floor</span>
-              <span className="text-sky-500 bg-sky-50 dark:bg-sky-500/10 px-2 py-0.5 rounded-md">{floors.find(f => f.id === currentFloor)?.name || 'Unknown'}</span>
-            </h3>
-            <div className="flex gap-2 overflow-x-auto custom-scrollbar pb-2 pt-1 -mx-2 px-2 snap-x">
-              {floors.map(f => (
-                <button
-                  key={f.id}
-                  onClick={() => setFloor(f.id)}
-                  className={`snap-center flex-shrink-0 px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all active:scale-95 ${currentFloor === f.id
-                      ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg shadow-sky-500/30 border border-transparent'
-                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-sky-300/50 dark:hover:border-sky-500/30'
-                    }`}
-                >
-                  {f.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Categories</h3>
-            
-            {(() => {
-              const activeCategoriesOnFloor = categories
-                .map(cat => ({
-                  ...cat,
-                  count: pois[currentFloor]?.filter(p => p.category === cat.key).length || 0
-                }))
-                .filter(cat => cat.count > 0);
-
-              if (activeCategoriesOnFloor.length === 0) {
-                return (
-                  <div className="py-8 text-center bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200/50 dark:border-slate-800/30">
-                    <span className="text-3xl opacity-50 block mb-2">🏝️</span>
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">No places added on this floor yet.</p>
+        <motion.div key="explore" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col gap-4 relative h-full">
+          
+          {activeCategory === null ? (
+            // ── DASHBOARD VIEW ────────────────────────────────────────────────
+            <>
+              {/* Header Card */}
+              <div className="rounded-3xl p-5 bg-gradient-to-br from-[#0f172a] via-[#0a0f1e] to-[#0f172a] border border-white/5 shadow-2xl relative overflow-hidden group">
+                <div className="absolute -right-10 -top-10 w-32 h-32 bg-sky-500/10 blur-3xl rounded-full pointer-events-none group-hover:bg-sky-400/20 transition-all duration-700"></div>
+                <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none"></div>
+                
+                <div className="relative z-10 flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-[18px] bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 flex-shrink-0">
+                    <FiNavigation className="w-6 h-6 text-white" />
                   </div>
-                );
-              }
+                  <div>
+                    <h2 className="text-[15px] font-black text-slate-100 dark:text-white leading-tight mb-1">
+                      {useMapStore.getState().currentBuilding ? useMapStore.getState().buildings?.find(b => b.id === useMapStore.getState().currentBuilding)?.name : 'Global Directory'}
+                    </h2>
+                    <p className="text-[9px] font-black tracking-[0.15em] text-sky-500 uppercase">Indoor Navigation</p>
+                  </div>
+                </div>
+              </div>
 
-              // Auto-select the first available category if current activeCategory has 0 count
-              if (activeCategoriesOnFloor.length > 0 && !activeCategoriesOnFloor.find(c => c.key === activeCategory)) {
-                setTimeout(() => setActiveCategory(activeCategoriesOnFloor[0].key), 0);
-              }
+              {/* Floor Status Card */}
+              <div className="rounded-3xl p-5 bg-[#0a0f1e]/60 dark:bg-[#050814]/80 border border-indigo-500/10 dark:border-indigo-500/20 shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative overflow-hidden backdrop-blur-xl">
+                <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\\"20\\" height=\\"20\\" xmlns=\\"http://www.w3.org/2000/svg\\"%3E%3Cpath d=\\"M0 0h20v20H0z\\" fill=\\"none\\"%3E%3C/path%3E%3Ccircle cx=\\"10\\" cy=\\"10\\" r=\\"1\\" fill=\\"%23fff\\"%3E%3C/circle%3E%3C/svg%3E")' }}></div>
+                
+                <div className="relative z-10">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Current Floor</p>
+                  <div className="flex justify-between items-end mb-5">
+                    <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
+                      {floors.find(f => f.id === currentFloor)?.name || 'Unknown'}
+                      <span className="text-[8px] font-black bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20 tracking-wider">ACTIVE</span>
+                    </h3>
+                  </div>
 
-              return (
+                  <div className="flex gap-5 mb-5 pb-5 border-b border-black/5 dark:border-white/5">
+                    <div className="flex flex-col">
+                      <span className="text-xl font-black text-slate-700 dark:text-white">{pois[currentFloor]?.length || 0}</span>
+                      <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Places</span>
+                    </div>
+                    <div className="w-px bg-black/5 dark:bg-white/5"></div>
+                    <div className="flex flex-col">
+                      <span className="text-xl font-black text-slate-700 dark:text-white">
+                        {new Set(pois[currentFloor]?.map(p => p.category)).size}
+                      </span>
+                      <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Categories</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-2 px-2 pb-1 snap-x">
+                    {floors.map(f => (
+                      <button
+                        key={f.id}
+                        onClick={() => setFloor(f.id)}
+                        className={`snap-center flex-shrink-0 px-4 py-2.5 rounded-[14px] text-[11px] font-bold transition-all active:scale-95 ${currentFloor === f.id
+                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25 border border-transparent'
+                            : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10'
+                          }`}
+                      >
+                        {f.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Categories Grid */}
+              <div className="pb-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Explore Categories</h3>
+                  <button onClick={() => setActiveCategory('all')} className="text-[10px] font-bold text-sky-500 hover:text-sky-600 transition-colors">View All ›</button>
+                </div>
+                
                 <div className="grid grid-cols-3 gap-2.5">
-                  {activeCategoriesOnFloor.map(cat => {
-                    const isActive = activeCategory === cat.key;
-                    const isDark = document.documentElement.classList.contains('dark');
-                    
-                    // Generate a unique modern gradient using the category ID to slightly shift the appearance
-                    let hash = 0;
-                    for (let i = 0; i < cat.key.length; i++) hash = cat.key.charCodeAt(i) + ((hash << 5) - hash);
-                    const hueShift = Math.abs(hash % 40) - 20; // -20 to +20 degree shift
-                    const grad = `linear-gradient(135deg, ${cat.color}, color-mix(in srgb, ${cat.color}, black 20%))`;
+                  {/* "All Places" Special Card */}
+                  <button onClick={() => setActiveCategory('all')} className="flex flex-col items-center justify-center p-3 rounded-[18px] bg-slate-50 dark:bg-[#0a0f1e]/80 border border-sky-500/20 hover:border-sky-500/40 shadow-sm dark:shadow-[0_0_15px_rgba(14,165,233,0.05)] transition-all group active:scale-95">
+                    <div className="text-sky-500 mb-1.5 transition-transform group-hover:scale-110 drop-shadow-sm dark:drop-shadow-[0_0_8px_rgba(14,165,233,0.5)]"><LucideIcons.LayoutGrid className="w-5 h-5" /></div>
+                    <span className="text-[9px] font-black text-slate-600 dark:text-slate-200 uppercase tracking-wide">All Places</span>
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-200/50 dark:bg-white/5 px-2 py-0.5 rounded-full mt-1.5">{flatPois.length}</span>
+                  </button>
+
+                  {/* Dynamic Category Cards */}
+                  {categories.map((cat, i) => {
+                    const count = flatPois.filter(p => p.category === cat.key).length;
+                    if (count === 0) return null; // Only show non-empty categories
+
+                    // Dynamic styling based on index/color
+                    const colors = [
+                      { border: 'border-purple-500/20 hover:border-purple-500/40', text: 'text-purple-500', shadow: 'dark:shadow-[0_0_15px_rgba(168,85,247,0.05)]', glow: 'drop-shadow-sm dark:drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]' },
+                      { border: 'border-emerald-500/20 hover:border-emerald-500/40', text: 'text-emerald-500', shadow: 'dark:shadow-[0_0_15px_rgba(16,185,129,0.05)]', glow: 'drop-shadow-sm dark:drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' },
+                      { border: 'border-rose-500/20 hover:border-rose-500/40', text: 'text-rose-500', shadow: 'dark:shadow-[0_0_15px_rgba(244,63,110,0.05)]', glow: 'drop-shadow-sm dark:drop-shadow-[0_0_8px_rgba(244,63,110,0.5)]' },
+                      { border: 'border-amber-500/20 hover:border-amber-500/40', text: 'text-amber-500', shadow: 'dark:shadow-[0_0_15px_rgba(245,158,11,0.05)]', glow: 'drop-shadow-sm dark:drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]' },
+                      { border: 'border-cyan-500/20 hover:border-cyan-500/40', text: 'text-cyan-500', shadow: 'dark:shadow-[0_0_15px_rgba(6,182,212,0.05)]', glow: 'drop-shadow-sm dark:drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]' },
+                    ];
+                    const c = colors[i % colors.length];
 
                     return (
-                      <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
-                        style={{
-                          background: grad,
-                          boxShadow: isActive
-                            ? `0 0 0 3px rgba(255,255,255,0.85), 0 8px 25px ${cat.color}66`
-                            : `0 4px 15px ${cat.color}22`,
-                          transform: isActive ? 'scale(1.04) translateY(-2px)' : 'scale(1)',
-                          opacity: isActive ? 1 : isDark ? 0.8 : 0.9,
-                          filter: isActive ? 'saturate(1.2)' : `hue-rotate(${hueShift}deg)`,
-                          transition: 'all 0.3s cubic-bezier(.34,1.56,.64,1)',
-                        }}
-                        className="relative flex flex-col items-center p-3 rounded-2xl active:scale-95 gap-1.5 overflow-hidden border-0"
-                      >
-                    {/* Brightness overlay on hover for inactive */}
-                    {!isActive && (
-                      <div className="absolute inset-0 bg-white opacity-0 hover:opacity-10 transition-opacity duration-150 rounded-2xl" />
-                    )}
-                        {/* Active sparkle ring */}
-                        {isActive && (
-                          <div className="absolute inset-0 rounded-2xl" style={{ boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.4)' }} />
-                        )}
-                        
-                        <span className={`text-2xl drop-shadow-md text-white transition-transform duration-300 ${isActive ? 'scale-110' : 'scale-100'}`}>
-                          <DynamicIcon name={cat.iconName} className="w-6 h-6" />
-                        </span>
-                        
-                        <span className="text-[10px] font-extrabold leading-tight text-center text-white drop-shadow-sm line-clamp-2">
-                          {cat.label}
-                        </span>
-                        
-                        <span
-                          className="text-[9px] font-bold px-1.5 py-0.5 rounded-full mt-auto"
-                          style={{
-                            backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.15)',
-                            color: '#fff',
-                          }}
-                        >
-                          {cat.count} {cat.count === 1 ? 'place' : 'places'}
-                        </span>
+                      <button key={cat.key} onClick={() => setActiveCategory(cat.key)} className={`flex flex-col items-center justify-center p-3 rounded-[18px] bg-slate-50 dark:bg-[#0a0f1e]/80 border ${c.border} shadow-sm ${c.shadow} transition-all group active:scale-95`}>
+                        <div className={`${c.text} mb-1.5 transition-transform group-hover:scale-110 ${c.glow}`}>
+                           {/* We assume DynamicIcon is defined in Sidebar.jsx */}
+                           <DynamicIcon name={cat.iconName} className="w-5 h-5" />
+                        </div>
+                        <span className="text-[9px] font-black text-slate-600 dark:text-slate-200 text-center line-clamp-1 uppercase tracking-wide">{cat.label}</span>
+                        <span className="text-[9px] font-bold text-slate-500 bg-slate-200/50 dark:bg-white/5 px-2 py-0.5 rounded-full mt-1.5">{count}</span>
                       </button>
                     );
                   })}
                 </div>
-              );
-            })()}
-          </div>
-
-
-          {(() => {
-            const categoryPlaces = pois[currentFloor]?.filter(p => p.category === activeCategory) || [];
-            const activeCatObj = categories.find(c => c.key === activeCategory);
-
-            return (
-              <div>
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">
-                  {activeCatObj ? activeCatObj.label : 'Places'} ({categoryPlaces.length})
-                </h3>
-                {categoryPlaces.length === 0 ? (
-                  <div className="py-8 text-center bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200/50 dark:border-slate-800/30">
-                    <span className="text-3xl opacity-50 block mb-2">🤷‍♂️</span>
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">No places found in this category.</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-1.5">
-                    {categoryPlaces.map(poi => (
-                      <div key={poi.id} className="flex flex-col">
-                        <button onClick={() => {
-                          setExpandedPoiId(expandedPoiId === poi.id ? null : poi.id);
-                          useMapStore.getState().zoomMapTo(poi.x, poi.y, 3.5);
-                          if (isMobile) setIsOpen(false);
-                        }}
-                          className={`flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-98 text-left ${expandedPoiId === poi.id ? 'bg-sky-500/10 dark:bg-sky-500/10 ring-1 ring-sky-500/30' : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-base flex-shrink-0 overflow-hidden text-slate-500">
-                            {poi.imageUrl ? <img src={poi.imageUrl} alt="" className="w-full h-full object-cover" /> : (poi.isCustom ? <LucideIcons.MapPin className="w-4 h-4" /> : <DynamicIcon name={activeCatObj?.iconName} className="w-4 h-4" />)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{poi.name}</p>
-                            <p className="text-xs text-slate-400 truncate">{poi.description || poi.category}</p>
-                          </div>
-                          <span className="text-[9px] font-bold px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex-shrink-0">{poi.category}</span>
-                        </button>
-                        {expandedPoiId === poi.id && (
-                          <motion.div initial={{ opacity: 0, height: 0, y: -5 }} animate={{ opacity: 1, height: 'auto', y: 0 }} className="px-3 pb-3 pt-1">
-                            <div className="flex gap-2 p-1.5 rounded-xl bg-slate-100/50 dark:bg-slate-800/30 border border-slate-200/50 dark:border-slate-700/50">
-                              <button onClick={() => { setNavigationMode(true); if (navigationEnd?.id === poi.id) setNavigationEnd(null); setNavigationStart(poi); setActiveTab('navigate'); }}
-                                className="flex-1 py-2 flex items-center justify-center gap-1.5 text-[11px] font-bold bg-white dark:bg-slate-800 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700 rounded-lg shadow-sm transition-all active:scale-95">
-                                <LucideIcons.MapPin className="w-3 h-3" /> From Here
-                              </button>
-                              <button onClick={() => { setNavigationMode(true); if (navigationStart?.id === poi.id) setNavigationStart(null); setNavigationEnd(poi); setActiveTab('navigate'); }}
-                                className="flex-1 py-2 flex items-center justify-center gap-1.5 text-[11px] font-bold bg-sky-500 hover:bg-sky-600 text-white border border-transparent rounded-lg shadow-sm shadow-sky-500/20 transition-all active:scale-95">
-                                <LucideIcons.Navigation className="w-3 h-3" /> To Here
-                              </button>
-                            </div>
-                          </motion.div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
-            );
-          })()}
+
+              {/* Action Cards */}
+              <div className="grid grid-cols-2 gap-3 mt-auto pb-4">
+                <button onClick={() => setActiveCategory('search')} className="flex items-center gap-3 p-4 rounded-2xl bg-slate-100 dark:bg-gradient-to-br dark:from-[#0f172a] dark:to-[#0a0f1e] border border-slate-200 dark:border-sky-500/10 dark:shadow-[0_0_15px_rgba(14,165,233,0.05)] hover:border-sky-400/40 transition-all group active:scale-95 text-left">
+                  <div className="w-10 h-10 rounded-full bg-sky-500/10 flex items-center justify-center flex-shrink-0 text-sky-500 group-hover:bg-sky-500/20 transition-all"><FiSearch className="w-4 h-4" /></div>
+                  <div>
+                    <h4 className="text-[11px] font-black text-slate-800 dark:text-white">Find Places</h4>
+                    <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold mt-0.5">Search map</p>
+                  </div>
+                </button>
+                <button onClick={() => { setActiveTab('navigate'); setIsOpen(true); setNavigationMode(true); }} className="flex items-center gap-3 p-4 rounded-2xl bg-slate-100 dark:bg-gradient-to-br dark:from-[#0f172a] dark:to-[#0a0f1e] border border-slate-200 dark:border-indigo-500/10 dark:shadow-[0_0_15px_rgba(79,70,229,0.05)] hover:border-indigo-400/40 transition-all group active:scale-95 text-left">
+                  <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center flex-shrink-0 text-indigo-500 group-hover:bg-indigo-500/20 transition-all"><FiCompass className="w-4 h-4" /></div>
+                  <div>
+                    <h4 className="text-[11px] font-black text-slate-800 dark:text-white">Directions</h4>
+                    <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold mt-0.5">Best routes</p>
+                  </div>
+                </button>
+              </div>
+            </>
+          ) : (
+            // ── LIST VIEW (Category / Search) ──────────────────────────────────
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-4 h-full">
+              
+              {/* Back Button & Title */}
+              <div className="flex items-center gap-3 pb-3 border-b border-slate-200/50 dark:border-slate-800/50">
+                <button onClick={() => setActiveCategory(null)} className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-90">
+                  <FiChevronsLeft className="w-5 h-5" />
+                </button>
+                <div>
+                  <h2 className="text-[13px] font-black text-slate-800 dark:text-white capitalize">
+                    {activeCategory === 'all' ? 'All Places' : (activeCategory === 'search' ? 'Search Places' : categories.find(c => c.key === activeCategory)?.label || 'Places')}
+                  </h2>
+                  <p className="text-[9px] font-bold text-sky-500 uppercase tracking-wider">
+                    {activeCategory !== 'search' && `${flatPois.filter(p => activeCategory === 'all' || p.category === activeCategory).length} Locations`}
+                    {activeCategory === 'search' && 'Search Directory'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Search Box */}
+              <div className="bg-slate-50 dark:bg-[#0a0f1e]/80 rounded-2xl p-1 border border-slate-200/50 dark:border-white/5 shadow-sm">
+                <Search />
+              </div>
+
+              {/* List of Places */}
+              <div className="flex-1 overflow-y-auto no-scrollbar -mx-2 px-2 pb-10">
+                {(() => {
+                  const query = useMapStore.getState().searchQuery.toLowerCase();
+                  let displayPlaces = flatPois;
+                  
+                  if (activeCategory !== 'all' && activeCategory !== 'search') {
+                    displayPlaces = displayPlaces.filter(p => p.category === activeCategory);
+                  }
+                  
+                  if (query) {
+                    displayPlaces = displayPlaces.filter(p => 
+                      p.name.toLowerCase().includes(query) || 
+                      p.category.toLowerCase().includes(query) ||
+                      (p.description && p.description.toLowerCase().includes(query))
+                    );
+                  }
+
+                  if (displayPlaces.length === 0) {
+                    return (
+                      <div className="py-12 text-center flex flex-col items-center">
+                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-[#0f172a] flex items-center justify-center mb-4 text-slate-400">
+                          <FiSearch className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-[13px] font-black text-slate-700 dark:text-slate-300 mb-1">No places found</h3>
+                        <p className="text-[10px] font-bold text-slate-500 max-w-[200px]">Try adjusting your search or category.</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="flex flex-col gap-2">
+                      {displayPlaces.map(poi => {
+                        const catObj = categories.find(c => c.key === poi.category);
+                        return (
+                          <div key={poi.id} className="flex flex-col">
+                            <button onClick={() => {
+                              setExpandedPoiId(expandedPoiId === poi.id ? null : poi.id);
+                              // Auto switch floor and zoom
+                              if (useMapStore.getState().currentFloor !== poi.floor) {
+                                window.__mapSkipNextReset = true;
+                                useMapStore.getState().setFloor(poi.floor);
+                              }
+                              setTimeout(() => useMapStore.getState().zoomMapTo(poi.x, poi.y, 4), 100);
+                              if (isMobile) setIsOpen(false);
+                            }}
+                              className={`flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-98 text-left ${expandedPoiId === poi.id ? 'bg-sky-50 dark:bg-sky-500/10 ring-1 ring-sky-500/30 shadow-sm' : 'hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent dark:border-transparent'}`}>
+                              
+                              <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-slate-200 to-slate-300 dark:from-[#1e293b] dark:to-[#0f172a] flex items-center justify-center flex-shrink-0 overflow-hidden shadow-inner border border-black/5 dark:border-white/5">
+                                {poi.imageUrl ? <img src={poi.imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="text-slate-500 dark:text-slate-400"><DynamicIcon name={catObj?.iconName || 'MapPin'} className="w-4 h-4" /></div>}
+                              </div>
+                              
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[13px] font-black text-slate-800 dark:text-slate-100 truncate">{poi.name}</p>
+                                <p className="text-[10px] font-bold text-slate-500 truncate mt-0.5">{poi.description || `${useMapStore.getState().floors.find(f => f.id === poi.floor)?.name || 'Unknown Floor'}`}</p>
+                              </div>
+                              
+                              <div className="flex flex-col items-end gap-1">
+                                <span className="text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-200/50 dark:bg-[#1e293b] text-slate-600 dark:text-slate-400 border border-slate-300/50 dark:border-slate-700/50">{poi.category}</span>
+                              </div>
+                            </button>
+                            
+                            <AnimatePresence>
+                              {expandedPoiId === poi.id && (
+                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="px-3 pb-3 overflow-hidden">
+                                  <div className="flex gap-2 p-1.5 mt-1 rounded-[14px] bg-slate-50 dark:bg-[#0a0f1e]/80 border border-slate-200/50 dark:border-indigo-500/20">
+                                    <button onClick={() => { setNavigationMode(true); if (navigationEnd?.id === poi.id) setNavigationEnd(null); setNavigationStart(poi); setActiveTab('navigate'); }}
+                                      className="flex-1 py-2.5 flex items-center justify-center gap-1.5 text-[11px] font-black bg-white dark:bg-[#1e293b] hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-400 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/50 rounded-xl shadow-sm transition-all active:scale-95">
+                                      <LucideIcons.MapPin className="w-3 h-3" /> From Here
+                                    </button>
+                                    <button onClick={() => { setNavigationMode(true); if (navigationStart?.id === poi.id) setNavigationStart(null); setNavigationEnd(poi); setActiveTab('navigate'); }}
+                                      className="flex-1 py-2.5 flex items-center justify-center gap-1.5 text-[11px] font-black bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white border border-transparent rounded-xl shadow-[0_4px_15px_rgba(14,165,233,0.3)] transition-all active:scale-95">
+                                      <LucideIcons.Navigation className="w-3 h-3" /> To Here
+                                    </button>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+            </motion.div>
+          )}
+
         </motion.div>
       )}
 
