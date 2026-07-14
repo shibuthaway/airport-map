@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMapStore } from '../../store/useMapStore';
+import SearchableSelect from './SearchableSelect';
 import { FiUploadCloud, FiTrash2, FiPlus, FiEdit3, FiSave, FiX, FiLayers } from 'react-icons/fi';
 
 export default function FloorManager() {
@@ -10,6 +11,7 @@ export default function FloorManager() {
   const [newBuildingName, setNewBuildingName] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [floorToDelete, setFloorToDelete] = useState(null);
+  const [activeSelect, setActiveSelect] = useState(null);
   
   // Form States
   const [level, setLevel] = useState('');
@@ -130,15 +132,17 @@ export default function FloorManager() {
             </button>
           </div>
         ) : (
-          <select
-            value={currentBuilding || ''}
-            onChange={(e) => setBuilding(e.target.value)}
-            className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 outline-none focus:border-sky-500 cursor-pointer text-slate-800 dark:text-slate-200 font-bold text-[16px]"
-          >
-            {buildings.map(b => (
-              <option key={b.id} value={b.id}>{b.name}</option>
-            ))}
-          </select>
+          <div className="relative z-10 w-full">
+            <SearchableSelect
+              placeholder="Select building..."
+              options={buildings.map(b => ({ value: b.id, label: b.name }))}
+              value={currentBuilding || ''}
+              onChange={val => setBuilding(val)}
+              isControlledOpen={activeSelect === 'building'}
+              onOpen={() => setActiveSelect('building')}
+              onClose={() => setActiveSelect(null)}
+            />
+          </div>
         )}
       </div>
 

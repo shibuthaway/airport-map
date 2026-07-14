@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMapStore } from '../../store/useMapStore';
+import SearchableSelect from './SearchableSelect';
 import {
   FiMapPin, FiToggleLeft, FiToggleRight, FiPlus, FiEdit2,
   FiTrash2, FiDownload, FiRefreshCw, FiCheck, FiX, FiTag, FiUploadCloud,
@@ -26,6 +27,7 @@ export default function TaggingPanel() {
   const [form, setForm] = useState(emptyForm);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [activeSelect, setActiveSelect] = useState(null);
 
   // Block Path form state
   const [blockReason, setBlockReason] = useState('');
@@ -295,16 +297,20 @@ export default function TaggingPanel() {
             </div>
 
             {/* Category */}
-            <div>
+            <div className="z-20 relative">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Category *</label>
-              <select
+              <SearchableSelect
+                placeholder="Search category..."
+                options={[
+                  { value: 'waypoint', label: '📍 Navigation Waypoint' },
+                  ...(categories || []).map(c => ({ value: c.id, label: c.name }))
+                ]}
                 value={form.category}
-                onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/50"
-              >
-                <option value="waypoint" className="font-bold text-sky-600 dark:text-sky-400">📍 Navigation Waypoint</option>
-                {categories && categories.length > 0 ? categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>) : <option value="default">Default</option>}
-              </select>
+                onChange={val => setForm(f => ({ ...f, category: val }))}
+                isControlledOpen={activeSelect === 'category'}
+                onOpen={() => setActiveSelect('category')}
+                onClose={() => setActiveSelect(null)}
+              />
             </div>
 
             {/* Description */}
@@ -496,25 +502,28 @@ export default function TaggingPanel() {
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Block This Path</p>
 
                     {/* Reason */}
-                    <div>
+                    <div className="z-10 relative">
                       <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Reason *</label>
-                      <select
+                      <SearchableSelect
+                        placeholder="Select reason..."
+                        options={[
+                          { value: '🚧 Under Construction', label: '🚧 Under Construction' },
+                          { value: '🔧 Maintenance Work', label: '🔧 Maintenance Work' },
+                          { value: '🚨 Emergency Closure', label: '🚨 Emergency Closure' },
+                          { value: '🌊 Flooding / Water', label: '🌊 Flooding / Water' },
+                          { value: '🔥 Fire Safety Drill', label: '🔥 Fire Safety Drill' },
+                          { value: '🎖️ VIP Security', label: '🎖️ VIP Security' },
+                          { value: '⚡ Power Outage', label: '⚡ Power Outage' },
+                          { value: '📦 Cargo Blockage', label: '📦 Cargo Blockage' },
+                          { value: '🧹 Cleaning', label: '🧹 Cleaning' },
+                          { value: 'Other', label: 'Other' },
+                        ]}
                         value={blockReason}
-                        onChange={e => setBlockReason(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-red-400/40"
-                      >
-                        <option value="">Select reason...</option>
-                        <option value="🚧 Under Construction">🚧 Under Construction</option>
-                        <option value="🔧 Maintenance Work">🔧 Maintenance Work</option>
-                        <option value="🚨 Emergency Closure">🚨 Emergency Closure</option>
-                        <option value="🌊 Flooding / Water">🌊 Flooding / Water</option>
-                        <option value="🔥 Fire Safety Drill">🔥 Fire Safety Drill</option>
-                        <option value="🎖️ VIP Security">🎖️ VIP Security</option>
-                        <option value="⚡ Power Outage">⚡ Power Outage</option>
-                        <option value="📦 Cargo Blockage">📦 Cargo Blockage</option>
-                        <option value="🧹 Cleaning">🧹 Cleaning</option>
-                        <option value="Other">Other</option>
-                      </select>
+                        onChange={val => setBlockReason(val)}
+                        isControlledOpen={activeSelect === 'blockReason'}
+                        onOpen={() => setActiveSelect('blockReason')}
+                        onClose={() => setActiveSelect(null)}
+                      />
                     </div>
 
                     {/* Duration */}

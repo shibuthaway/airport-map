@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiPlus, FiTrash2, FiSave, FiX, FiCheck, FiLoader, FiAlertTriangle } from 'react-icons/fi';
 import * as LucideIcons from 'lucide-react';
 import { useMapStore } from '../../store/useMapStore';
+import SearchableSelect from './SearchableSelect';
 
 const AVAILABLE_ICONS = [
   'Plane', 'Briefcase', 'Shield', 'ShoppingBag', 'Coffee', 'Droplet', 'Stethoscope', 
@@ -17,6 +18,7 @@ export default function CategoryManager() {
   const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [activeSelectIndex, setActiveSelectIndex] = useState(null);
 
   useEffect(() => {
     // Clone categories for local editing
@@ -158,16 +160,16 @@ export default function CategoryManager() {
               </div>
               
               {/* Icon Selector */}
-              <div className="flex items-center gap-2 flex-1">
-                <select
+              <div className="flex items-center gap-2 flex-1 relative z-10">
+                <SearchableSelect
+                  placeholder="Select icon..."
+                  options={AVAILABLE_ICONS.map(iconName => ({ value: iconName, label: iconName }))}
                   value={cat.icon}
-                  onChange={(e) => handleUpdate(index, 'icon', e.target.value)}
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-700 dark:text-slate-300 outline-none appearance-none"
-                >
-                  {AVAILABLE_ICONS.map(iconName => (
-                    <option key={iconName} value={iconName}>{iconName}</option>
-                  ))}
-                </select>
+                  onChange={(val) => handleUpdate(index, 'icon', val)}
+                  isControlledOpen={activeSelectIndex === index}
+                  onOpen={() => setActiveSelectIndex(index)}
+                  onClose={() => setActiveSelectIndex(null)}
+                />
               </div>
             </div>
           </motion.div>
