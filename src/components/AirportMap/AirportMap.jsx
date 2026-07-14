@@ -77,11 +77,11 @@ export default function AirportMap() {
     loadMapData, theme,
     mapRotation, setMapRotation,
     pendingZoom, clearPendingZoom,
-    
+
     // Graph states & actions
     nodes, edges, dragNode, dragEdgeCurve, toggleEdge, isDrawingEdges, setIsDrawingEdges,
     selectedEdge, setSelectedEdge, setZoomActions,
-    userPosition, categories, isFullScreen
+    userPosition, categories
   } = useMapStore();
 
   const { isActive, error: ipsError, startTracking, stopTracking } = useIndoorPositioning();
@@ -100,14 +100,14 @@ export default function AirportMap() {
     if (e.touches.length === 2 && touchStateRef.current.active) {
       const { touches } = e;
       const currentAngle = Math.atan2(touches[1].clientY - touches[0].clientY, touches[1].clientX - touches[0].clientX) * 180 / Math.PI;
-      
+
       let deltaAngle = currentAngle - touchStateRef.current.lastAngle;
-      
+
       if (deltaAngle > 180) deltaAngle -= 360;
       else if (deltaAngle < -180) deltaAngle += 360;
-      
+
       touchStateRef.current.lastAngle = currentAngle;
-      
+
       const currentMapRotation = useMapStore.getState().mapRotation;
       useMapStore.getState().setMapRotation(currentMapRotation + deltaAngle);
     }
@@ -171,7 +171,7 @@ export default function AirportMap() {
     if (draggedNodeId) {
       dragNode(draggedNodeId, clampedX, clampedY);
     }
-    
+
     if (draggedEdgeHandleId) {
       dragEdgeCurve(draggedEdgeHandleId, clampedX, clampedY);
     }
@@ -204,7 +204,7 @@ export default function AirportMap() {
           (e.from === edgeStartNodeId && e.to === nodeId) ||
           (e.from === nodeId && e.to === edgeStartNodeId)
         );
-        
+
         if (existingEdge) {
           // If exists, toggleEdge will delete it
           toggleEdge(edgeStartNodeId, nodeId);
@@ -232,7 +232,7 @@ export default function AirportMap() {
           <FiSettings className="w-12 h-12 mb-4 opacity-50 animate-pulse" />
           <h2 className="text-xl font-bold mb-2">Connecting to Map Server...</h2>
           <p className="text-sm max-w-sm mb-6">If this screen is stuck, the database connection might have timed out due to cold start. Please reload the page.</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl active:scale-95 transition-all shadow-lg shadow-indigo-500/30"
           >
@@ -351,7 +351,7 @@ export default function AirportMap() {
       <g className="edges-layer">
         {allEdges.map(e => {
           const fromNode = nodes.find(n => n.id === e.from);
-          const toNode   = nodes.find(n => n.id === e.to);
+          const toNode = nodes.find(n => n.id === e.to);
           if (!fromNode || !toNode || fromNode.floor !== currentFloor || toNode.floor !== currentFloor) return null;
 
           const isSelected = selectedEdge?.id === e.id;
@@ -575,19 +575,19 @@ export default function AirportMap() {
         const prev = navigationPath[i - 1];
         const curr = navigationPath[i];
         const next = navigationPath[i + 1];
-        
+
         if (curr.floor === currentFloor && prev.floor === currentFloor && next.floor === currentFloor) {
           const dx1 = curr.x - prev.x;
           const dy1 = curr.y - prev.y;
           const dx2 = next.x - curr.x;
           const dy2 = next.y - curr.y;
-          
+
           const angle1 = Math.atan2(dy1, dx1);
           const angle2 = Math.atan2(dy2, dx2);
           let diff = (angle2 - angle1) * (180 / Math.PI);
           while (diff <= -180) diff += 360;
           while (diff > 180) diff -= 360;
-          
+
           let turnData = null;
           if (diff > 40 && diff <= 150) {
             turnData = { ...curr, text: 'Right', color: '#f59e0b', exitAngle: angle2 * (180 / Math.PI) };
@@ -600,7 +600,7 @@ export default function AirportMap() {
           if (turnData) {
             if (turns.length > 0) {
               const lastTurn = turns[turns.length - 1];
-              const dist = Math.sqrt((curr.x - lastTurn.x)**2 + (curr.y - lastTurn.y)**2);
+              const dist = Math.sqrt((curr.x - lastTurn.x) ** 2 + (curr.y - lastTurn.y) ** 2);
               if (dist < 80) continue; // Skip turn badges that are too close to previous ones
             }
             turns.push(turnData);
@@ -621,13 +621,13 @@ export default function AirportMap() {
             } else {
               const prev = s[i - 1];
               const curr = s[i];
-              
+
               // Find the edge connecting prev to curr to check for a custom control point
-              const edge = edges.find(e => 
-                (e.from === prev.id && e.to === curr.id) || 
+              const edge = edges.find(e =>
+                (e.from === prev.id && e.to === curr.id) ||
                 (e.from === curr.id && e.to === prev.id)
               );
-              
+
               if (edge && edge.controlPoint) {
                 d += ` Q ${edge.controlPoint.x} ${edge.controlPoint.y}, ${curr.x} ${curr.y}`;
               } else {
@@ -642,7 +642,7 @@ export default function AirportMap() {
             <g key={idx}>
               <path id={pathId} d={d} fill="none" stroke="#38bdf8" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" className="opacity-40 blur-[2px]" />
               <path d={d} fill="none" stroke="#0ea5e9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="8,6" className="animate-[dash_1s_linear_infinite]" />
-              
+
               {/* Moving Arrow 1 */}
               <g>
                 <path d="M-8,-5 L8,0 L-8,5 L-4,0 Z" fill="#ffffff" stroke="#0284c7" strokeWidth="1" className="drop-shadow-sm" />
@@ -650,7 +650,7 @@ export default function AirportMap() {
                   <mpath href={`#${pathId}`} />
                 </animateMotion>
               </g>
-              
+
               {/* Moving Arrow 2 (Delayed) */}
               <g>
                 <path d="M-8,-5 L8,0 L-8,5 L-4,0 Z" fill="#ffffff" stroke="#0284c7" strokeWidth="1" className="drop-shadow-sm" />
@@ -670,7 +670,7 @@ export default function AirportMap() {
               <path d="M-5,-5 L4,0 L-5,5 L-2,0 Z" fill="none" stroke="#020617" strokeWidth="4" strokeLinejoin="round" />
               <path d="M-5,-5 L4,0 L-5,5 L-2,0 Z" fill={turn.color} />
             </g>
-            
+
             {/* Dark Halo for contrast */}
             <text x="4" y="0" fontFamily="Outfit, sans-serif" fontSize="12" fontWeight="900" fill="none" stroke="#020617" strokeWidth="5" strokeLinejoin="round" textAnchor="middle" letterSpacing="0.5">
               {turn.text}
@@ -692,10 +692,10 @@ export default function AirportMap() {
               const nextFloor = navigationPath[i + 1].floor;
               const rawName = nextFloor.replace(/_\d+$/, '').replace(/_/g, ' ');
               const shortName = rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-              
+
               return (
-                <g 
-                  key={`exit-${node.id}`} 
+                <g
+                  key={`exit-${node.id}`}
                   transform={`translate(${node.x}, ${node.y - 18})`}
                   className="cursor-pointer drop-shadow-lg"
                   onClick={(e) => {
@@ -717,11 +717,11 @@ export default function AirportMap() {
               const prevFloor = navigationPath[i - 1].floor;
               const rawName = prevFloor.replace(/_\d+$/, '').replace(/_/g, ' ');
               const shortName = rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-              
+
               return (
-                <g 
-                  key={`entry-${node.id}`} 
-                  transform={`translate(${node.x}, ${node.y - 18})`} 
+                <g
+                  key={`entry-${node.id}`}
+                  transform={`translate(${node.x}, ${node.y - 18})`}
                   className="cursor-pointer drop-shadow-lg transition-transform hover:scale-105"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -737,7 +737,7 @@ export default function AirportMap() {
                 </g>
               );
             }
-            
+
             return null;
           })}
         </g>
@@ -766,10 +766,10 @@ export default function AirportMap() {
       {/* Navigation active overlay — only tracking status, no duplicate banner */}
       {navigationMode && (
         <div className="absolute left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2 w-[90%] md:w-auto max-w-sm pointer-events-none" style={{ top: '72px' }}>
-          
+
           {/* Start Tracking Button (mobile only — desktop doesn't need live tracking) */}
           {navigationStart && !isActive && (
-            <button 
+            <button
               onClick={startTracking}
               className="md:hidden bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg flex items-center gap-2 animate-bounce cursor-pointer pointer-events-auto"
             >
@@ -786,7 +786,7 @@ export default function AirportMap() {
 
           {(() => {
             if (!userPosition || !navigationEnd || !isActive) return null;
-            
+
             const dist = Math.hypot(userPosition.x - navigationEnd.x, userPosition.y - navigationEnd.y);
             const isDestinationReached = userPosition.floor === navigationEnd.floor && dist < 50;
 
@@ -831,28 +831,27 @@ export default function AirportMap() {
 
       {(() => {
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-        const sidebarWidth = isMobile || isFullScreen ? 0 : 480; // approximate width of sidebar rail + content + gap
-        const w = typeof window !== 'undefined' ? (window.innerWidth - sidebarWidth) : 1000;
+        const w = typeof window !== 'undefined' ? window.innerWidth : 1000;
         const h = typeof window !== 'undefined' ? window.innerHeight : 600;
-        
+
         // Dynamically calculate scale to fit screen, ensuring it looks good on very large displays
-        // We leave some padding so it doesn't touch the edges completely.
-        const scaleX = (w - 60) / 1000;
-        const scaleY = (h - 120) / 600;
+        // We leave some padding (e.g. 100px) so it doesn't touch the edges completely.
+        const scaleX = (w - 100) / 1000;
+        const scaleY = (h - 100) / 600;
         let targetScale = isMobile ? 0.35 : Math.min(scaleX, scaleY);
         // Ensure it doesn't get too small on weird desktop window sizes, and cap it for extreme sizes
         if (!isMobile) {
-          targetScale = Math.max(0.4, Math.min(targetScale, 2.5));
+          targetScale = Math.max(0.6, Math.min(targetScale, 2.5));
         }
-        
+
         // On mobile, the search bar is around 110px from the top.
         // The bottom sheet covers 72vh from the bottom.
         // Setting initY to 130 ensures it's placed nicely in the visible gap.
         const initX = (w - 1000 * targetScale) / 2;
         const initY = isMobile ? 130 : (h - 600 * targetScale) / 2;
-        
+
         return (
-          <div 
+          <div
             className="w-full h-full relative"
             onTouchStartCapture={handleTouchStart}
             onTouchMoveCapture={handleTouchMove}
@@ -861,328 +860,347 @@ export default function AirportMap() {
           >
             {/* Overlay UI components */}
             <FloorSelector />
-            
+
             <TransformWrapper
-            ref={transformRef}
-            initialScale={targetScale}
-            initialPositionX={isMobile ? initX : undefined}
-            initialPositionY={isMobile ? initY : undefined}
-            minScale={0.15} 
-            maxScale={6}
-            centerOnInit={!isMobile}
-            centerZoomedOut={!isMobile}
-            limitToBounds={false}
-            doubleClick={{ disabled: false }}
-        panning={{ 
-          velocityDisabled: true,
-          disabled: taggingMode || isDrawingEdges || draggedNodeId !== null,
-          excluded: []
-        }}
-        pinch={{ disabled: false }}
-        wheel={{ disabled: false, touchPadDisabled: false }}
-        onInit={(ref) => {
-          setZoomActions({
-            zoomIn: () => ref.zoomIn(),
-            zoomOut: () => ref.zoomOut(),
-            resetTransform: () => ref.resetTransform()
-          });
-          // Expose globally so Sidebar viewOnMap can trigger zoom
-          window.__mapTransformRef = ref;
-          window.__mapZoomToPoint = (svgX, svgY, scale = 3.5) => {
-            const wrapper = ref.instance?.wrapperComponent;
-            if (!wrapper) return;
-            const rect = wrapper.getBoundingClientRect();
-            const W = rect.width || window.innerWidth;
-            const H = rect.height || window.innerHeight;
-            const posX = W / 2 - svgX * scale;
-            const posY = H / 2 - svgY * scale;
-            ref.setTransform(posX, posY, scale, 600, 'easeOut');
-          };
-          setZoomScale(ref.state.scale);
-        }}
-        onTransform={(ref) => {
-          setZoomScale(ref.state.scale);
-        }}
-      >
-        {({ zoomIn, zoomOut, resetTransform }) => (
-          <div className="w-full h-full touch-none">
-            <TransformComponent
-              wrapperClassName="!w-full !h-full"
-              contentClassName=""
-              wrapperStyle={{ touchAction: 'none', minWidth: '320px' }}
+              ref={transformRef}
+              initialScale={targetScale}
+              initialPositionX={isMobile ? initX : undefined}
+              initialPositionY={isMobile ? initY : undefined}
+              minScale={0.15}
+              maxScale={6}
+              centerOnInit={!isMobile}
+              centerZoomedOut={!isMobile}
+              limitToBounds={false}
+              doubleClick={{ disabled: false }}
+              panning={{
+                velocityDisabled: true,
+                disabled: taggingMode || isDrawingEdges || draggedNodeId !== null,
+                excluded: []
+              }}
+              pinch={{ disabled: false }}
+              wheel={{ disabled: false, touchPadDisabled: false }}
+              onInit={(ref) => {
+                setZoomActions({
+                  zoomIn: () => ref.zoomIn(),
+                  zoomOut: () => ref.zoomOut(),
+                  resetTransform: () => ref.resetTransform()
+                });
+                // Expose globally so Sidebar viewOnMap can trigger zoom
+                window.__mapTransformRef = ref;
+                window.__mapZoomToPoint = (svgX, svgY, scale = 3.5) => {
+                  const wrapper = ref.instance?.wrapperComponent;
+                  if (!wrapper) return;
+                  const rect = wrapper.getBoundingClientRect();
+                  const W = rect.width || window.innerWidth;
+                  const H = rect.height || window.innerHeight;
+                  const posX = W / 2 - svgX * scale;
+                  const posY = H / 2 - svgY * scale;
+                  ref.setTransform(posX, posY, scale, 600, 'easeOut');
+                };
+                setZoomScale(ref.state.scale);
+              }}
+              onTransform={(ref) => {
+                setZoomScale(ref.state.scale);
+              }}
             >
-              <div
-                className="w-[1000px] h-[600px] relative select-none"
-                style={{ 
-                  transform: `rotate(${mapRotation}deg)`, 
-                  transformOrigin: 'center center', 
-                  transition: isTouchRotating ? 'none' : 'transform 0.3s ease' 
-                }}
-                onMouseMove={handleSvgMouseMove}
-                onMouseUp={handleSvgMouseUp}
-                onMouseLeave={handleSvgMouseUp}
-              >
-                {/* 1. Base Map */}
-                {renderMap()}
+              {({ zoomIn, zoomOut, resetTransform }) => (
+                <div className="w-full h-full touch-none">
+                  <TransformComponent
+                    wrapperClassName="!w-full !h-full"
+                    contentClassName=""
+                    wrapperStyle={{ touchAction: 'none', minWidth: '320px' }}
+                  >
+                    <div
+                      className="w-[1000px] h-[600px] relative select-none"
+                      style={{
+                        transform: `rotate(${mapRotation}deg)`,
+                        transformOrigin: 'center center',
+                        transition: isTouchRotating ? 'none' : 'transform 0.3s ease'
+                      }}
+                      onMouseMove={handleSvgMouseMove}
+                      onMouseUp={handleSvgMouseUp}
+                      onMouseLeave={handleSvgMouseUp}
+                    >
+                      {/* 1. Base Map */}
+                      {renderMap()}
 
-                {/* Empty State Fallback */}
-                {(!floors || floors.length === 0) && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
-                    <div className="bg-slate-900/80 backdrop-blur-md text-slate-300 px-8 py-6 rounded-3xl border border-slate-800 shadow-2xl flex flex-col items-center text-center max-w-sm">
-                      <span className="text-5xl mb-4">🗺️</span>
-                      <h2 className="text-2xl font-black text-white mb-2">Blank Canvas</h2>
-                      <p className="text-sm">There are no floors in this project yet. Open the <strong className="text-sky-400">Floor Manager</strong> in the sidebar to upload your first map image!</p>
-                    </div>
-                  </div>
-                )}
+                      {/* Empty State Fallback */}
+                      {(!floors || floors.length === 0) && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
+                          <div className="bg-slate-900/80 backdrop-blur-md text-slate-300 px-8 py-6 rounded-3xl border border-slate-800 shadow-2xl flex flex-col items-center text-center max-w-sm">
+                            <span className="text-5xl mb-4">🗺️</span>
+                            <h2 className="text-2xl font-black text-white mb-2">Blank Canvas</h2>
+                            <p className="text-sm">There are no floors in this project yet. Open the <strong className="text-sky-400">Floor Manager</strong> in the sidebar to upload your first map image!</p>
+                          </div>
+                        </div>
+                      )}
 
-                {/* 2. Overlay SVG */}
-                <svg
-                  ref={svgOverlayRef}
-                  className={`absolute inset-0 w-full h-full z-10 ${
-                    (taggingMode || isDrawingEdges) ? 'cursor-crosshair' : ''
-                  } ${
-                    (taggingMode || isDrawingEdges || navigationPath?.length > 0 || edges.some(e => {
-                          const fn = nodes.find(n => n.id === e.from);
-                          const tn = nodes.find(n => n.id === e.to);
-                          return e.blocked && fn?.floor === currentFloor && tn?.floor === currentFloor;
-                    })) ? 'pointer-events-auto' : 'pointer-events-none'
-                  }`}
-                  viewBox="0 0 1000 600"
-                  onClick={handleMapClick}
-                >
-                  <defs>
-                    <marker id="nav-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                      <path d="M 2 1 L 9 5 L 2 9 L 4 5 z" fill="#ffffff" stroke="#0284c7" strokeWidth="1" strokeLinejoin="round" />
-                    </marker>
-                  </defs>
-                  
-                  {renderEdges()}
-                  {renderRubberBand()}
-                  {renderEdgeDeleteButton()}
-
-                  {/* Render Live User Position if on this floor */}
-                  {userPosition && userPosition.floor === currentFloor && (
-                    <UserLocationMarker 
-                      position={userPosition} 
-                      heading={userPosition.heading} 
-                      isWalking={userPosition.isWalking} 
-                      isOffRoute={userPosition.isOffRoute}
-                    />
-                  )}
-                  {renderNavigationPath()}
-
-                  {/* Temporary placement coords feedback */}
-                  {taggingMode && taggingCoords && (
-                    <g transform={`translate(${taggingCoords.x}, ${taggingCoords.y})`}>
-                      <circle r="18" fill="#f59e0b" className="opacity-20 animate-ping" />
-                      <circle r="10" fill="#f59e0b" className="opacity-40 animate-pulse" />
-                      <circle r="5" fill="#f59e0b" stroke="#fff" strokeWidth="1.5" />
-                      <text x="0" y="-14" fontFamily="Outfit, sans-serif" fontSize="9" fontWeight="bold" fill="#f59e0b" textAnchor="middle">
-                        {taggingCoords.x}, {taggingCoords.y}
-                      </text>
-                    </g>
-                  )}
-
-                  {/* Nodes Overlay */}
-                  {(nodes || []).map((poi) => {
-                    if (poi.floor !== currentFloor) return null;
-
-                    const isActive = activePoiIds.includes(poi.id);
-                    const isSelected = selectedPoi?.id === poi.id;
-                    const isStart = navigationStart?.id === poi.id;
-                    const isEnd = navigationEnd?.id === poi.id;
-                    const isEdgeStart = edgeStartNodeId === poi.id;
-                    const cat = categories?.find(c => c.id === poi.category);
-                    const color = cat?.color || getCategoryColor(poi.category);
-
-                    // Special Waypoint node representation
-                    if (poi.category === 'waypoint') {
-                      if (!taggingMode && !isDrawingEdges) return null;
-                      return (
-                        <g
-                          key={poi.id}
-                          transform={`translate(${poi.x}, ${poi.y})`}
-                          className="cursor-pointer pointer-events-auto group"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (isDrawingEdges) {
-                              handleNodeEdgeClick(poi.id);
-                            } else {
-                              selectPoi(poi);
-                            }
-                          }}
-                          onMouseDown={(e) => handleNodeMouseDown(e, poi)}
-                        >
-                          {isEdgeStart && (
-                            <circle r="14" fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="3,3" className="animate-spin" style={{ animationDuration: '6s' }} />
-                          )}
-                          <circle
-                            r={isSelected || isEdgeStart ? '8' : '5'}
-                            fill={isEdgeStart ? '#f59e0b' : (isSelected ? '#0ea5e9' : '#64748b')}
-                            stroke="#fff"
-                            strokeWidth="1.5"
-                            className="transition-all hover:scale-125"
-                          />
-                          {(taggingMode || isDrawingEdges) && (
-                            <text y="-10" fontSize="7" fontWeight="bold" fill={theme === 'dark' ? '#94a3b8' : '#475569'} textAnchor="middle" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                              {poi.name}
-                            </text>
-                          )}
-                        </g>
-                      );
-                    }
-
-                    // Regular POI rendering
-                    if (!isActive && !isSelected && !isStart && !isEnd && !taggingMode && !isDrawingEdges) return null;
-
-                    const nameLines = getLabelLines(poi.name);
-                    const maxLineLength = Math.max(...nameLines.map(line => line.length));
-                    const boxWidth = Math.max(52, maxLineLength * 6.5 + 16);
-                    const boxHeight = 14 + 14 + (nameLines.length * 11);
-
-                    return (
-                      <g
-                        key={poi.id}
-                        transform={`translate(${poi.x}, ${poi.y})`}
-                        className="cursor-pointer pointer-events-auto"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (isDrawingEdges) {
-                            handleNodeEdgeClick(poi.id);
-                          } else {
-                            selectPoi(poi);
-                          }
-                        }}
-                        onMouseDown={(e) => handleNodeMouseDown(e, poi)}
+                      {/* 2. Overlay SVG */}
+                      <svg
+                        ref={svgOverlayRef}
+                        className={`absolute inset-0 w-full h-full z-10 ${(taggingMode || isDrawingEdges) ? 'cursor-crosshair' : ''
+                          } ${(taggingMode || isDrawingEdges || navigationPath?.length > 0 || edges.some(e => {
+                            const fn = nodes.find(n => n.id === e.from);
+                            const tn = nodes.find(n => n.id === e.to);
+                            return e.blocked && fn?.floor === currentFloor && tn?.floor === currentFloor;
+                          })) ? 'pointer-events-auto' : 'pointer-events-none'
+                          }`}
+                        viewBox="0 0 1000 600"
+                        onClick={handleMapClick}
                       >
-                        {isEdgeStart && (
-                          <circle r="22" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeDasharray="3,3" className="animate-spin" style={{ animationDuration: '6s' }} />
-                        )}
-                        {/* Blink ring when zoomed to via search */}
-                        {blinkPoiId === poi.id && (
-                          <>
-                            <circle r="28" fill="none" stroke="#fbbf24" strokeWidth="3" className="animate-ping" style={{ animationDuration: '0.6s' }} />
-                            <circle r="20" fill="none" stroke="#f59e0b" strokeWidth="2" className="animate-ping" style={{ animationDuration: '0.8s', animationDelay: '0.1s' }} />
-                          </>
-                        )}
-                        {(isSelected || isStart || isEnd) && (
-                          <>
-                            <circle r="16" fill={color} className="opacity-25 animate-ping" />
-                            <circle r="10" fill={color} className="opacity-40 animate-pulse" />
-                          </>
-                        )}
-                        {!(isSelected || isStart || isEnd) && isActive && zoomScale < 1.05 && <circle r="12" fill={color} className="opacity-15 animate-ping" />}
-                        
-                        {isStart && (
-                          <g transform="translate(0,-10)">
-                            <title>{`Start Location: ${poi.name}`}</title>
-                            <path d="M-8,-16 C-8,-24 8,-24 8,-16 C8,-8 0,0 0,0 C0,0 -8,-8 -8,-16 Z" fill="#10b981" stroke="#fff" strokeWidth="1.5" />
-                            <text x="0" y="-12" fontSize="8" fontWeight="bold" fill="#fff" textAnchor="middle">S</text>
-                          </g>
-                        )}
-                        {isEnd && (
-                          <g transform="translate(0,-10)">
-                            <title>{`Destination: ${poi.name}`}</title>
-                            <path d="M-8,-20 C-8,-30 8,-30 8,-20 C8,-10 0,0 0,0 C0,0 -8,-10 -8,-20 Z" fill="#ef4444" stroke="#fff" strokeWidth="1.5" />
-                            <text x="0" y="-15" fontSize="8" fontWeight="bold" fill="#fff" textAnchor="middle">E</text>
-                          </g>
-                        )}
-                        {!isStart && !isEnd && (zoomScale < 1.05 && !taggingMode && !isDrawingEdges) && (
-                          <>
-                            {poi.isCustom && (
-                              <circle r={isSelected ? '8' : '6'} fill={color} className="opacity-20" />
-                            )}
-                            <circle
-                              r={isSelected ? '6' : '4.5'}
-                              fill={color}
-                              stroke="#fff"
-                              strokeWidth={isSelected ? '2' : '1.5'}
-                              className="transition-all duration-300"
-                            />
-                            {poi.isCustom && (
-                              <circle r="2" cx="4" cy="-4" fill="#f59e0b" stroke="#fff" strokeWidth="0.5" />
-                            )}
-                          </>
-                        )}
-                        
-                        {/* Label Badge (Transparent Halo Text) */}
-                        {(zoomScale >= 1.05 || isSelected || taggingMode || isDrawingEdges) && (
-                          <g transform="translate(0, 0)" pointerEvents="auto" className="transition-all duration-300 drop-shadow-md">
-                            
-                            {/* Halo Background Outline */}
-                            <text fontFamily="Outfit, sans-serif" textAnchor="middle" fill="none" stroke={theme === 'dark' ? '#0f172a' : '#ffffff'} strokeWidth="4.5" strokeLinejoin="round" className="opacity-90">
-                              <tspan x="0" y={-boxHeight / 2 + 15} fontSize="13">
-                                {/* Spacing */}
-                              </tspan>
-                              {nameLines.map((line, lineIdx) => (
-                                <tspan key={`bg-${lineIdx}`} x="0" y={-boxHeight / 2 + 28 + lineIdx * 11} fontSize="8.5" fontWeight="800">
-                                  {line}
-                                </tspan>
-                              ))}
-                            </text>
+                        <defs>
+                          <marker id="nav-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                            <path d="M 2 1 L 9 5 L 2 9 L 4 5 z" fill="#ffffff" stroke="#0284c7" strokeWidth="1" strokeLinejoin="round" />
+                          </marker>
+                        </defs>
 
-                        {/* Foreground Content */}
-                        {(() => {
-                          const cat = categories?.find(c => c.id === poi.category);
-                          const CustomIcon = cat?.icon && LucideIcons[cat.icon] ? LucideIcons[cat.icon] : null;
-                          const iconColor = isSelected ? '#0ea5e9' : (cat?.color || (theme === 'dark' ? '#f8fafc' : '#0f172a'));
-                          
-                          return (
-                            <>
-                              {CustomIcon ? (
-                                <g transform={`translate(-6, ${-boxHeight / 2 + 4})`}>
-                                  <CustomIcon size={12} color={iconColor} strokeWidth={2.5} />
-                                </g>
-                              ) : (
-                                <text fontFamily="Outfit, sans-serif" textAnchor="middle">
-                                  <tspan x="0" y={-boxHeight / 2 + 15} fontSize="13">
-                                    {getCategoryIcon(poi.category)}
-                                  </tspan>
-                                </text>
-                              )}
-                              
-                              <text fontFamily="Outfit, sans-serif" textAnchor="middle">
-                                {nameLines.map((line, lineIdx) => (
-                                <tspan
-                                  key={`fg-${lineIdx}`}
-                                  x="0"
-                                  y={-boxHeight / 2 + 28 + lineIdx * 11}
-                                  fontSize="8.5"
-                                  fontWeight="800"
-                                  fill={isSelected ? '#0ea5e9' : (theme === 'dark' ? '#f8fafc' : '#0f172a')}
-                                >
-                                  {line}
-                                </tspan>
-                              ))}
-                              </text>
-                            </>
-                          );
-                        })()}
-                      </g>
-                    )}
-                        
-                        {/* Red locator search query pin */}
-                        {searchQuery.trim() !== '' && isActive && (
-                          <g className="animate-search-pin" transform={`translate(0, ${zoomScale >= 1.05 ? -22 : -10})`} pointerEvents="none">
-                            <path
-                              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                              fill="#ef4444"
-                              stroke="#ffffff"
-                              strokeWidth="1.5"
-                              transform="translate(-12, -22)"
-                            />
+                        {renderEdges()}
+                        {renderRubberBand()}
+                        {renderEdgeDeleteButton()}
+
+                        {/* Render Live User Position if on this floor */}
+                        {userPosition && userPosition.floor === currentFloor && (
+                          <UserLocationMarker
+                            position={userPosition}
+                            heading={userPosition.heading}
+                            isWalking={userPosition.isWalking}
+                            isOffRoute={userPosition.isOffRoute}
+                          />
+                        )}
+                        {renderNavigationPath()}
+
+                        {/* Temporary placement coords feedback */}
+                        {taggingMode && taggingCoords && (
+                          <g transform={`translate(${taggingCoords.x}, ${taggingCoords.y})`}>
+                            <circle r="18" fill="#f59e0b" className="opacity-20 animate-ping" />
+                            <circle r="10" fill="#f59e0b" className="opacity-40 animate-pulse" />
+                            <circle r="5" fill="#f59e0b" stroke="#fff" strokeWidth="1.5" />
+                            <text x="0" y="-14" fontFamily="Outfit, sans-serif" fontSize="9" fontWeight="bold" fill="#f59e0b" textAnchor="middle">
+                              {taggingCoords.x}, {taggingCoords.y}
+                            </text>
                           </g>
                         )}
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
-            </TransformComponent>
-          </div>
-        )}
-      </TransformWrapper>
+
+                        {/* Nodes Overlay */}
+                        {(nodes || []).map((poi) => {
+                          if (poi.floor !== currentFloor) return null;
+
+                          const isActive = activePoiIds.includes(poi.id);
+                          const isSelected = selectedPoi?.id === poi.id;
+                          const isStart = navigationStart?.id === poi.id;
+                          const isEnd = navigationEnd?.id === poi.id;
+                          const isEdgeStart = edgeStartNodeId === poi.id;
+                          const cat = categories?.find(c => c.id === poi.category);
+                          const color = cat?.color || getCategoryColor(poi.category);
+
+                          // Special Waypoint node representation
+                          if (poi.category === 'waypoint') {
+                            if (!taggingMode && !isDrawingEdges) return null;
+                            return (
+                              <g
+                                key={poi.id}
+                                transform={`translate(${poi.x}, ${poi.y})`}
+                                className="cursor-pointer pointer-events-auto group"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isDrawingEdges) {
+                                    handleNodeEdgeClick(poi.id);
+                                  } else {
+                                    selectPoi(poi);
+                                  }
+                                }}
+                                onMouseDown={(e) => handleNodeMouseDown(e, poi)}
+                              >
+                                {isEdgeStart && (
+                                  <circle r="14" fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="3,3" className="animate-spin" style={{ animationDuration: '6s' }} />
+                                )}
+                                <circle
+                                  r={isSelected || isEdgeStart ? '8' : '5'}
+                                  fill={isEdgeStart ? '#f59e0b' : (isSelected ? '#0ea5e9' : '#64748b')}
+                                  stroke="#fff"
+                                  strokeWidth="1.5"
+                                  className="transition-all hover:scale-125"
+                                />
+                                {(taggingMode || isDrawingEdges) && (
+                                  <text y="-10" fontSize="7" fontWeight="bold" fill={theme === 'dark' ? '#94a3b8' : '#475569'} textAnchor="middle" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {poi.name}
+                                  </text>
+                                )}
+                              </g>
+                            );
+                          }
+
+                          // Regular POI rendering
+                          if (!isActive && !isSelected && !isStart && !isEnd && !taggingMode && !isDrawingEdges) return null;
+
+                          const nameLines = getLabelLines(poi.name);
+                          const maxLineLength = Math.max(...nameLines.map(line => line.length));
+                          const boxWidth = Math.max(52, maxLineLength * 6.5 + 16);
+                          const boxHeight = 14 + 14 + (nameLines.length * 11);
+
+                          return (
+                            <g
+                              key={poi.id}
+                              transform={`translate(${poi.x}, ${poi.y})`}
+                              className="cursor-pointer pointer-events-auto"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (isDrawingEdges) {
+                                  handleNodeEdgeClick(poi.id);
+                                } else {
+                                  selectPoi(poi);
+                                }
+                              }}
+                              onMouseDown={(e) => handleNodeMouseDown(e, poi)}
+                            >
+                              {isEdgeStart && (
+                                <circle r="22" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeDasharray="3,3" className="animate-spin" style={{ animationDuration: '6s' }} />
+                              )}
+                              {/* Blink ring when zoomed to via search */}
+                              {blinkPoiId === poi.id && (
+                                <>
+                                  <circle r="28" fill="none" stroke="#fbbf24" strokeWidth="3" className="animate-ping" style={{ animationDuration: '0.6s' }} />
+                                  <circle r="20" fill="none" stroke="#f59e0b" strokeWidth="2" className="animate-ping" style={{ animationDuration: '0.8s', animationDelay: '0.1s' }} />
+                                </>
+                              )}
+                              {(isSelected || isStart || isEnd) && (
+                                <>
+                                  <circle r="16" fill={color} className="opacity-25 animate-ping" />
+                                  <circle r="10" fill={color} className="opacity-40 animate-pulse" />
+                                </>
+                              )}
+                              {!(isSelected || isStart || isEnd) && isActive && zoomScale < 1.05 && <circle r="12" fill={color} className="opacity-15 animate-ping" />}
+
+                              {isStart && (
+                                <g transform="translate(0,-10)">
+                                  <title>{`Start Location: ${poi.name}`}</title>
+                                  <path d="M-8,-16 C-8,-24 8,-24 8,-16 C8,-8 0,0 0,0 C0,0 -8,-8 -8,-16 Z" fill="#10b981" stroke="#fff" strokeWidth="1.5" />
+                                  <text x="0" y="-12" fontSize="8" fontWeight="bold" fill="#fff" textAnchor="middle">S</text>
+                                </g>
+                              )}
+                              {isEnd && (
+                                <g transform="translate(0,-10)">
+                                  <title>{`Destination: ${poi.name}`}</title>
+                                  <path d="M-8,-20 C-8,-30 8,-30 8,-20 C8,-10 0,0 0,0 C0,0 -8,-10 -8,-20 Z" fill="#ef4444" stroke="#fff" strokeWidth="1.5" />
+                                  <text x="0" y="-15" fontSize="8" fontWeight="bold" fill="#fff" textAnchor="middle">E</text>
+                                </g>
+                              )}
+                              {!isStart && !isEnd && (zoomScale < 1.05 && !taggingMode && !isDrawingEdges) && (
+                                <g className="transition-all duration-300 hover:scale-110 drop-shadow-sm pointer-events-none">
+                                  {poi.isCustom && (
+                                    <circle r={isSelected ? '12' : '10'} fill={color} className="opacity-20" />
+                                  )}
+                                  <circle
+                                    r={isSelected ? '9' : '7.5'}
+                                    fill={color}
+                                    stroke="#ffffff"
+                                    strokeWidth={isSelected ? '2' : '1.5'}
+                                    className="transition-all duration-300"
+                                  />
+                                  {(() => {
+                                    const cat = categories?.find(c => c.id === poi.category);
+                                    const CustomIcon = cat?.icon && LucideIcons[cat.icon] ? LucideIcons[cat.icon] : null;
+                                    if (CustomIcon) {
+                                      return (
+                                        <g transform={isSelected ? "translate(-4.5, -4.5)" : "translate(-3.5, -3.5)"}>
+                                          <CustomIcon size={isSelected ? 9 : 7} color="#ffffff" strokeWidth={3} />
+                                        </g>
+                                      );
+                                    } else {
+                                      return (
+                                        <text x="0" y={isSelected ? "3" : "2.5"} fontFamily="Outfit, sans-serif" fontSize={isSelected ? "8" : "6"} textAnchor="middle" fill="#ffffff">
+                                          {getCategoryIcon(poi.category)}
+                                        </text>
+                                      );
+                                    }
+                                  })()}
+                                  {poi.isCustom && (
+                                    <circle r="2.5" cx="6" cy="-6" fill="#f59e0b" stroke="#fff" strokeWidth="1" />
+                                  )}
+                                </g>
+                              )}
+
+                              {/* Label Badge (Transparent Halo Text) */}
+                              {(zoomScale >= 1.05 || isSelected || taggingMode || isDrawingEdges) && (
+                                <g transform="translate(0, 0)" pointerEvents="auto" className="transition-all duration-300 drop-shadow-md">
+
+                                  {/* Halo Background Outline */}
+                                  <text fontFamily="Outfit, sans-serif" textAnchor="middle" fill="none" stroke={theme === 'dark' ? '#0f172a' : '#ffffff'} strokeWidth="4.5" strokeLinejoin="round" className="opacity-90">
+                                    <tspan x="0" y={-boxHeight / 2 + 15} fontSize="13">
+                                      {/* Spacing */}
+                                    </tspan>
+                                    {nameLines.map((line, lineIdx) => (
+                                      <tspan key={`bg-${lineIdx}`} x="0" y={-boxHeight / 2 + 28 + lineIdx * 11} fontSize="8.5" fontWeight="800">
+                                        {line}
+                                      </tspan>
+                                    ))}
+                                  </text>
+
+                                  {/* Foreground Content */}
+                                  {(() => {
+                                    const cat = categories?.find(c => c.id === poi.category);
+                                    const CustomIcon = cat?.icon && LucideIcons[cat.icon] ? LucideIcons[cat.icon] : null;
+                                    const badgeBg = isSelected ? '#0ea5e9' : color;
+
+                                    return (
+                                      <>
+                                        <g transform={`translate(0, ${-boxHeight / 2 + 8})`} className="drop-shadow-md">
+                                          <circle r="13" fill={badgeBg} />
+                                          <circle r="13" fill="none" stroke="#ffffff" strokeWidth="1.5" className="opacity-90" />
+                                          {CustomIcon ? (
+                                            <g transform="translate(-7, -7)">
+                                              <CustomIcon size={14} color="#ffffff" strokeWidth={2.5} />
+                                            </g>
+                                          ) : (
+                                            <text fontFamily="Outfit, sans-serif" textAnchor="middle" fill="#ffffff">
+                                              <tspan x="0" y="4.5" fontSize="12">
+                                                {getCategoryIcon(poi.category)}
+                                              </tspan>
+                                            </text>
+                                          )}
+                                        </g>
+
+                                        <text fontFamily="Outfit, sans-serif" textAnchor="middle">
+                                          {nameLines.map((line, lineIdx) => (
+                                            <tspan
+                                              key={`fg-${lineIdx}`}
+                                              x="0"
+                                              y={-boxHeight / 2 + 30 + lineIdx * 11}
+                                              fontSize="8.5"
+                                              fontWeight="800"
+                                              fill={isSelected ? '#0ea5e9' : (theme === 'dark' ? '#f8fafc' : '#0f172a')}
+                                            >
+                                              {line}
+                                            </tspan>
+                                          ))}
+                                        </text>
+                                      </>
+                                    );
+                                  })()}
+                                </g>
+                              )}
+
+                              {/* Red locator search query pin */}
+                              {searchQuery.trim() !== '' && isActive && (
+                                <g className="animate-search-pin" transform={`translate(0, ${zoomScale >= 1.05 ? -22 : -10})`} pointerEvents="none">
+                                  <path
+                                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                                    fill="#ef4444"
+                                    stroke="#ffffff"
+                                    strokeWidth="1.5"
+                                    transform="translate(-12, -22)"
+                                  />
+                                </g>
+                              )}
+                            </g>
+                          );
+                        })}
+                      </svg>
+                    </div>
+                  </TransformComponent>
+                </div>
+              )}
+            </TransformWrapper>
           </div>
         );
       })()}
@@ -1193,7 +1211,7 @@ export default function AirportMap() {
           className="fixed z-[9999] pointer-events-none"
           style={{
             left: hoveredBlockedEdge.screenX + 16,
-            top:  hoveredBlockedEdge.screenY - 10,
+            top: hoveredBlockedEdge.screenY - 10,
           }}
         >
           <div style={{
