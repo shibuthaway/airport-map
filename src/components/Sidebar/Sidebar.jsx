@@ -926,7 +926,23 @@ export default function Sidebar() {
             <FiChevronsLeft className="w-4 h-4" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">{renderTabContent()}</div>
+        <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
+          {/* Desktop Date and Time Header */}
+          <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-200/50 dark:border-slate-800/50">
+            <div className="flex flex-col">
+              <span className="text-[24px] font-black tracking-tight text-slate-800 dark:text-white leading-none">
+                {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-sky-500 dark:text-sky-400 mt-1">
+                {currentTime.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-[14px] bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border border-slate-200 dark:border-slate-700/50">
+              <LucideIcons.Clock className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+            </div>
+          </div>
+          {renderTabContent()}
+        </div>
       </motion.div>
     </div>
   );

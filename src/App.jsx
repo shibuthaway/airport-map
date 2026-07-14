@@ -8,7 +8,6 @@ import MapHeader from './components/MapHeader/MapHeader';
 import Login from './components/Auth/Login';
 import SuperAdminDashboard from './components/Admin/SuperAdminDashboard';
 import { useMapStore } from './store/useMapStore';
-import OfflineBanner from './components/OfflineBanner/OfflineBanner';
 import ToastContainer from './components/Toast/ToastContainer';
 
 // ── Error Boundary ─────────────────────────────────────────────────────────────
@@ -83,8 +82,6 @@ const MapLayout = () => {
 
   return (
     <div className="w-screen h-[100dvh] flex md:p-4 md:gap-4 overflow-hidden bg-[#f5f5f7] dark:bg-[#000000] font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-500 relative">
-      {/* Offline indicator */}
-      <OfflineBanner />
       {/* 1. Preloader */}
       <LoadingScreen />
 

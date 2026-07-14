@@ -23,10 +23,19 @@ export default function MapHeader() {
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [rotOpen, setRotOpen] = useState(false);
   const [time, setTime] = useState(new Date());
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   if (!dataLoaded) return null;
@@ -54,12 +63,12 @@ export default function MapHeader() {
 
           {/* LEFT: Live Status Indicator */}
           <div className="flex items-center min-w-0 flex-1">
-            <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/50 backdrop-blur-md shadow-sm">
+            <div className={`flex items-center gap-2.5 px-3 py-1.5 rounded-full ${isOnline ? 'bg-slate-100/50 dark:bg-slate-900/50 border-slate-200/50 dark:border-slate-800/50' : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50'} border backdrop-blur-md shadow-sm`}>
               <div className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isOnline ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
               </div>
-              <span className="text-[10px] font-black text-slate-600 dark:text-slate-300 tracking-wider uppercase">Live</span>
+              <span className={`text-[10px] font-black tracking-wider uppercase ${isOnline ? 'text-slate-600 dark:text-slate-300' : 'text-red-600 dark:text-red-400'}`}>{isOnline ? 'Live' : 'Offline'}</span>
               <div className="w-px h-3 bg-slate-300 dark:bg-slate-700 mx-0.5"></div>
               <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
                 {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -67,8 +76,8 @@ export default function MapHeader() {
             </div>
           </div>
 
-          {/* MIDDLE: Mobile Compact Search */}
-          <div className="md:hidden flex-1 min-w-0 px-2 flex justify-center">
+          {/* MIDDLE: Search Box */}
+          <div className="flex-1 min-w-0 px-2 flex justify-center md:max-w-md mx-auto">
             <Search compact />
           </div>
 
