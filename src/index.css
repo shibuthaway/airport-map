@@ -154,3 +154,11 @@ body {
 .animate-search-pin {
   animation: searchPinBounce 1s infinite ease-in-out;
 }
+
+/* Fix react-zoom-pan-pinch wrapper size to occupy full screen */
+.transform-component-module_wrapper__SPB86,
+[class*="transform-component-module_wrapper"] {
+  width: 100% !important;
+  height: 100% !important;
+}
+
