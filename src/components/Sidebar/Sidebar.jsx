@@ -760,35 +760,59 @@ export default function Sidebar() {
   }
 
   // ── DESKTOP: Sidebar ───────────────────────────────────────────────────────
+  const tabColors = {
+    explore: 'from-sky-400 to-blue-600 shadow-sky-500/40',
+    navigate: 'from-indigo-500 to-violet-600 shadow-indigo-500/40',
+    tagging: 'from-emerald-400 to-teal-600 shadow-emerald-500/40',
+    floors: 'from-amber-400 to-orange-500 shadow-amber-500/40',
+    categories: 'from-pink-500 to-rose-600 shadow-pink-500/40',
+    settings: 'from-slate-500 to-slate-700 shadow-slate-500/40',
+    profile: 'from-fuchsia-500 to-purple-600 shadow-fuchsia-500/40',
+  };
+  
+  const tabHoverColors = {
+    explore: 'hover:bg-sky-50 dark:hover:bg-sky-500/10 hover:text-sky-600 dark:hover:text-sky-400 hover:border-sky-200 dark:hover:border-sky-800',
+    navigate: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-800',
+    tagging: 'hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-200 dark:hover:border-emerald-800',
+    floors: 'hover:bg-amber-50 dark:hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-200 dark:hover:border-amber-800',
+    categories: 'hover:bg-pink-50 dark:hover:bg-pink-500/10 hover:text-pink-600 dark:hover:text-pink-400 hover:border-pink-200 dark:hover:border-pink-800',
+    settings: 'hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600',
+    profile: 'hover:bg-fuchsia-50 dark:hover:bg-fuchsia-500/10 hover:text-fuchsia-600 dark:hover:text-fuchsia-400 hover:border-fuchsia-200 dark:hover:border-fuchsia-800',
+  };
+
   return (
     <div className="relative h-full flex z-40 gap-4">
       {/* Side Rail */}
-      <div className="w-[76px] rounded-[2rem] bg-white/70 dark:bg-[#111111]/70 backdrop-blur-3xl shadow-xl dark:shadow-2xl border border-black/5 dark:border-white/10 flex flex-col items-center py-6 gap-6 z-50 flex-shrink-0 transition-colors duration-500">
-        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 ${useMapStore.getState().appSettings?.logo_url ? 'bg-white dark:bg-[#1a1a1a] shadow-sm border border-black/5 dark:border-white/5 p-1.5' : 'bg-gradient-to-br from-sky-500 via-indigo-500 to-purple-600 shadow-md shadow-indigo-500/20 text-white'}`}>
+      <div className="w-[88px] rounded-[2.5rem] bg-white/75 dark:bg-[#0a0a0a]/75 backdrop-blur-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-2xl border border-black/5 dark:border-white/10 flex flex-col items-center py-6 gap-3 z-50 flex-shrink-0 transition-colors duration-500">
+        <div className={`w-12 h-12 rounded-[18px] mb-2 flex items-center justify-center overflow-hidden flex-shrink-0 ${useMapStore.getState().appSettings?.logo_url ? 'bg-white dark:bg-[#1a1a1a] shadow-sm border border-black/5 dark:border-white/5 p-1.5' : 'bg-gradient-to-br from-sky-500 via-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 text-white'}`}>
           {useMapStore.getState().appSettings?.logo_url ? (
             <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-full h-full object-contain" />
           ) : (
             <FiNavigation className="w-5 h-5 transform fill-white/20" />
           )}
         </div>
-        <div className="flex flex-col gap-2 w-full px-2">
+        
+        <div className="flex flex-col gap-2.5 w-full px-2.5">
           {tabs.map(tab => {
             const isActive = activeTab === tab.id;
+            const grad = tabColors[tab.id] || tabColors.explore;
+            const hover = tabHoverColors[tab.id] || tabHoverColors.explore;
+            
             return (
               <button
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id); setIsOpen(true); setNavigationMode(tab.id === 'navigate'); }}
-                className={`w-full aspect-square rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all group relative ${isActive
-                    ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-inner'
-                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                className={`w-full h-[66px] rounded-[20px] flex flex-col items-center justify-center gap-1.5 transition-all duration-300 group relative border border-transparent ${isActive
+                    ? `bg-gradient-to-br ${grad} text-white shadow-xl scale-[1.02]`
+                    : `text-slate-400 dark:text-slate-500 ${hover} bg-transparent`
                   }`}
                 title={tab.label}
               >
                 {isActive && (
-                  <motion.div layoutId="desktop-active-rail" className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-500 dark:bg-blue-400 rounded-r-full shadow-[0_0_10px_rgba(59,130,246,0.3)]" />
+                  <motion.div layoutId="desktop-active-rail" className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-1.5 h-6 bg-sky-500 dark:bg-sky-400 rounded-r-full shadow-[0_0_10px_rgba(14,165,233,0.5)]" />
                 )}
-                {React.cloneElement(tab.icon, { className: 'w-5 h-5 transition-transform group-hover:scale-110' })}
-                <span className="text-[9px] font-bold uppercase tracking-widest">{tab.label}</span>
+                {React.cloneElement(tab.icon, { className: `w-5 h-5 transition-all duration-300 ${isActive ? 'scale-110 drop-shadow-md' : 'group-hover:scale-110 group-hover:-translate-y-0.5'}` })}
+                <span className={`text-[8.5px] font-black uppercase tracking-widest transition-all ${isActive ? 'text-white/95' : 'opacity-70 group-hover:opacity-100'}`}>{tab.label}</span>
               </button>
             )
           })}
