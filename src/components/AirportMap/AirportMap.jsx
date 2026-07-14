@@ -228,8 +228,16 @@ export default function AirportMap() {
   const renderMap = () => {
     if (!floors || floors.length === 0) {
       return (
-        <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 p-6 text-center">
+          <FiSettings className="w-12 h-12 mb-4 opacity-50 animate-pulse" />
+          <h2 className="text-xl font-bold mb-2">Connecting to Map Server...</h2>
+          <p className="text-sm max-w-sm mb-6">If this screen is stuck, the database connection might have timed out due to cold start. Please reload the page.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl active:scale-95 transition-all shadow-lg shadow-indigo-500/30"
+          >
+            Reload Page
+          </button>
         </div>
       );
     }

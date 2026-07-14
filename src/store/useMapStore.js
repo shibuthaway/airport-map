@@ -528,7 +528,7 @@ export const useMapStore = create((set, get) => ({
     }
   },
 
-  loadMapData: async (retries = 3) => {
+  loadMapData: async (retries = 6) => {
     try {
       let projectId = 'default';
       if (typeof window !== 'undefined') {
@@ -601,7 +601,7 @@ export const useMapStore = create((set, get) => ({
       } else {
         if (retries > 0) {
           console.warn(`API returned ${floorsRes.status}, retrying...`);
-          setTimeout(() => useMapStore.getState().loadMapData(retries - 1), 2000);
+          setTimeout(() => useMapStore.getState().loadMapData(retries - 1), 2500);
           return;
         }
         set({ dataLoaded: true });
@@ -609,7 +609,7 @@ export const useMapStore = create((set, get) => ({
     } catch (e) {
       console.error('Failed to load map data from APIs', e);
       if (retries > 0) {
-        setTimeout(() => useMapStore.getState().loadMapData(retries - 1), 2000);
+        setTimeout(() => useMapStore.getState().loadMapData(retries - 1), 2500);
         return;
       }
       set({ dataLoaded: true });
