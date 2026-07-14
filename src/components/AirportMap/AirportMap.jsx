@@ -1140,32 +1140,28 @@ export default function AirportMap() {
                                   {(() => {
                                     const cat = categories?.find(c => c.id === poi.category);
                                     const CustomIcon = cat?.icon && LucideIcons[cat.icon] ? LucideIcons[cat.icon] : null;
-                                    const badgeBg = isSelected ? '#0ea5e9' : color;
+                                    const iconColor = isSelected ? '#0ea5e9' : (cat?.color || (theme === 'dark' ? '#f8fafc' : '#0f172a'));
 
                                     return (
                                       <>
-                                        <g transform={`translate(0, ${-boxHeight / 2 + 8})`} className="drop-shadow-md">
-                                          <circle r="13" fill={badgeBg} />
-                                          <circle r="13" fill="none" stroke="#ffffff" strokeWidth="1.5" className="opacity-90" />
-                                          {CustomIcon ? (
-                                            <g transform="translate(-7, -7)">
-                                              <CustomIcon size={14} color="#ffffff" strokeWidth={2.5} />
-                                            </g>
-                                          ) : (
-                                            <text fontFamily="Outfit, sans-serif" textAnchor="middle" fill="#ffffff">
-                                              <tspan x="0" y="4.5" fontSize="12">
-                                                {getCategoryIcon(poi.category)}
-                                              </tspan>
-                                            </text>
-                                          )}
-                                        </g>
+                                        {CustomIcon ? (
+                                          <g transform={`translate(-6, ${-boxHeight / 2 + 4})`}>
+                                            <CustomIcon size={12} color={iconColor} strokeWidth={2.5} />
+                                          </g>
+                                        ) : (
+                                          <text fontFamily="Outfit, sans-serif" textAnchor="middle">
+                                            <tspan x="0" y={-boxHeight / 2 + 15} fontSize="13">
+                                              {getCategoryIcon(poi.category)}
+                                            </tspan>
+                                          </text>
+                                        )}
 
                                         <text fontFamily="Outfit, sans-serif" textAnchor="middle">
                                           {nameLines.map((line, lineIdx) => (
                                             <tspan
                                               key={`fg-${lineIdx}`}
                                               x="0"
-                                              y={-boxHeight / 2 + 30 + lineIdx * 11}
+                                              y={-boxHeight / 2 + 28 + lineIdx * 11}
                                               fontSize="8.5"
                                               fontWeight="800"
                                               fill={isSelected ? '#0ea5e9' : (theme === 'dark' ? '#f8fafc' : '#0f172a')}
