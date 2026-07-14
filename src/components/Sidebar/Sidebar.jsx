@@ -254,8 +254,23 @@ export default function Sidebar() {
                     <FiNavigation className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-[15px] font-black text-slate-100 dark:text-white leading-tight mb-1">
+                    <h2 className="text-[15px] font-black text-slate-100 dark:text-white leading-tight mb-1 relative flex items-center">
                       {useMapStore.getState().currentBuilding ? useMapStore.getState().buildings?.find(b => b.id === useMapStore.getState().currentBuilding)?.name : 'Global Directory'}
+                      
+                      {useMapStore.getState().buildings?.length > 1 && (
+                        <select 
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          value={useMapStore.getState().currentBuilding || ''}
+                          onChange={(e) => useMapStore.getState().setBuilding(e.target.value)}
+                        >
+                          {useMapStore.getState().buildings.map(b => (
+                            <option key={b.id} value={b.id} className="text-slate-800">{b.name}</option>
+                          ))}
+                        </select>
+                      )}
+                      {useMapStore.getState().buildings?.length > 1 && (
+                        <LucideIcons.ChevronDown className="w-4 h-4 ml-1 opacity-50" />
+                      )}
                     </h2>
                     <p className="text-[9px] font-black tracking-[0.15em] text-sky-500 uppercase">Indoor Navigation</p>
                   </div>
@@ -263,7 +278,7 @@ export default function Sidebar() {
               </div>
 
               {/* Floor Status Card */}
-              <div className="rounded-3xl p-5 bg-[#0a0f1e]/60 dark:bg-[#050814]/80 border border-indigo-500/10 dark:border-indigo-500/20 shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative overflow-hidden backdrop-blur-xl">
+              <div className="rounded-3xl p-5 bg-white/90 dark:bg-[#050814]/80 border border-indigo-100 dark:border-indigo-500/20 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative overflow-hidden backdrop-blur-xl">
                 <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\\"20\\" height=\\"20\\" xmlns=\\"http://www.w3.org/2000/svg\\"%3E%3Cpath d=\\"M0 0h20v20H0z\\" fill=\\"none\\"%3E%3C/path%3E%3Ccircle cx=\\"10\\" cy=\\"10\\" r=\\"1\\" fill=\\"%23fff\\"%3E%3C/circle%3E%3C/svg%3E")' }}></div>
                 
                 <div className="relative z-10">
@@ -277,13 +292,13 @@ export default function Sidebar() {
 
                   <div className="flex gap-5 mb-5 pb-5 border-b border-black/5 dark:border-white/5">
                     <div className="flex flex-col">
-                      <span className="text-xl font-black text-slate-700 dark:text-white">{pois[currentFloor]?.length || 0}</span>
+                      <span className="text-xl font-black text-slate-700 dark:text-white">{pois[currentFloor]?.filter(p => p.category !== 'waypoint').length || 0}</span>
                       <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Places</span>
                     </div>
                     <div className="w-px bg-black/5 dark:bg-white/5"></div>
                     <div className="flex flex-col">
                       <span className="text-xl font-black text-slate-700 dark:text-white">
-                        {new Set(pois[currentFloor]?.map(p => p.category)).size}
+                        {new Set(pois[currentFloor]?.filter(p => p.category !== 'waypoint').map(p => p.category)).size}
                       </span>
                       <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Categories</span>
                     </div>
@@ -304,6 +319,24 @@ export default function Sidebar() {
                     ))}
                   </div>
                 </div>
+              </div>
+
+              {/* Action Cards */}
+              <div className="grid grid-cols-2 gap-3 pb-2 pt-1">
+                <button onClick={() => setActiveCategory('search')} className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-[#0f172a] dark:to-[#0a0f1e] border border-slate-200/70 dark:border-sky-500/10 shadow-sm dark:shadow-[0_0_15px_rgba(14,165,233,0.05)] hover:border-sky-300 dark:hover:border-sky-400/40 transition-all group active:scale-95 text-left">
+                  <div className="w-10 h-10 rounded-full bg-sky-50 dark:bg-sky-500/10 flex items-center justify-center flex-shrink-0 text-sky-500 group-hover:bg-sky-100 dark:group-hover:bg-sky-500/20 transition-all"><FiSearch className="w-4 h-4" /></div>
+                  <div>
+                    <h4 className="text-[11px] font-black text-slate-800 dark:text-white">Find Places</h4>
+                    <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold mt-0.5">Search map</p>
+                  </div>
+                </button>
+                <button onClick={() => { setActiveTab('navigate'); setIsOpen(true); setNavigationMode(true); }} className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-[#0f172a] dark:to-[#0a0f1e] border border-slate-200/70 dark:border-indigo-500/10 shadow-sm dark:shadow-[0_0_15px_rgba(79,70,229,0.05)] hover:border-indigo-300 dark:hover:border-indigo-400/40 transition-all group active:scale-95 text-left">
+                  <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center flex-shrink-0 text-indigo-500 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-all"><FiCompass className="w-4 h-4" /></div>
+                  <div>
+                    <h4 className="text-[11px] font-black text-slate-800 dark:text-white">Directions</h4>
+                    <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold mt-0.5">Best routes</p>
+                  </div>
+                </button>
               </div>
 
               {/* Categories Grid */}
@@ -348,24 +381,6 @@ export default function Sidebar() {
                     );
                   })}
                 </div>
-              </div>
-
-              {/* Action Cards */}
-              <div className="grid grid-cols-2 gap-3 pt-2 pb-4">
-                <button onClick={() => setActiveCategory('search')} className="flex items-center gap-3 p-4 rounded-2xl bg-slate-100 dark:bg-gradient-to-br dark:from-[#0f172a] dark:to-[#0a0f1e] border border-slate-200 dark:border-sky-500/10 dark:shadow-[0_0_15px_rgba(14,165,233,0.05)] hover:border-sky-400/40 transition-all group active:scale-95 text-left">
-                  <div className="w-10 h-10 rounded-full bg-sky-500/10 flex items-center justify-center flex-shrink-0 text-sky-500 group-hover:bg-sky-500/20 transition-all"><FiSearch className="w-4 h-4" /></div>
-                  <div>
-                    <h4 className="text-[11px] font-black text-slate-800 dark:text-white">Find Places</h4>
-                    <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold mt-0.5">Search map</p>
-                  </div>
-                </button>
-                <button onClick={() => { setActiveTab('navigate'); setIsOpen(true); setNavigationMode(true); }} className="flex items-center gap-3 p-4 rounded-2xl bg-slate-100 dark:bg-gradient-to-br dark:from-[#0f172a] dark:to-[#0a0f1e] border border-slate-200 dark:border-indigo-500/10 dark:shadow-[0_0_15px_rgba(79,70,229,0.05)] hover:border-indigo-400/40 transition-all group active:scale-95 text-left">
-                  <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center flex-shrink-0 text-indigo-500 group-hover:bg-indigo-500/20 transition-all"><FiCompass className="w-4 h-4" /></div>
-                  <div>
-                    <h4 className="text-[11px] font-black text-slate-800 dark:text-white">Directions</h4>
-                    <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold mt-0.5">Best routes</p>
-                  </div>
-                </button>
               </div>
             </>
           ) : (
