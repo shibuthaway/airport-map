@@ -26,6 +26,12 @@ export default function Sidebar() {
   // Controls which SearchableSelect is open — prevents From/To overlap
   const [activeSelect, setActiveSelect] = useState(null); // 'from' | 'to' | null
   const [expandedPoiId, setExpandedPoiId] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Voice guidance (FREE — Web Speech API)
   const {
@@ -245,7 +251,7 @@ export default function Sidebar() {
             // ── DASHBOARD VIEW ────────────────────────────────────────────────
             <>
               {/* Header Card */}
-              <div className="rounded-3xl p-5 bg-gradient-to-br from-[#0f172a] via-[#0a0f1e] to-[#0f172a] border border-white/5 shadow-2xl relative overflow-hidden group">
+              <div className="rounded-3xl p-5 bg-white dark:bg-gradient-to-br dark:from-[#0f172a] dark:via-[#0a0f1e] dark:to-[#0f172a] border border-slate-200/80 dark:border-white/5 shadow-sm dark:shadow-2xl relative overflow-hidden group">
                 <div className="absolute -right-10 -top-10 w-32 h-32 bg-sky-500/10 blur-3xl rounded-full pointer-events-none group-hover:bg-sky-400/20 transition-all duration-700"></div>
                 <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none"></div>
                 
@@ -254,7 +260,7 @@ export default function Sidebar() {
                     <FiNavigation className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-[15px] font-black text-slate-100 dark:text-white leading-tight mb-1 relative flex items-center">
+                    <h2 className="text-[15px] font-black text-slate-800 dark:text-white leading-tight mb-1 relative flex items-center">
                       {useMapStore.getState().currentBuilding ? useMapStore.getState().buildings?.find(b => b.id === useMapStore.getState().currentBuilding)?.name : 'Global Directory'}
                       
                       {useMapStore.getState().buildings?.length > 1 && (
@@ -788,20 +794,19 @@ export default function Sidebar() {
               </button>
             </div>
 
-            {/* Tab Pills */}
-            <div className="px-4 pt-3 pb-2 flex gap-2 overflow-x-auto custom-scrollbar flex-shrink-0">
-              {tabs.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setActiveTab(t.id)}
-                  className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-bold transition-all active:scale-95 flex-shrink-0 ${activeTab === t.id
-                      ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-md shadow-sky-500/30'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-                    }`}
-                >
-                  {t.label}
-                </button>
-              ))}
+            {/* Date and Time Header */}
+            <div className="px-5 pt-3 pb-2 flex items-center justify-between flex-shrink-0 border-b border-slate-100 dark:border-slate-800/50 mb-2">
+              <div className="flex flex-col">
+                <span className="text-[20px] font-black tracking-tight text-slate-800 dark:text-white leading-none">
+                  {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-sky-500 dark:text-sky-400 mt-1">
+                  {currentTime.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
+                </span>
+              </div>
+              <div className="w-9 h-9 rounded-[12px] bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border border-slate-200 dark:border-slate-700/50">
+                <LucideIcons.Clock className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+              </div>
             </div>
 
             {/* Scrollable Content */}
