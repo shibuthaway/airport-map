@@ -672,13 +672,12 @@ export default function Sidebar() {
               <div className="w-9 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
             </div>
 
-            {/* Sheet Header */}
             <div className="px-4 pb-3 flex items-center gap-3 flex-shrink-0 border-b border-slate-100 dark:border-slate-800">
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
+              <div className={`w-9 h-9 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0 ${useMapStore.getState().appSettings?.logo_url ? 'bg-white dark:bg-[#1a1a1a] p-1 border border-black/5 dark:border-white/5' : 'bg-gradient-to-br from-sky-500 via-indigo-500 to-purple-600 text-white'}`}>
                 {useMapStore.getState().appSettings?.logo_url ? (
                   <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-full h-full object-contain" />
                 ) : (
-                  <span className="text-lg">✈️</span>
+                  <FiNavigation className="w-4 h-4 transform fill-white/20" />
                 )}
               </div>
               <div className="min-w-0 flex-1">
@@ -758,11 +757,11 @@ export default function Sidebar() {
     <div className="relative h-full flex z-40 gap-4">
       {/* Side Rail */}
       <div className="w-[76px] rounded-[2rem] bg-white/70 dark:bg-[#111111]/70 backdrop-blur-3xl shadow-xl dark:shadow-2xl border border-black/5 dark:border-white/10 flex flex-col items-center py-6 gap-6 z-50 flex-shrink-0 transition-colors duration-500">
-        <div className="w-11 h-11 rounded-2xl bg-white dark:bg-[#1a1a1a] flex items-center justify-center shadow-sm border border-black/5 dark:border-white/5 overflow-hidden p-1.5 flex-shrink-0">
+        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 ${useMapStore.getState().appSettings?.logo_url ? 'bg-white dark:bg-[#1a1a1a] shadow-sm border border-black/5 dark:border-white/5 p-1.5' : 'bg-gradient-to-br from-sky-500 via-indigo-500 to-purple-600 shadow-md shadow-indigo-500/20 text-white'}`}>
           {useMapStore.getState().appSettings?.logo_url ? (
             <img src={useMapStore.getState().appSettings.logo_url} alt="Logo" className="w-full h-full object-contain" />
           ) : (
-            <span className="text-xl">✈️</span>
+            <FiNavigation className="w-5 h-5 transform fill-white/20" />
           )}
         </div>
         <div className="flex flex-col gap-2 w-full px-2">
