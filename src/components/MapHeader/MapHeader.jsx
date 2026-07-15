@@ -57,15 +57,15 @@ export default function MapHeader() {
         <div className="h-14 border-b border-slate-200/50 dark:border-slate-800/40 bg-white/95 dark:bg-slate-950/90 backdrop-blur-xl flex items-center justify-between px-3 md:px-6 z-20 select-none flex-shrink-0 gap-2">
 
           {/* LEFT: Live Status Indicator */}
-          <div className="flex items-center min-w-0 flex-1">
-            <div className={`flex items-center gap-2.5 px-3 py-1.5 rounded-full ${isOnline ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200/60 dark:border-emerald-800/50' : 'bg-red-50/80 dark:bg-red-950/30 border-red-200/60 dark:border-red-900/50'} border backdrop-blur-md shadow-sm transition-colors duration-300`}>
-              <div className="relative flex h-2 w-2">
+          <div className="flex items-center flex-1 min-w-[auto] md:min-w-0">
+            <div className={`flex items-center gap-1.5 md:gap-2.5 px-2.5 md:px-3 py-1.5 rounded-full ${isOnline ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200/60 dark:border-emerald-800/50' : 'bg-red-50/80 dark:bg-red-950/30 border-red-200/60 dark:border-red-900/50'} border backdrop-blur-md shadow-sm transition-colors duration-300 flex-shrink-0 flex-nowrap whitespace-nowrap`}>
+              <div className="relative flex h-2 w-2 flex-shrink-0">
                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isOnline ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
                 <span className={`relative inline-flex rounded-full h-2 w-2 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
               </div>
-              <span className={`text-[10px] font-black tracking-widest uppercase ${isOnline ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>{isOnline ? 'Live' : 'Offline'}</span>
-              <div className={`w-px h-3 mx-0.5 ${isOnline ? 'bg-emerald-200 dark:bg-emerald-800/60' : 'bg-red-200 dark:bg-red-800/60'}`}></div>
-              <span className={`text-[11px] font-bold ${isOnline ? 'text-emerald-700 dark:text-emerald-500' : 'text-red-700 dark:text-red-500'}`}>
+              <span className={`text-[10px] font-black tracking-widest uppercase flex-shrink-0 ${isOnline ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>{isOnline ? 'Live' : 'Offline'}</span>
+              <div className={`w-px h-3 mx-0.5 flex-shrink-0 ${isOnline ? 'bg-emerald-200 dark:bg-emerald-800/60' : 'bg-red-200 dark:bg-red-800/60'}`}></div>
+              <span className={`text-[10px] md:text-[11px] font-bold flex-shrink-0 whitespace-nowrap ${isOnline ? 'text-emerald-700 dark:text-emerald-500' : 'text-red-700 dark:text-red-500'}`}>
                 {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
