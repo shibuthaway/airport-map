@@ -169,7 +169,7 @@ export const useMapStore = create((set, get) => ({
 
   // Floors
   floors: [],
-  currentFloor: 'lounge',
+  currentFloor: null,
   setFloor: (floor) => set({
     currentFloor: floor,
     taggingCoords: null,
@@ -585,18 +585,11 @@ export const useMapStore = create((set, get) => ({
         if (floors.offline || !Array.isArray(floors)) floors = [];
         if (categories.offline || !Array.isArray(categories)) categories = [];
 
-        // Fallback for default project if offline and cache is completely empty
-        if (floors.length === 0 && projectId === 'default') {
-          floors = [
-            { id: 'lounge', level: 'Level 1', name: 'Main Concourse', image: '/maps/airport.svg' }
-          ];
-        }
-
         const nodes = graph.nodes || [];
         const edges = graph.edges || [];
         const computedPois = computePoisFromNodes(nodes);
         
-        let topFloorId = floors[0]?.id || 'lounge';
+        let topFloorId = floors[0]?.id || null;
         if (floors && floors.length > 0) {
           const sorted = [...floors].sort((a, b) => {
             const numA = parseInt(a.level.replace(/[^0-9]/g, '')) || 0;
