@@ -74,11 +74,37 @@ class ErrorBoundary extends React.Component {
 
 // ── Map Layout ─────────────────────────────────────────────────────────────────
 const MapLayout = () => {
-  const { isFullScreen, dataLoaded, loadMapData } = useMapStore();
+  const floors = useMapStore(state => state.floors);
+  const nodes = useMapStore(state => state.nodes);
+  const edges = useMapStore(state => state.edges);
+  const pois = useMapStore(state => state.pois);
+  const currentFloor = useMapStore(state => state.currentFloor);
+  const currentBuilding = useMapStore(state => state.currentBuilding);
+  const isFullScreen = useMapStore(state => state.isFullScreen);
+  const dataLoaded = useMapStore(state => state.dataLoaded);
+  const loadMapData = useMapStore(state => state.loadMapData);
 
   useEffect(() => {
     loadMapData();
   }, [loadMapData]);
+
+  // Auto-sync active building state to the local cache so modifications (adding a floor/node)
+  // are never lost when switching back and forth between terminals.
+  useEffect(() => {
+    if (dataLoaded && currentBuilding) {
+      useMapStore.setState(state => {
+        const newCache = { ...state.buildingCache };
+        newCache[currentBuilding] = {
+          floors: state.floors,
+          nodes: state.nodes,
+          edges: state.edges,
+          pois: state.pois,
+          topFloorId: state.currentFloor
+        };
+        return { buildingCache: newCache };
+      });
+    }
+  }, [floors, nodes, edges, pois, currentFloor, currentBuilding, dataLoaded]);
 
   return (
     <div className="w-screen h-[100dvh] flex md:p-4 md:gap-4 overflow-hidden bg-[#f5f5f7] dark:bg-[#000000] font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-500 relative">
