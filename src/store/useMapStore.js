@@ -77,9 +77,26 @@ export const useMapStore = create((set, get) => ({
   buildings: [],
   currentBuilding: null,
   categories: [],
+  buildingCache: {}, // { buildingId: { floors, nodes, edges, pois, topFloorId } }
+  
   setBuilding: (buildingId) => {
     if (get().currentBuilding === buildingId) return; // Prevent reload if already active
-    set({ currentBuilding: buildingId }); // Don't clear data or unmount shell
+    
+    const cache = get().buildingCache[buildingId];
+    if (cache) {
+      // Instant optimistic UI switch using cache
+      set({ 
+        currentBuilding: buildingId,
+        floors: cache.floors,
+        nodes: cache.nodes,
+        edges: cache.edges,
+        pois: cache.pois,
+        currentFloor: cache.topFloorId
+      });
+    } else {
+      set({ currentBuilding: buildingId, floors: [], nodes: [], edges: [], pois: {}, currentFloor: null }); 
+    }
+    
     get().loadMapData();
   },
 
@@ -599,7 +616,17 @@ export const useMapStore = create((set, get) => ({
           topFloorId = sorted[sorted.length - 1].id;
         }
 
-        set({ floors, nodes, edges, pois: computedPois, currentFloor: topFloorId, appSettings: settings, categories, dataLoaded: true });
+        set((state) => {
+          const newCache = { ...state.buildingCache };
+          if (activeBuildingId) {
+            newCache[activeBuildingId] = { floors, nodes, edges, pois: computedPois, topFloorId };
+          }
+          return { 
+            floors, nodes, edges, pois: computedPois, currentFloor: topFloorId, 
+            appSettings: settings, categories, dataLoaded: true,
+            buildingCache: newCache 
+          };
+        });
 
         // ── Prefetch all floor map images for offline use ──────────────────
         // This ensures Service Worker caches every floor image immediately,

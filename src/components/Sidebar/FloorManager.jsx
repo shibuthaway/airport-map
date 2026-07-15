@@ -8,6 +8,9 @@ export default function FloorManager() {
   const [isAdding, setIsAdding] = useState(false);
   const [isAddingBuilding, setIsAddingBuilding] = useState(false);
   const [newBuildingName, setNewBuildingName] = useState('');
+  
+  const [isSavingFloor, setIsSavingFloor] = useState(false);
+  const [isDeletingFloor, setIsDeletingFloor] = useState(false);
   const [isEditingBuilding, setIsEditingBuilding] = useState(false);
   const [editBuildingName, setEditBuildingName] = useState('');
   const [editingId, setEditingId] = useState(null);
@@ -58,24 +61,29 @@ export default function FloorManager() {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!level || !name || !imageUrl) {
-      addToast('Please fill out all fields and upload a blueprint image.', 'error');
+    if (!level.trim() || !name.trim()) {
+      addToast("Level code and Floor name are required", "error");
       return;
     }
-
-    if (editingId) {
-      await editFloor(editingId, level, name, imageUrl);
-      setEditingId(null);
-    } else {
-      await addFloor(level, name, imageUrl);
+    
+    setIsSavingFloor(true);
+    try {
+      if (editingId) {
+        await editFloor(editingId, level, name, imageUrl);
+        addToast(`Updated floor ${level} successfully`, "success");
+      } else {
+        await addFloor(level, name, imageUrl);
+        addToast(`Added new floor ${level}`, "success");
+      }
       setIsAdding(false);
+      setEditingId(null);
+      setLevel('');
+      setName('');
+      setImageUrl('');
+      setPreview(null);
+    } finally {
+      setIsSavingFloor(false);
     }
-
-    // Reset fields
-    setLevel('');
-    setName('');
-    setImageUrl('');
-    setPreview(null);
   };
 
   const handleStartEdit = (floor) => {
@@ -314,11 +322,19 @@ export default function FloorManager() {
 
           <button
             type="submit"
-            disabled={uploading}
+            disabled={uploading || isSavingFloor}
             className="w-full py-2.5 rounded-lg bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-sky-500/10"
           >
-            <FiSave className="w-4 h-4" />
-            {editingId ? 'Update Blueprint' : 'Add Floor Blueprint'}
+            {isSavingFloor ? (
+              <span className="flex items-center gap-2">
+                <FiSettings className="w-4 h-4 animate-spin" /> Saving...
+              </span>
+            ) : (
+              <>
+                <FiSave className="w-4 h-4" />
+                {editingId ? 'Update Blueprint' : 'Add Floor Blueprint'}
+              </>
+            )}
           </button>
         </form>
       )}
@@ -396,13 +412,24 @@ export default function FloorManager() {
                 </button>
                 <button
                   type="button"
+                  disabled={isDeletingFloor}
                   onClick={async () => {
-                    await deleteFloor(floorToDelete.id);
-                    setFloorToDelete(null);
+                    setIsDeletingFloor(true);
+                    try {
+                      await deleteFloor(floorToDelete.id);
+                      setFloorToDelete(null);
+                      addToast("Floor deleted successfully", "success");
+                    } finally {
+                      setIsDeletingFloor(false);
+                    }
                   }}
-                  className="flex-1 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-colors active:scale-95 shadow-lg shadow-rose-500/20 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold shadow-lg shadow-rose-500/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Delete Floor
+                  {isDeletingFloor ? (
+                    <><FiSettings className="w-4 h-4 animate-spin" /> Deleting...</>
+                  ) : (
+                    'Delete Floor'
+                  )}
                 </button>
               </div>
             </motion.div>
