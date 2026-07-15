@@ -83,9 +83,12 @@ export const useMapStore = create((set, get) => ({
   setBuilding: (buildingId) => {
     if (get().currentBuilding === buildingId) return; // Prevent reload if already active
     
+    // Always trigger the loading overlay for a smooth psychological transition and to hide render lag
+    set({ isLoadingBuilding: true });
+    
     const cache = get().buildingCache[buildingId];
     if (cache) {
-      // Instant optimistic UI switch using cache
+      // Use cache immediately so it's ready when the loader lifts
       set({ 
         currentBuilding: buildingId,
         floors: cache.floors,
@@ -95,9 +98,10 @@ export const useMapStore = create((set, get) => ({
         currentFloor: cache.topFloorId
       });
     } else {
-      set({ currentBuilding: buildingId, floors: [], nodes: [], edges: [], pois: {}, currentFloor: null, isLoadingBuilding: true }); 
+      set({ currentBuilding: buildingId, floors: [], nodes: [], edges: [], pois: {}, currentFloor: null }); 
     }
     
+    // Always fetch fresh data to ensure we never have stale "galat data"
     get().loadMapData();
   },
 
