@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMapStore } from '../../store/useMapStore';
-import { FiUploadCloud, FiTrash2, FiPlus, FiEdit3, FiSave, FiX, FiLayers } from 'react-icons/fi';
+import { FiUploadCloud, FiTrash2, FiPlus, FiEdit3, FiSave, FiX, FiLayers, FiChevronDown } from 'react-icons/fi';
 
 export default function FloorManager() {
   const { floors, addFloor, editFloor, deleteFloor, buildings, currentBuilding, setBuilding, addBuilding, addToast } = useMapStore();
@@ -131,13 +131,31 @@ export default function FloorManager() {
             </button>
           </div>
         ) : (
-          <div className="flex items-center justify-between bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-xl shadow-sm">
-            <div className="flex flex-col">
-              <span className="text-base font-black text-slate-800 dark:text-slate-100">{buildings.find(b => b.id === currentBuilding)?.name || 'Unknown Building'}</span>
+          <div className="flex items-center justify-between bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-xl shadow-sm relative hover:border-sky-300 dark:hover:border-sky-700 transition-colors">
+            {buildings.length > 1 && (
+              <select 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                value={currentBuilding || ''}
+                onChange={(e) => setBuilding(e.target.value)}
+              >
+                {buildings.map(b => (
+                  <option key={b.id} value={b.id} className="text-slate-800">{b.name}</option>
+                ))}
+              </select>
+            )}
+            
+            <div className="flex flex-col flex-1 relative pointer-events-none">
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-black text-slate-800 dark:text-slate-100">
+                  {buildings.find(b => b.id === currentBuilding)?.name || 'Unknown Building'}
+                </span>
+                {buildings.length > 1 && <FiChevronDown className="w-4 h-4 text-slate-400" />}
+              </div>
               <span className="text-[10px] font-bold text-sky-500 uppercase tracking-widest">{floors.length} Floors Active</span>
             </div>
-            <div className="flex items-center gap-1">
-              <button onClick={() => { if (window.confirm('Are you sure you want to delete this building and all its floors?')) useMapStore.getState().deleteBuilding(currentBuilding); }} className="p-2 text-slate-400 hover:text-rose-500 bg-slate-50 hover:bg-rose-50 dark:bg-slate-900 dark:hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer" title="Delete Building">
+            
+            <div className="flex items-center gap-1 relative z-20">
+              <button onClick={(e) => { e.stopPropagation(); if (window.confirm('Are you sure you want to delete this building and all its floors?')) useMapStore.getState().deleteBuilding(currentBuilding); }} className="p-2 text-slate-400 hover:text-rose-500 bg-slate-50 hover:bg-rose-50 dark:bg-slate-900 dark:hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer pointer-events-auto" title="Delete Building">
                 <FiTrash2 className="w-4 h-4" />
               </button>
             </div>
