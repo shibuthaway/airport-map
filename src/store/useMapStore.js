@@ -787,7 +787,11 @@ export const useMapStore = create((set, get) => ({
     }
   },
 
-  getFlatPois: () => get().nodes.filter(n => n.category !== 'waypoint'),
+  getFlatPois: () => {
+    const { nodes, floors } = get();
+    const currentFloorIds = new Set(floors.map(f => f.id));
+    return nodes.filter(n => n.category !== 'waypoint' && currentFloorIds.has(n.floor));
+  },
 
   exportFloorData: (floor) => {
     const data = get().nodes.filter(n => n.floor === floor);

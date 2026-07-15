@@ -40,6 +40,14 @@ export default function Sidebar() {
   const [expandedPoiId, setExpandedPoiId] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const isOnline = useNetworkStatus();
+  
+  const currentBuilding = useMapStore(state => state.currentBuilding);
+  const buildings = useMapStore(state => state.buildings);
+  const [activeBuildingUI, setActiveBuildingUI] = useState(currentBuilding);
+
+  useEffect(() => {
+    setActiveBuildingUI(currentBuilding);
+  }, [currentBuilding]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -269,25 +277,31 @@ export default function Sidebar() {
             // ── DASHBOARD VIEW ────────────────────────────────────────────────
             <>
               {/* Terminal / Building Switcher */}
-              {useMapStore.getState().buildings?.length > 0 && (
+              {buildings?.length > 0 && (
                 <div className="flex flex-col gap-2.5 mb-1 mt-1">
                   <div className="flex items-center justify-between px-1">
                     <h2 className="text-[11px] font-black tracking-widest uppercase text-slate-500 dark:text-slate-400">
-                      {useMapStore.getState().buildings?.length > 1 ? `Select ${primaryType}` : 'Current Location'}
+                      {buildings?.length > 1 ? `Select ${primaryType}` : 'Current Location'}
                     </h2>
                     <span className="text-[9px] font-black tracking-widest uppercase text-sky-500 bg-sky-50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/20 px-2.5 py-1 rounded-lg">
-                      {useMapStore.getState().buildings.length} {useMapStore.getState().buildings.length === 1 ? primaryType : primaryTypePlural}
+                      {buildings.length} {buildings.length === 1 ? primaryType : primaryTypePlural}
                     </span>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-2 pb-2 pt-1">
-                    {useMapStore.getState().buildings.map(b => {
-                      const isActive = useMapStore.getState().currentBuilding === b.id;
+                    {buildings.map(b => {
+                      const isActive = activeBuildingUI === b.id;
                       const bType = getBuildingType(b.name);
                       return (
                         <button
                           key={b.id}
-                          onClick={() => useMapStore.getState().setBuilding(b.id)}
+                          onClick={() => {
+                            if (activeBuildingUI === b.id) return;
+                            setActiveBuildingUI(b.id);
+                            setTimeout(() => {
+                              useMapStore.getState().setBuilding(b.id);
+                            }, 50);
+                          }}
                           className={`relative flex flex-col items-start w-full p-3.5 rounded-[18px] border transition-all duration-300 text-left group ${
                             isActive 
                               ? 'bg-gradient-to-br from-indigo-500 via-sky-500 to-indigo-600 border-transparent shadow-[0_8px_20px_rgba(99,102,241,0.25)] ring-2 ring-indigo-500/20 ring-offset-2 dark:ring-offset-slate-950' 
