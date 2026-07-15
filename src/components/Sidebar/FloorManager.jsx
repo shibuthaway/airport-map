@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMapStore } from '../../store/useMapStore';
-import { FiUploadCloud, FiTrash2, FiPlus, FiEdit3, FiSave, FiX, FiLayers, FiChevronDown } from 'react-icons/fi';
+import { FiUploadCloud, FiTrash2, FiPlus, FiEdit3, FiSave, FiX, FiLayers, FiChevronDown, FiSettings } from 'react-icons/fi';
 
 export default function FloorManager() {
   const { floors, addFloor, editFloor, deleteFloor, buildings, currentBuilding, setBuilding, addBuilding, editBuilding, addToast } = useMapStore();
