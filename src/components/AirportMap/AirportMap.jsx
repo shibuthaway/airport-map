@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { FiX, FiNavigation } from 'react-icons/fi';
+import { FiX, FiNavigation, FiSettings } from 'react-icons/fi';
 import * as LucideIcons from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { useMapStore } from '../../store/useMapStore';
