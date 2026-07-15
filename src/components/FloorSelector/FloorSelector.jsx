@@ -8,6 +8,13 @@ export default function FloorSelector() {
   const [showBuildings, setShowBuildings] = useState(false);
   const containerRef = useRef(null);
 
+  // Local state for instant UI feedback to prevent mobile freeze
+  const [activeBuildingUI, setActiveBuildingUI] = useState(currentBuilding);
+
+  useEffect(() => {
+    setActiveBuildingUI(currentBuilding);
+  }, [currentBuilding]);
+
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -76,8 +83,15 @@ export default function FloorSelector() {
                 {buildings.map(b => (
                   <button
                     key={b.id}
-                    onClick={() => { setBuilding(b.id); setShowBuildings(false); }}
-                    className={`px-3 py-2 text-xs font-bold text-left transition-colors ${currentBuilding === b.id ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                    onClick={() => { 
+                      if (activeBuildingUI === b.id) return;
+                      setActiveBuildingUI(b.id);
+                      setShowBuildings(false); 
+                      setTimeout(() => {
+                        setBuilding(b.id);
+                      }, 50);
+                    }}
+                    className={`px-3 py-2 text-xs font-bold text-left transition-colors ${activeBuildingUI === b.id ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                   >
                     {b.name}
                   </button>
