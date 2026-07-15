@@ -61,9 +61,9 @@ export default function MapHeader() {
       {!isFullScreen && (
         <div className="h-14 border-b border-slate-200/50 dark:border-slate-800/40 bg-white/95 dark:bg-slate-950/90 backdrop-blur-xl flex items-center justify-between px-3 md:px-6 z-20 select-none flex-shrink-0 gap-2">
 
-          {/* LEFT: Live Status Indicator */}
+          {/* LEFT: Live Status Indicator (Mobile Only) */}
           <div className="flex items-center min-w-0 flex-1">
-            <div className={`flex items-center gap-2.5 px-3 py-1.5 rounded-full ${isOnline ? 'bg-slate-100/50 dark:bg-slate-900/50 border-slate-200/50 dark:border-slate-800/50' : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50'} border backdrop-blur-md shadow-sm`}>
+            <div className={`md:hidden flex items-center gap-2.5 px-3 py-1.5 rounded-full ${isOnline ? 'bg-slate-100/50 dark:bg-slate-900/50 border-slate-200/50 dark:border-slate-800/50' : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50'} border backdrop-blur-md shadow-sm`}>
               <div className="relative flex h-2 w-2">
                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isOnline ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
                 <span className={`relative inline-flex rounded-full h-2 w-2 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
