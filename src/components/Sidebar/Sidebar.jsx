@@ -16,6 +16,7 @@ import {
   FiArrowUp, FiCornerUpRight, FiCornerUpLeft, FiMapPin, FiTrendingUp, FiCheck, FiSettings,
   FiVolume2, FiVolumeX, FiUser, FiLogOut
 } from 'react-icons/fi';
+import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
@@ -27,19 +28,11 @@ export default function Sidebar() {
   const [activeSelect, setActiveSelect] = useState(null); // 'from' | 'to' | null
   const [expandedPoiId, setExpandedPoiId] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const isOnline = useNetworkStatus();
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      clearInterval(timer);
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
+    return () => clearInterval(timer);
   }, []);
 
   // Voice guidance (FREE — Web Speech API)

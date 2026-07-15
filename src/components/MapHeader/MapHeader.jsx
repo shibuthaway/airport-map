@@ -7,6 +7,7 @@ import {
   FiRotateCcw, FiRotateCw, FiX
 } from 'react-icons/fi';
 import Search from '../Search/Search';
+import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 
 export default function MapHeader() {
   const {
@@ -23,18 +24,12 @@ export default function MapHeader() {
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [rotOpen, setRotOpen] = useState(false);
   const [time, setTime] = useState(new Date());
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const isOnline = useNetworkStatus();
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
     return () => {
       clearInterval(timer);
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
     };
   }, []);
 
