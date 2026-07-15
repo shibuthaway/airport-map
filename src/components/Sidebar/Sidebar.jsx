@@ -344,12 +344,12 @@ export default function Sidebar() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-2 px-2 pb-1 snap-x">
+                  <div className="flex flex-wrap gap-2 pt-1">
                     {floors.map(f => (
                       <button
                         key={f.id}
                         onClick={() => setFloor(f.id)}
-                        className={`snap-center flex-shrink-0 px-4 py-2.5 rounded-[14px] text-[11px] font-bold transition-all active:scale-95 ${currentFloor === f.id
+                        className={`flex-grow md:flex-grow-0 px-4 py-2.5 rounded-[14px] text-[11px] font-bold transition-all active:scale-95 text-center ${currentFloor === f.id
                             ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25 border border-transparent'
                             : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10'
                           }`}
