@@ -5,13 +5,19 @@ import { useMapStore } from '../../store/useMapStore';
 import { FiSearch, FiX, FiMapPin } from 'react-icons/fi';
 
 export default function Search({ compact = false }) {
-  const { searchQuery, setSearchQuery, selectPoi, pois, currentFloor, setFloor, zoomMapTo } = useMapStore();
+  const { searchQuery, setSearchQuery, selectPoi, pois, floors, currentFloor, setFloor, zoomMapTo } = useMapStore();
   const [suggestions, setSuggestions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const searchRef = useRef(null);
 
-  // Index POIs from ALL floors so users can find exact locations anywhere in the airport
-  const allPois = Object.values(pois).flat();
+  // Index POIs ONLY from the floors of the current building
+  const allPois = React.useMemo(() => {
+    if (!floors) return [];
+    const currentFloorIds = new Set(floors.map(f => f.id));
+    return Object.values(pois)
+      .flat()
+      .filter(p => currentFloorIds.has(p.floor));
+  }, [pois, floors]);
 
   // Re-build Fuse index whenever POIs change
   const fuseRef = useRef(null);
@@ -21,7 +27,7 @@ export default function Search({ compact = false }) {
       threshold: 0.4, // more lenient for better matching
       distance: 100,
     });
-  }, [pois]);
+  }, [allPois]);
 
   // Handle outside click to close suggestions
   useEffect(() => {
