@@ -806,8 +806,16 @@ export default function Sidebar() {
                   {currentTime.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
                 </span>
               </div>
-              <div className="w-9 h-9 rounded-[12px] bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border border-slate-200 dark:border-slate-700/50">
-                <LucideIcons.Clock className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+              
+              {/* Mobile Network Status */}
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-[12px] ${isOnline ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200/60 dark:border-emerald-800/50' : 'bg-red-50/80 dark:bg-red-950/30 border-red-200/60 dark:border-red-900/50'} border backdrop-blur-md shadow-sm`}>
+                <div className="relative flex h-2 w-2">
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isOnline ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                </div>
+                <span className={`text-[10px] font-black tracking-widest uppercase ${isOnline ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                  {isOnline ? 'Live' : 'Offline'}
+                </span>
               </div>
             </div>
 
