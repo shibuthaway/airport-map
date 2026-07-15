@@ -280,7 +280,7 @@ export default function Sidebar() {
                     </span>
                   </div>
                   
-                  <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pt-1 -mx-2 px-2 snap-x">
+                  <div className="grid grid-cols-2 gap-2 pb-2 pt-1">
                     {useMapStore.getState().buildings.map(b => {
                       const isActive = useMapStore.getState().currentBuilding === b.id;
                       const bType = getBuildingType(b.name);
@@ -288,18 +288,18 @@ export default function Sidebar() {
                         <button
                           key={b.id}
                           onClick={() => useMapStore.getState().setBuilding(b.id)}
-                          className={`relative flex flex-col items-start min-w-[150px] p-4 rounded-[20px] border transition-all duration-300 snap-center text-left group ${
+                          className={`relative flex flex-col items-start w-full p-3.5 rounded-[18px] border transition-all duration-300 text-left group ${
                             isActive 
-                              ? 'bg-gradient-to-br from-indigo-500 via-sky-500 to-indigo-600 border-transparent shadow-[0_8px_20px_rgba(99,102,241,0.25)]' 
-                              : 'bg-white dark:bg-[#0a0a0a] border-slate-200/80 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/40 shadow-sm active:scale-95'
+                              ? 'bg-gradient-to-br from-indigo-500 via-sky-500 to-indigo-600 border-transparent shadow-[0_8px_20px_rgba(99,102,241,0.25)] ring-2 ring-indigo-500/20 ring-offset-2 dark:ring-offset-slate-950' 
+                              : 'bg-white dark:bg-[#0a0f1e] border-slate-200/80 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/40 shadow-sm hover:shadow-md active:scale-95'
                           }`}
                         >
-                          <div className="relative z-10 flex flex-col w-full">
-                            <span className={`text-[14px] font-black leading-tight tracking-tight mb-1.5 ${isActive ? 'text-white' : 'text-slate-800 dark:text-white'}`}>
+                          <div className="relative z-10 flex flex-col w-full h-full justify-between">
+                            <span className={`text-[12.5px] font-black leading-tight tracking-tight mb-2 line-clamp-2 ${isActive ? 'text-white' : 'text-slate-800 dark:text-white'}`}>
                               {b.name}
                             </span>
-                            <div className="flex items-center justify-between w-full">
-                              <span className={`text-[9px] font-black tracking-widest uppercase ${isActive ? 'text-indigo-100' : 'text-slate-400 dark:text-slate-500'}`}>
+                            <div className="flex items-center justify-between w-full mt-auto">
+                              <span className={`text-[8.5px] font-black tracking-widest uppercase ${isActive ? 'text-indigo-100' : 'text-slate-400 dark:text-slate-500'}`}>
                                 {bType}
                               </span>
                               {isActive && (

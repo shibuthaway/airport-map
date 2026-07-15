@@ -134,32 +134,36 @@ export default function FloorManager() {
             </button>
           </div>
         ) : isEditingBuilding ? (
-          <div className="flex gap-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl border border-sky-500/30 shadow-inner">
-            <input
-              type="text"
-              value={editBuildingName}
-              onChange={(e) => setEditBuildingName(e.target.value)}
-              className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 text-[16px] font-bold text-slate-800 dark:text-white"
-            />
-            <button
-              onClick={() => {
-                if(editBuildingName.trim()){
-                  editBuilding(currentBuilding, editBuildingName.trim());
-                  setIsEditingBuilding(false);
-                }
-              }}
-              className="bg-sky-500 text-white px-3 py-1.5 rounded-lg font-bold hover:bg-sky-600 cursor-pointer shadow-md shadow-sky-500/20 active:scale-95 transition-all flex items-center justify-center"
-              title="Save Name"
-            >
-              <FiSave className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setIsEditingBuilding(false)}
-              className="bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg font-bold hover:bg-slate-300 dark:hover:bg-slate-700 cursor-pointer active:scale-95 transition-all flex items-center justify-center"
-              title="Cancel"
-            >
-              <FiX className="w-4 h-4" />
-            </button>
+          <div className="flex flex-col gap-2 p-3 bg-white dark:bg-slate-800 rounded-xl border border-sky-500 shadow-[0_0_20px_rgba(14,165,233,0.15)] relative transition-all">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] font-black text-sky-500 uppercase tracking-widest flex items-center gap-1.5">
+                <FiEdit3 className="w-3 h-3" /> Rename Building
+              </span>
+              <button onClick={() => setIsEditingBuilding(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-full active:scale-90 transition-all">
+                <FiX className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={editBuildingName}
+                onChange={(e) => setEditBuildingName(e.target.value)}
+                autoFocus
+                placeholder="Terminal Name"
+                className="flex-1 min-w-0 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 text-[14px] font-black text-slate-800 dark:text-white transition-all shadow-inner"
+              />
+              <button
+                onClick={() => {
+                  if(editBuildingName.trim()){
+                    editBuilding(currentBuilding, editBuildingName.trim());
+                    setIsEditingBuilding(false);
+                  }
+                }}
+                className="bg-sky-500 text-white px-4 py-2 rounded-xl font-bold hover:bg-sky-600 cursor-pointer active:scale-95 transition-all flex flex-shrink-0 items-center justify-center gap-2 shadow-md shadow-sky-500/20"
+              >
+                <FiSave className="w-4 h-4" /> <span className="hidden sm:inline">Save</span>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-between bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-xl shadow-sm relative hover:border-sky-300 dark:hover:border-sky-700 transition-colors">
