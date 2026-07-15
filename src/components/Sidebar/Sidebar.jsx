@@ -298,6 +298,7 @@ export default function Sidebar() {
                           onClick={() => {
                             if (activeBuildingUI === b.id) return;
                             setActiveBuildingUI(b.id);
+                            if (isMobile) setIsOpen(false);
                             setTimeout(() => {
                               useMapStore.getState().setBuilding(b.id);
                             }, 50);
