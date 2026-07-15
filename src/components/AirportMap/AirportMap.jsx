@@ -81,7 +81,8 @@ export default function AirportMap() {
     // Graph states & actions
     nodes, edges, dragNode, dragEdgeCurve, toggleEdge, isDrawingEdges, setIsDrawingEdges,
     selectedEdge, setSelectedEdge, setZoomActions,
-    userPosition, categories
+    userPosition, categories,
+    isLoadingBuilding
   } = useMapStore();
 
   const { isActive, error: ipsError, startTracking, stopTracking } = useIndoorPositioning();
@@ -226,6 +227,24 @@ export default function AirportMap() {
 
   // ── Floor Map Renderer ────────────────────────────────────────────────────
   const renderMap = () => {
+    if (isLoadingBuilding) {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur-sm z-[60]">
+          <div className="bg-white/80 dark:bg-slate-950/80 p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50">
+            <div className="relative flex items-center justify-center">
+              <div className="w-16 h-16 border-4 border-slate-200 dark:border-slate-800 rounded-full"></div>
+              <div className="w-16 h-16 border-4 border-sky-500 rounded-full border-t-transparent animate-spin absolute"></div>
+              <FiSettings className="w-6 h-6 text-sky-500 absolute animate-pulse" />
+            </div>
+            <div className="text-center">
+              <h2 className="text-base font-black text-slate-800 dark:text-slate-100 mb-1 tracking-tight">Syncing Terminal Data</h2>
+              <p className="text-xs font-bold text-slate-500">Loading maps and pathways...</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
     if (!floors || floors.length === 0) {
       return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="100%" height="100%" className="airport-map-svg select-none">

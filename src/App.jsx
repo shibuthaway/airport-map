@@ -46,9 +46,14 @@ class ErrorBoundary extends React.Component {
         >
           <span style={{ fontSize: '3rem' }}>⚠️</span>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 900, margin: 0 }}>Something went wrong</h1>
-          <p style={{ color: '#94a3b8', fontSize: '0.875rem', maxWidth: 320, margin: 0 }}>
-            An unexpected error occurred. Please refresh the page to continue.
+          <p style={{ color: '#94a3b8', fontSize: '0.875rem', maxWidth: '80%', margin: 0, wordBreak: 'break-all' }}>
+            {this.state.error?.toString() || 'An unexpected error occurred.'}
           </p>
+          {this.state.errorInfo && (
+            <pre style={{ textAlign: 'left', background: '#0f172a', padding: '1rem', borderRadius: '0.5rem', fontSize: '0.75rem', overflowX: 'auto', maxWidth: '90%', color: '#ef4444' }}>
+              {this.state.errorInfo.componentStack}
+            </pre>
+          )}
           <button
             onClick={() => window.location.reload()}
             style={{
@@ -58,9 +63,8 @@ class ErrorBoundary extends React.Component {
               color: '#fff',
               border: 'none',
               borderRadius: '0.75rem',
-              fontSize: '0.875rem',
-              fontWeight: 700,
               cursor: 'pointer',
+              fontWeight: 700,
             }}
           >
             Reload App

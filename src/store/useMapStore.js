@@ -59,6 +59,7 @@ export const useMapStore = create((set, get) => ({
 
   // Loading State
   dataLoaded: false,
+  isLoadingBuilding: false,
 
   // Toast Notifications
   toasts: [],
@@ -94,7 +95,7 @@ export const useMapStore = create((set, get) => ({
         currentFloor: cache.topFloorId
       });
     } else {
-      set({ currentBuilding: buildingId, floors: [], nodes: [], edges: [], pois: {}, currentFloor: null }); 
+      set({ currentBuilding: buildingId, floors: [], nodes: [], edges: [], pois: {}, currentFloor: null, isLoadingBuilding: true }); 
     }
     
     get().loadMapData();
@@ -623,7 +624,7 @@ export const useMapStore = create((set, get) => ({
           }
           return { 
             floors, nodes, edges, pois: computedPois, currentFloor: topFloorId, 
-            appSettings: settings, categories, dataLoaded: true,
+            appSettings: settings, categories, dataLoaded: true, isLoadingBuilding: false,
             buildingCache: newCache 
           };
         });
@@ -656,7 +657,7 @@ export const useMapStore = create((set, get) => ({
           setTimeout(() => useMapStore.getState().loadMapData(retries - 1), 2500);
           return;
         }
-        set({ dataLoaded: true });
+        set({ dataLoaded: true, isLoadingBuilding: false });
       }
     } catch (e) {
       console.error('Failed to load map data from APIs', e);
@@ -664,7 +665,7 @@ export const useMapStore = create((set, get) => ({
         setTimeout(() => useMapStore.getState().loadMapData(retries - 1), 2500);
         return;
       }
-      set({ dataLoaded: true });
+      set({ dataLoaded: true, isLoadingBuilding: false });
     }
   },
 
