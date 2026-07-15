@@ -252,38 +252,63 @@ export default function Sidebar() {
           {activeCategory === null ? (
             // ── DASHBOARD VIEW ────────────────────────────────────────────────
             <>
-              {/* Header Card */}
-              <div className="rounded-3xl p-5 bg-white dark:bg-gradient-to-br dark:from-[#0f172a] dark:via-[#0a0f1e] dark:to-[#0f172a] border border-slate-200/80 dark:border-white/5 shadow-sm dark:shadow-2xl relative overflow-hidden group">
-                <div className="absolute -right-10 -top-10 w-32 h-32 bg-sky-500/10 blur-3xl rounded-full pointer-events-none group-hover:bg-sky-400/20 transition-all duration-700"></div>
-                <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none"></div>
-                
-                <div className="relative z-10 flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-[18px] bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 flex-shrink-0">
-                    <FiNavigation className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-[15px] font-black text-slate-800 dark:text-white leading-tight mb-1 relative flex items-center">
-                      {useMapStore.getState().currentBuilding ? useMapStore.getState().buildings?.find(b => b.id === useMapStore.getState().currentBuilding)?.name : 'Global Directory'}
-                      
-                      {useMapStore.getState().buildings?.length > 1 && (
-                        <select 
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          value={useMapStore.getState().currentBuilding || ''}
-                          onChange={(e) => useMapStore.getState().setBuilding(e.target.value)}
-                        >
-                          {useMapStore.getState().buildings.map(b => (
-                            <option key={b.id} value={b.id} className="text-slate-800">{b.name}</option>
-                          ))}
-                        </select>
-                      )}
-                      {useMapStore.getState().buildings?.length > 1 && (
-                        <LucideIcons.ChevronDown className="w-4 h-4 ml-1 opacity-50" />
-                      )}
+              {/* Terminal / Building Switcher */}
+              {useMapStore.getState().buildings?.length > 0 && (
+                <div className="flex flex-col gap-2.5 mb-1 mt-1">
+                  <div className="flex items-center justify-between px-1">
+                    <h2 className="text-[11px] font-black tracking-widest uppercase text-slate-500 dark:text-slate-400">
+                      {useMapStore.getState().buildings?.length > 1 ? 'Select Terminal' : 'Current Location'}
                     </h2>
-                    <p className="text-[9px] font-black tracking-[0.15em] text-sky-500 uppercase">Indoor Navigation</p>
+                    <span className="text-[9px] font-black tracking-widest uppercase text-sky-500 bg-sky-50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/20 px-2.5 py-1 rounded-lg">
+                      {useMapStore.getState().buildings.length} {useMapStore.getState().buildings.length === 1 ? 'Terminal' : 'Terminals'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pt-1 -mx-2 px-2 snap-x">
+                    {useMapStore.getState().buildings.map(b => {
+                      const isActive = useMapStore.getState().currentBuilding === b.id;
+                      return (
+                        <button
+                          key={b.id}
+                          onClick={() => useMapStore.getState().setBuilding(b.id)}
+                          className={`relative flex flex-col items-start min-w-[150px] p-4 rounded-[20px] border transition-all duration-300 snap-center text-left overflow-hidden group ${
+                            isActive 
+                              ? 'bg-gradient-to-br from-indigo-500 via-sky-500 to-indigo-600 border-transparent shadow-[0_8px_20px_rgba(99,102,241,0.25)]' 
+                              : 'bg-white dark:bg-[#0a0a0a] border-slate-200/80 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/40 shadow-sm active:scale-95'
+                          }`}
+                        >
+                          {isActive && (
+                            <>
+                              <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/20 rounded-full blur-2xl pointer-events-none"></div>
+                              <div className="absolute -left-4 -top-4 w-16 h-16 bg-sky-300/20 rounded-full blur-xl pointer-events-none"></div>
+                            </>
+                          )}
+                          {!isActive && (
+                            <div className="absolute -right-10 -bottom-10 w-24 h-24 bg-slate-100 dark:bg-white/5 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 transition-colors"></div>
+                          )}
+                          
+                          <div className="relative z-10 flex flex-col w-full">
+                            <span className={`text-[14px] font-black leading-tight tracking-tight mb-1.5 ${isActive ? 'text-white' : 'text-slate-800 dark:text-white'}`}>
+                              {b.name}
+                            </span>
+                            <div className="flex items-center justify-between w-full">
+                              <span className={`text-[9px] font-black tracking-widest uppercase ${isActive ? 'text-indigo-100' : 'text-slate-400 dark:text-slate-500'}`}>
+                                Building
+                              </span>
+                              {isActive && (
+                                <span className="flex h-2 w-2 relative">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-40"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Floor Status Card */}
               <div className="rounded-3xl p-5 bg-white/90 dark:bg-[#050814]/80 border border-indigo-100 dark:border-indigo-500/20 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative overflow-hidden backdrop-blur-xl">
