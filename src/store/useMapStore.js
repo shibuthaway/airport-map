@@ -556,10 +556,22 @@ export const useMapStore = create((set, get) => ({
         fetch(`/api/load-categories?project=${projectId}`)
       ]);
       if (floorsRes.ok && graphRes.ok) {
-        const floors = await floorsRes.json();
+        let floors = await floorsRes.json();
         const graph = await graphRes.json();
         const settings = settingsRes.ok ? await settingsRes.json() : { name: 'Airport Indoor Map', logo_url: null };
-        const categories = catRes.ok ? await catRes.json() : [];
+        let categories = catRes.ok ? await catRes.json() : [];
+        
+        // Handle Service Worker offline fallback objects
+        if (floors.offline || !Array.isArray(floors)) floors = [];
+        if (categories.offline || !Array.isArray(categories)) categories = [];
+
+        // Fallback for default project if offline and cache is completely empty
+        if (floors.length === 0 && projectId === 'default') {
+          floors = [
+            { id: 'lounge', level: 'Level 1', name: 'Main Concourse', image: '/maps/airport.svg' }
+          ];
+        }
+
         const nodes = graph.nodes || [];
         const edges = graph.edges || [];
         const computedPois = computePoisFromNodes(nodes);
