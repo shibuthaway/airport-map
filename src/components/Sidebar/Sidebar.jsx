@@ -18,8 +18,19 @@ import {
 } from 'react-icons/fi';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 
+// Helper for dynamic naming
+const getBuildingType = (name = '') => {
+  const n = name.toLowerCase();
+  if (n.includes('mall')) return 'Mall';
+  if (n.includes('hospital') || n.includes('clinic')) return 'Hospital';
+  if (n.includes('campus') || n.includes('university')) return 'Campus';
+  if (n.includes('terminal') || n.includes('airport')) return 'Terminal';
+  if (n.includes('station')) return 'Station';
+  return 'Building';
+};
+
 export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(window.innerWidth >= 768);
   const [activeTab, setActiveTab] = useState('explore');
   const [activeCategory, setActiveCategory] = useState(null);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
@@ -243,7 +254,12 @@ export default function Sidebar() {
   };
 
   // ── Shared tab content renderer ───────────────────────────────────────────
-  const renderTabContent = () => (
+  const renderTabContent = () => {
+    const firstBldgName = useMapStore.getState().buildings?.[0]?.name || '';
+    const primaryType = getBuildingType(firstBldgName);
+    const primaryTypePlural = primaryType + 's';
+
+    return (
     <AnimatePresence mode="wait">
       {/* Explore */}
       {activeTab === 'explore' && (
@@ -257,43 +273,34 @@ export default function Sidebar() {
                 <div className="flex flex-col gap-2.5 mb-1 mt-1">
                   <div className="flex items-center justify-between px-1">
                     <h2 className="text-[11px] font-black tracking-widest uppercase text-slate-500 dark:text-slate-400">
-                      {useMapStore.getState().buildings?.length > 1 ? 'Select Terminal' : 'Current Location'}
+                      {useMapStore.getState().buildings?.length > 1 ? `Select ${primaryType}` : 'Current Location'}
                     </h2>
                     <span className="text-[9px] font-black tracking-widest uppercase text-sky-500 bg-sky-50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/20 px-2.5 py-1 rounded-lg">
-                      {useMapStore.getState().buildings.length} {useMapStore.getState().buildings.length === 1 ? 'Terminal' : 'Terminals'}
+                      {useMapStore.getState().buildings.length} {useMapStore.getState().buildings.length === 1 ? primaryType : primaryTypePlural}
                     </span>
                   </div>
                   
                   <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pt-1 -mx-2 px-2 snap-x">
                     {useMapStore.getState().buildings.map(b => {
                       const isActive = useMapStore.getState().currentBuilding === b.id;
+                      const bType = getBuildingType(b.name);
                       return (
                         <button
                           key={b.id}
                           onClick={() => useMapStore.getState().setBuilding(b.id)}
-                          className={`relative flex flex-col items-start min-w-[150px] p-4 rounded-[20px] border transition-all duration-300 snap-center text-left overflow-hidden group ${
+                          className={`relative flex flex-col items-start min-w-[150px] p-4 rounded-[20px] border transition-all duration-300 snap-center text-left group ${
                             isActive 
                               ? 'bg-gradient-to-br from-indigo-500 via-sky-500 to-indigo-600 border-transparent shadow-[0_8px_20px_rgba(99,102,241,0.25)]' 
                               : 'bg-white dark:bg-[#0a0a0a] border-slate-200/80 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/40 shadow-sm active:scale-95'
                           }`}
                         >
-                          {isActive && (
-                            <>
-                              <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/20 rounded-full blur-2xl pointer-events-none"></div>
-                              <div className="absolute -left-4 -top-4 w-16 h-16 bg-sky-300/20 rounded-full blur-xl pointer-events-none"></div>
-                            </>
-                          )}
-                          {!isActive && (
-                            <div className="absolute -right-10 -bottom-10 w-24 h-24 bg-slate-100 dark:bg-white/5 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 transition-colors"></div>
-                          )}
-                          
                           <div className="relative z-10 flex flex-col w-full">
                             <span className={`text-[14px] font-black leading-tight tracking-tight mb-1.5 ${isActive ? 'text-white' : 'text-slate-800 dark:text-white'}`}>
                               {b.name}
                             </span>
                             <div className="flex items-center justify-between w-full">
                               <span className={`text-[9px] font-black tracking-widest uppercase ${isActive ? 'text-indigo-100' : 'text-slate-400 dark:text-slate-500'}`}>
-                                Building
+                                {bType}
                               </span>
                               {isActive && (
                                 <span className="flex h-2 w-2 relative">
@@ -353,8 +360,6 @@ export default function Sidebar() {
                   </div>
                 </div>
               </div>
-
-              {/* Action Cards */}
               <div className="grid grid-cols-2 gap-3 pb-2 pt-1">
                 <button onClick={() => setActiveCategory('search')} className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-[#0f172a] dark:to-[#0a0f1e] border border-slate-200/70 dark:border-sky-500/10 shadow-sm dark:shadow-[0_0_15px_rgba(14,165,233,0.05)] hover:border-sky-300 dark:hover:border-sky-400/40 transition-all group active:scale-95 text-left">
                   <div className="w-10 h-10 rounded-full bg-sky-50 dark:bg-sky-500/10 flex items-center justify-center flex-shrink-0 text-sky-500 group-hover:bg-sky-100 dark:group-hover:bg-sky-500/20 transition-all"><FiSearch className="w-4 h-4" /></div>
@@ -405,7 +410,6 @@ export default function Sidebar() {
                     return (
                       <button key={cat.key} onClick={() => setActiveCategory(cat.key)} className={`flex flex-col items-center justify-center p-3 rounded-[18px] bg-slate-50 dark:bg-[#0a0f1e]/80 border ${c.border} shadow-sm ${c.shadow} transition-all group active:scale-95`}>
                         <div className={`${c.text} mb-1.5 transition-transform group-hover:scale-110 ${c.glow}`}>
-                           {/* We assume DynamicIcon is defined in Sidebar.jsx */}
                            <DynamicIcon name={cat.iconName} className="w-5 h-5" />
                         </div>
                         <span className="text-[9px] font-black text-slate-600 dark:text-slate-200 text-center line-clamp-1 uppercase tracking-wide">{cat.label}</span>
@@ -730,6 +734,7 @@ export default function Sidebar() {
       {activeTab === 'settings' && isAdminMode && <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><SettingsManager /></motion.div>}
     </AnimatePresence>
   );
+  };
 
   // ── MOBILE: Bottom Sheet + Bottom Nav ─────────────────────────────────────
   if (isMobile) {

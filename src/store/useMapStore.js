@@ -78,7 +78,8 @@ export const useMapStore = create((set, get) => ({
   currentBuilding: null,
   categories: [],
   setBuilding: (buildingId) => {
-    set({ currentBuilding: buildingId, floors: [], nodes: [], edges: [], pois: {} });
+    if (get().currentBuilding === buildingId) return; // Prevent reload if already active
+    set({ currentBuilding: buildingId, floors: [], nodes: [], edges: [], pois: {}, dataLoaded: false });
     get().loadMapData();
   },
 
