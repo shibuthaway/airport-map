@@ -4,12 +4,15 @@ import { useMapStore } from '../../store/useMapStore';
 import { FiUploadCloud, FiTrash2, FiPlus, FiEdit3, FiSave, FiX, FiLayers, FiChevronDown } from 'react-icons/fi';
 
 export default function FloorManager() {
-  const { floors, addFloor, editFloor, deleteFloor, buildings, currentBuilding, setBuilding, addBuilding, addToast } = useMapStore();
+  const { floors, addFloor, editFloor, deleteFloor, buildings, currentBuilding, setBuilding, addBuilding, editBuilding, addToast } = useMapStore();
   const [isAdding, setIsAdding] = useState(false);
   const [isAddingBuilding, setIsAddingBuilding] = useState(false);
   const [newBuildingName, setNewBuildingName] = useState('');
+  const [isEditingBuilding, setIsEditingBuilding] = useState(false);
+  const [editBuildingName, setEditBuildingName] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [floorToDelete, setFloorToDelete] = useState(null);
+  const [buildingToDelete, setBuildingToDelete] = useState(null);
   const [activeSelect, setActiveSelect] = useState(null);
   
   // Form States
@@ -130,6 +133,34 @@ export default function FloorManager() {
               Add
             </button>
           </div>
+        ) : isEditingBuilding ? (
+          <div className="flex gap-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl border border-sky-500/30 shadow-inner">
+            <input
+              type="text"
+              value={editBuildingName}
+              onChange={(e) => setEditBuildingName(e.target.value)}
+              className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 text-[16px] font-bold text-slate-800 dark:text-white"
+            />
+            <button
+              onClick={() => {
+                if(editBuildingName.trim()){
+                  editBuilding(currentBuilding, editBuildingName.trim());
+                  setIsEditingBuilding(false);
+                }
+              }}
+              className="bg-sky-500 text-white px-3 py-1.5 rounded-lg font-bold hover:bg-sky-600 cursor-pointer shadow-md shadow-sky-500/20 active:scale-95 transition-all flex items-center justify-center"
+              title="Save Name"
+            >
+              <FiSave className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setIsEditingBuilding(false)}
+              className="bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg font-bold hover:bg-slate-300 dark:hover:bg-slate-700 cursor-pointer active:scale-95 transition-all flex items-center justify-center"
+              title="Cancel"
+            >
+              <FiX className="w-4 h-4" />
+            </button>
+          </div>
         ) : (
           <div className="flex items-center justify-between bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-xl shadow-sm relative hover:border-sky-300 dark:hover:border-sky-700 transition-colors">
             {buildings.length > 1 && (
@@ -144,7 +175,7 @@ export default function FloorManager() {
               </select>
             )}
             
-            <div className="flex flex-col flex-1 relative pointer-events-none">
+            <div className="flex flex-col flex-1 relative pointer-events-none pr-2">
               <div className="flex items-center gap-1.5">
                 <span className="text-base font-black text-slate-800 dark:text-slate-100">
                   {buildings.find(b => b.id === currentBuilding)?.name || 'Unknown Building'}
@@ -154,8 +185,27 @@ export default function FloorManager() {
               <span className="text-[10px] font-bold text-sky-500 uppercase tracking-widest">{floors.length} Floors Active</span>
             </div>
             
-            <div className="flex items-center gap-1 relative z-20">
-              <button onClick={(e) => { e.stopPropagation(); if (window.confirm('Are you sure you want to delete this building and all its floors?')) useMapStore.getState().deleteBuilding(currentBuilding); }} className="p-2 text-slate-400 hover:text-rose-500 bg-slate-50 hover:bg-rose-50 dark:bg-slate-900 dark:hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer pointer-events-auto" title="Delete Building">
+            <div className="flex items-center gap-1 relative z-20 pointer-events-auto">
+              <button 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  const bName = buildings.find(b => b.id === currentBuilding)?.name;
+                  setEditBuildingName(bName || '');
+                  setIsEditingBuilding(true);
+                }} 
+                className="p-2 text-slate-400 hover:text-sky-500 bg-slate-50 hover:bg-sky-50 dark:bg-slate-900 dark:hover:bg-sky-500/10 rounded-lg transition-colors cursor-pointer" 
+                title="Edit Building Name"
+              >
+                <FiEdit3 className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setBuildingToDelete(buildings.find(b => b.id === currentBuilding)); 
+                }} 
+                className="p-2 text-slate-400 hover:text-rose-500 bg-slate-50 hover:bg-rose-50 dark:bg-slate-900 dark:hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer" 
+                title="Delete Building"
+              >
                 <FiTrash2 className="w-4 h-4" />
               </button>
             </div>
@@ -349,6 +399,51 @@ export default function FloorManager() {
                   className="flex-1 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-colors active:scale-95 shadow-lg shadow-rose-500/20 cursor-pointer"
                 >
                   Delete Floor
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {buildingToDelete && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/45 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 15 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/80 rounded-2xl max-w-sm w-full p-6 shadow-2xl flex flex-col gap-4 text-center"
+            >
+              <div className="mx-auto w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center text-rose-500 text-lg shadow-inner">
+                <FiTrash2 className="w-5 h-5 animate-pulse" />
+              </div>
+              
+              <div className="flex flex-col gap-2">
+                <h4 className="text-sm font-extrabold text-slate-850 dark:text-slate-105 tracking-wide">
+                  Delete Entire Building?
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed px-1">
+                  Are you sure you want to delete <strong className="text-slate-700 dark:text-slate-200">"{buildingToDelete.name}"</strong>? This will permanently delete ALL floors, map data, and Points of Interest associated with this building! This action cannot be undone.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setBuildingToDelete(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-850 active:scale-95 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await useMapStore.getState().deleteBuilding(buildingToDelete.id);
+                    setBuildingToDelete(null);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-colors active:scale-95 shadow-lg shadow-rose-500/20 cursor-pointer"
+                >
+                  Delete Building
                 </button>
               </div>
             </motion.div>

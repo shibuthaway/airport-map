@@ -126,6 +126,25 @@ export const useMapStore = create((set, get) => ({
     }
   },
 
+  editBuilding: async (id, newName) => {
+    const { buildings } = get();
+    const updated = buildings.map(b => b.id === id ? { ...b, name: newName } : b);
+    
+    try {
+      await fetch('/api/save-buildings', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(get().token ? { 'Authorization': `Bearer ${get().token}` } : {})
+        },
+        body: JSON.stringify(updated)
+      });
+      set({ buildings: updated });
+    } catch (e) {
+      console.error('Failed to edit building', e);
+    }
+  },
+
   deleteBuilding: async (id) => {
     const { buildings, currentBuilding } = get();
     const updated = buildings.filter(b => b.id !== id);
