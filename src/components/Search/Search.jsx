@@ -137,8 +137,11 @@ export default function Search({ compact = false }) {
                 <div className="flex items-center gap-3">
                   <span className="text-xl">{getCategoryIcon(poi.category)}</span>
                   <div>
-                    <h4 className="font-medium text-slate-800 dark:text-slate-100 text-sm">
+                    <h4 className="font-medium text-slate-800 dark:text-slate-100 text-sm flex items-center gap-2">
                       {poi.name}
+                      <span className="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded">
+                        {floors.find(f => f.id === poi.floor)?.name || 'Unknown Floor'}
+                      </span>
                     </h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[180px]">
                       {poi.description}
