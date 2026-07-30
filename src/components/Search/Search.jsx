@@ -126,24 +126,24 @@ export default function Search({ compact = false }) {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute left-0 right-0 mt-2 p-2 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden max-h-72 overflow-y-auto"
+            className="absolute left-0 right-0 mt-2 p-2 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-2xl z-50 max-h-72 overflow-y-auto overflow-x-hidden"
           >
             {suggestions.map((poi) => (
               <button
                 key={poi.id}
                 onClick={() => handleSelect(poi)}
-                className="w-full text-left flex items-center justify-between p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition duration-200"
+                className="w-full text-left flex items-center justify-between p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition duration-200 gap-2"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{getCategoryIcon(poi.category)}</span>
-                  <div>
-                    <h4 className="font-medium text-slate-800 dark:text-slate-100 text-sm flex items-center gap-2">
-                      {poi.name}
-                      <span className="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <span className="text-xl shrink-0">{getCategoryIcon(poi.category)}</span>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-medium text-slate-800 dark:text-slate-100 text-sm flex items-center gap-2 flex-wrap">
+                      <span className="truncate">{poi.name}</span>
+                      <span className="text-[10px] shrink-0 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded">
                         {floors.find(f => f.id === poi.floor)?.name || 'Unknown Floor'}
                       </span>
                     </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[180px]">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate w-full">
                       {poi.description}
                     </p>
                   </div>
